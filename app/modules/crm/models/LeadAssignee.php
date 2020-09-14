@@ -7,6 +7,7 @@ use modules\account\models\Staff;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\crm\models\queries\LeadAssigneeQuery;
+use modules\task\models\Task;
 use Throwable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -187,16 +188,13 @@ class LeadAssignee extends ActiveRecord
      */
     public function recordRemoveAssignementHistory()
     {
-        $historyRelationship = [
-            Lead::class => $this->lead_id,
-            LeadAssignee::class => $this->id,
-        ];
-
         return Account::history()->save('lead_assignee.delete', [
             'params' => $this->getHistoryParams(),
             'description' => 'Removing assignment of {assignee_name} from lead "{lead_name}"',
             'tag' => 'release_assignment',
-        ], $historyRelationship);
+            'model' => Lead::class,
+            'model_id' => $this->lead_id
+        ]);
     }
 
 }

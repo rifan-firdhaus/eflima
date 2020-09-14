@@ -1,8 +1,10 @@
 <?php
 
 use modules\account\web\admin\View;
+use modules\account\widgets\inputs\StaffInput;
 use modules\account\widgets\StaffCommentWidget;
 use modules\address\assets\FlagIconAsset;
+use modules\crm\assets\admin\LeadViewAsset;
 use modules\crm\models\forms\lead_follow_up\LeadFollowUpSearch;
 use modules\crm\models\Lead;
 use modules\crm\models\LeadStatus;
@@ -18,6 +20,8 @@ use yii\bootstrap4\ButtonDropdown;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\Url;
 
 /**
  * @var View               $this
@@ -25,6 +29,7 @@ use yii\helpers\Html;
  * @var LeadFollowUpSearch $followUpSearchModel
  */
 
+LeadViewAsset::register($this);
 FlagIconAsset::register($this);
 
 $this->beginContent('@modules/crm/views/admin/lead/components/view-layout.php', compact('model'));
@@ -113,7 +118,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
 ]);
 ?>
 
-    <div class="d-flex h-100">
+    <div id="lead-view-wrapper-<?= $this->uniqueId; ?>" class="d-flex h-100">
         <div class="overflow-auto py-3 w-100 d-flex flex-column container-fluid mh-100">
             <div class="d-flex row border-bottom">
                 <?= $this->block('@main:begin') ?>
@@ -220,7 +225,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
 
                     $followUpCard->addToHeader(
                         Html::a(Icon::show('i8:phone') . Yii::t('app', 'Add Follow Up'), ['/crm/admin/lead-follow-up/add', 'lead_id' => $model->id], [
-                            'class' => 'btn btn-sm btn-primary',
+                            'class' => 'btn btn-sm btn-outline-primary',
                             'data-lazy-modal' => 'lead-follow-up-form-modal',
                             'data-lazy-modal-size' => 'modal-md',
                             'data-lazy-container' => '#main-container',
@@ -234,7 +239,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                     Card::end(); ?>
 
                     <?php
-                    Card::begin([
+                    $assigneeCard = Card::begin([
                         'title' => Yii::t('app', 'Assignee'),
                         'icon' => 'i8:account',
                         'headerOptions' => [
@@ -242,6 +247,25 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                         ],
                         'bodyOptions' => false,
                     ]);
+
+
+                    $assigneeButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Assign'), '#', [
+                        'class' => 'btn btn-outline-primary btn-sm btn-lead-assignee',
+                    ]);
+                    $assigneeInput = StaffInput::widget([
+                        'name' => 'assignee',
+                        'url' => ['/crm/admin/lead/staff-assignable-auto-complete', 'id' => $model->id],
+                        'id' => 'event-member-input',
+                        'options' => [
+                            'class' => 'lead-assignee-input',
+                        ],
+                    ]);
+
+                    $assigneeCard->addToHeader(
+                        Html::tag('div', $assigneeInput . $assigneeButton, [
+                            'class' => 'lead-assignee-input-container',
+                        ])
+                    );
 
                     echo $this->block('@assignee:begin');
 
@@ -324,7 +348,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                         ],
                     ]);
 
-                    echo $this->block('@assignee:begin');
+                    echo $this->block('@assignee:end');
 
                     Card::end();
                     ?>
@@ -371,5 +395,12 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
 
 
 <?php
+$jsOptions = Json::encode([
+    'inviteUrl' => Url::to(['/crm/admin/lead/assign', 'id' => $model->id]),
+]);
+
+$this->registerJs("$('#lead-view-wrapper-{$this->uniqueId}').leadView({$jsOptions})");
+
+
 echo $this->block('@end');
 $this->endContent();

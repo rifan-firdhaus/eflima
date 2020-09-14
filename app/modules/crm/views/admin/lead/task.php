@@ -1,16 +1,14 @@
 <?php
 
 use modules\account\web\admin\View;
-use modules\crm\models\Customer;
+use modules\crm\models\Lead;
 use modules\task\models\forms\task\TaskSearch;
-use yii\data\ActiveDataProvider;
 use yii\helpers\ReplaceArrayValue;
 
 /**
- * @var Customer           $model
- * @var TaskSearch         $searchModel
- * @var ActiveDataProvider $dataProvider
- * @var View               $this
+ * @var Lead       $model
+ * @var TaskSearch $taskSearchModel
+ * @var View       $this
  */
 
 $active = 'task';
@@ -20,10 +18,9 @@ $this->beginContent('@modules/crm/views/admin/lead/components/view-layout.php', 
 echo $this->block('@begin');
 
 echo $this->render('@modules/task/views/admin/task/components/data-view', [
-    'dataProvider' => $dataProvider,
-    'searchModel' => $searchModel,
+    'searchModel' => $taskSearchModel,
     'dataViewOptions' => [
-        'searchAction' => new ReplaceArrayValue($searchModel->searchUrl('/crm/admin/lead/view', [
+        'searchAction' => new ReplaceArrayValue($taskSearchModel->searchUrl('/crm/admin/lead/view', [
             'id' => $model->id,
             'action' => 'task',
         ], false)),

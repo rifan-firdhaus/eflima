@@ -1,0 +1,107 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+body.quick-search-open {
+  overflow: hidden; }
+
+.quick-search-overlay,
+.quick-search-container {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0; }
+
+.quick-search-overlay {
+  z-index: -1;
+  background: rgba(206, 212, 218, 0.8);
+  opacity: 0;
+  transition: 0.3s; }
+
+.quick-search-input {
+  font-size: 1.38rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 1.1rem 1.25rem 1.1rem 50px;
+  height: 4rem; }
+
+.quick-search-header {
+  max-width: 600px;
+  margin: auto;
+  padding: 1.725rem 0; }
+
+.quick-search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  transform: translateY(-7.45rem);
+  transition: 0.3s; }
+
+.quick-search-input-wrapper > .icon {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  width: 50px;
+  justify-content: center;
+  font-size: 2rem; }
+
+.quick-search-result {
+  overflow: auto;
+  height: calc(100vh - 7.45rem);
+  transform: translateY(calc(100vh - 7.45rem));
+  transition: 0.3s;
+  opacity: 0; }
+
+.quick-search-result-section-header {
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 1.15rem; }
+
+.quick-search-result-item {
+  background: #FFF;
+  padding: 1.15rem;
+  border-radius: 0.35rem;
+  margin-bottom: 1.15rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  margin-left: 1.15rem;
+  margin-right: 1.15rem; }
+
+.quick-search-result-section {
+  max-width: 600px;
+  margin: auto; }
+
+.quick-search-result-section-body {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -1.15rem;
+  margin-right: -1.15rem; }
+
+.quick-search-close {
+  font-size: 4rem;
+  position: fixed;
+  right: 0;
+  top: 0;
+  line-height: 1;
+  padding: 2rem;
+  z-index: 9999999;
+  cursor: pointer;
+  transition: 0.3s;
+  transform: translateY(-100%); }
+
+.quick-search-container.quick-search-open .quick-search-overlay {
+  opacity: 1; }
+
+.quick-search-container.quick-search-open .quick-search-input-wrapper {
+  transform: translateY(0); }
+
+.quick-search-container.quick-search-open .quick-search-result {
+  transform: translateY(0);
+  opacity: 1; }
+
+.quick-search-container.quick-search-open .quick-search-close {
+  transform: translateY(0); }
+
+/*# sourceMappingURL=quick-search.css.map */

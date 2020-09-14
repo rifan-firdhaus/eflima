@@ -206,15 +206,6 @@ class TaskAssignee extends ActiveRecord
      */
     public function recordRemoveAssignementHistory()
     {
-        $historyRelationship = [
-            Task::class => $this->task_id,
-            TaskAssignee::class => $this->id,
-        ];
-
-        if (!empty($this->task->model)) {
-            $historyRelationship[get_class($this->task->getRelatedModel())] = $this->task->model_id;
-        }
-
         return Account::history()->save('task_assignee.delete', [
             'params' => $this->getHistoryParams(),
             'description' => 'Removing assignment of {assignee_name} from task "{task_title}"',

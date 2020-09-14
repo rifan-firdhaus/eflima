@@ -1,0 +1,61 @@
+@import "variables";
+@import "../../../../../../vendor/npm-asset/bootstrap/scss/functions.scss";
+@import "../../../../../../vendor/npm-asset/bootstrap/scss/variables.scss";
+@import "../../../../../../vendor/npm-asset/bootstrap/scss/mixins.scss";
+@import "bootstrap.scss";
+
+html {
+  font-size: $font-size;
+}
+
+body {
+  background: url("../img/bg-login.jpg") center;
+  background-size: cover;
+}
+
+html, body {
+  height: 100%;
+}
+
+#logo {
+  height: 2.5rem;
+  max-width: 100%;
+  margin-bottom: map-get($spacers, 4);
+}
+
+.icons8-size {
+  font-size: 145%;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.unauthenticated-container {
+  max-width: 100%;
+  width: 450px;
+}
+
+.unauthenticated-card {
+  border: 0;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+
+  .card-header-title {
+    font-size: $font-size-lg * 1.2;
+
+    & > small {
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+/***** FORM *****/
+.form-action {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+#footer {
+  margin-top: map-get($spacers, 3);
+  color: rgba($white, 0.8);
+  font-size: $font-size-sm;
+}

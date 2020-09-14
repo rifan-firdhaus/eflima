@@ -2,6 +2,7 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
+use Exception;
 use modules\account\Account;
 use modules\core\behaviors\AttributeTypecastBehavior;
 use modules\core\db\ActiveQuery;
@@ -33,18 +34,20 @@ use yii\helpers\Json;
  * @property string           $picture
  * @property string           $type             [varchar(64)]
  * @property string           $price            [decimal(25,10)]
+ * @property string           $real_price       [decimal(25,10)]
  * @property string           $amount           [decimal(25,10)]
  * @property string           $tax              [decimal(25,10)]
- * @property string           $sub_total        [decimal(25,10)]
- * @property string           $grand_total      [decimal(25,10)]
- * @property string           $real_price       [decimal(25,10)]
- * @property string           $real_sub_total   [decimal(25,10)]
  * @property string           $real_tax         [decimal(25,10)]
+ * @property string           $sub_total        [decimal(25,10)]
+ * @property string           $real_sub_total   [decimal(25,10)]
+ * @property string           $grand_total      [decimal(25,10)]
  * @property string           $real_grand_total [decimal(25,10)]
- * @property string|array     $params
+ * @property string           $params
+ * @property int              $order            [smallint(5) unsigned]
+ * @property string           $terms
  * @property int              $created_at       [int(11) unsigned]
  * @property int              $updated_at       [int(11) unsigned]
- * @property string           $terms
+ *
  */
 class InvoiceItem extends ActiveRecord
 {
@@ -75,6 +78,43 @@ class InvoiceItem extends ActiveRecord
         $query = new InvoiceItemQuery(get_called_class());
 
         return $query->alias("invoice_item");
+    }
+
+    public static function sort($invoiceId, $sort)
+    {
+        $models = self::find()->andWhere(['invoice_id' => $invoiceId, 'id' => $sort])->indexBy('id')->all();
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            foreach ($sort AS $order => $invoiceItemId) {
+                if (!isset($models[$invoiceItemId])) {
+                    continue;
+                }
+
+                $model = $models[$invoiceItemId];
+
+                $model->order = $order;
+
+                if (!$model->save(false)) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+        } catch (Exception $e) {
+            $transaction->rollBack();
+
+            throw $e;
+        } catch (Throwable $e) {
+            $transaction->rollBack();
+
+            throw $e;
+        }
+
+        $transaction->commit();
+
+        return true;
     }
 
     /**

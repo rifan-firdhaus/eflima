@@ -1,0 +1,50 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.ticket-reply-avatar {
+  height: 40px;
+  width: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.ticket-reply-name {
+  font-weight: $font-weight-bold;
+}
+
+.ticket-reply-header {
+  border-bottom: 1px solid $border-color;
+  padding: map-get($spacers,3);
+  margin-top: map-get($spacers,3) * -1;
+  margin-left: map-get($spacers,3) * -1;
+  margin-right: map-get($spacers,3) * -1;
+}
+
+.ticket-reply-avatar > img {
+  max-width: 100%;
+}
+
+.ticket-reply {
+  border-width: 0px 0px 0px 7px;
+  border-style: solid;
+}
+
+.ticket-reply.ticket-reply-contact,
+.ticket-reply.ticket-starter {
+  background-color: color-level($warning, -12);
+  border-color: color-level($warning, -5);
+
+  .ticket-reply-header {
+    border-color: color-level($warning, -5);
+    background-color: color-level($warning, -12);
+  }
+}
+
+.ticket-reply.ticket-reply-staff {
+  background-color: color-level($primary, -12);
+  border-color: color-level($primary, -5);
+
+  .ticket-reply-header {
+    border-color: color-level($primary, -5);
+    background-color: color-level($primary, -12);
+  }
+}

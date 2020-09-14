@@ -1,0 +1,121 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+.project-milestone-item {
+  max-width: 300px;
+  min-width: 300px;
+  width: 100%;
+  margin-right: 1.15rem;
+  border-radius: 0.35rem;
+  overflow: hidden; }
+
+.project-milestone-item-header {
+  padding: 1.15rem;
+  background: #f2c942;
+  color: #fff; }
+  .project-milestone-item-header .btn-menu {
+    color: #fff; }
+  .project-milestone-item-header > .handle {
+    margin-top: -1.15rem;
+    margin-bottom: -1.15rem;
+    margin-left: -1.15rem;
+    padding: 1.15rem;
+    cursor: move;
+    transition: 0.3s;
+    font-size: 1.38rem; }
+
+.project-milestone-item-title {
+  font-weight: 600;
+  color: #fff; }
+  .project-milestone-item-title:hover {
+    color: #fff; }
+
+.project-milestone-item-content {
+  border-color: #e9ecef;
+  border-style: solid;
+  flex-shrink: 1;
+  flex-basis: 100vh;
+  border-width: 0 1px 1px;
+  padding: 0.575rem; }
+
+.project-milestone-colors {
+  max-width: 15rem; }
+
+.project-milestone-colors > a {
+  max-width: 20%;
+  padding-top: 0.575rem;
+  padding-bottom: 0.575rem;
+  border-radius: 0.35rem;
+  background: transparent !important; }
+  .project-milestone-colors > a:hover > .project-milestone-color {
+    transform: scale(1.2); }
+
+.project-milestone-color {
+  width: 20px;
+  height: 20px;
+  background: #f2c942;
+  border-radius: 50%;
+  margin: auto;
+  transition: 0.1s; }
+
+.project-milestone-color-yellow {
+  background: #f2c942; }
+
+.project-milestone-color-red {
+  background: #e46572; }
+
+.project-milestone-color-blue {
+  background: #425c95; }
+
+.project-milestone-color-green {
+  background: #5cbc72; }
+
+.project-milestone-color-purple {
+  background: #926fd0; }
+
+.project-milestone-color-orange {
+  background: #ffbe62; }
+
+.project-milestone-color-indigo {
+  background: #8b49f5; }
+
+.project-milestone-color-cyan {
+  background: #65c4cb; }
+
+.project-milestone-color-teal {
+  background: #56d6b0; }
+
+.project-milestone-color-pink {
+  background: #ee6ca8; }
+
+.project-milestone-item-task {
+  margin-bottom: 1.15rem;
+  border: 1px solid #e9ecef;
+  padding: 0.575rem 0.575rem 0.575rem calc(0.575rem + 5px);
+  position: relative; }
+
+.project-milestone-item-task-status {
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  top: 0; }
+
+.project-milestone-item-task-header {
+  font-weight: bold;
+  margin-bottom: 0.575rem; }
+
+.project-milestone-item-task-title {
+  min-width: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap; }
+
+.project-milestone-item-task-label {
+  text-transform: uppercase;
+  font-size: 0.65625rem;
+  font-weight: bold;
+  color: rgba(108, 117, 125, 0.85); }
+
+/*# sourceMappingURL=project-milestone.css.map */

@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"file": "event-view.css",
+	"sources": [
+		"event-view.scss"
+	],
+	"names": [],
+	"mappings": "AAAA,AAAA,6BAA6B,CAAC,QAAQ,CAAC;EACrC,KAAK,EAAE,YAAY;EACnB,QAAQ,EAAE,MAAM;EAChB,UAAU,EAAE,MAAM,GACnB"
+}

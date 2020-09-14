@@ -36,7 +36,9 @@ if (!isset($hardcoded)) {
     <tbody>
         <?php
         if ($hardcoded) {
-            foreach ($model->items AS $item) {
+            $items = $model->getItems()->orderBy(['order' => SORT_ASC])->all();
+
+            foreach ($items AS $item) {
                 echo $this->render('item-row', [
                     'model' => $item,
                 ]);

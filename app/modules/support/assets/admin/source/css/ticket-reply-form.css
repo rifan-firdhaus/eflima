@@ -1,0 +1,71 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+.ticket-reply-predefined-reply > .select2 {
+  width: 0 !important;
+  overflow: hidden;
+  visibility: hidden; }
+
+.ticket-reply-predefined-reply {
+  display: flex;
+  align-items: center; }
+
+#ticket-reply-tinymce-toolbar .tox .tox-toolbar__primary {
+  background: transparent;
+  border: 0;
+  max-width: none; }
+
+#ticket-reply-tinymce-toolbar .tox.tox-tinymce-inline {
+  max-width: none;
+  border: 0;
+  display: block !important; }
+
+#ticket-reply-tinymce-toolbar {
+  border-bottom: 1px solid #e9ecef; }
+  #ticket-reply-tinymce-toolbar:empty {
+    display: none; }
+
+.ticket-reply-field {
+  margin-bottom: 0;
+  border-bottom: 1px solid #e9ecef; }
+
+.eflima .ticket-reply-field .select2-container--default .select2-selection--multiple,
+.eflima .ticket-reply-field .form-control {
+  background: transparent;
+  border: 0; }
+
+.eflima .ticket-reply-field .select2-container--default .select2-selection--multiple .select2-selection__choice {
+  border: 1px solid #e9ecef;
+  background-color: transparent;
+  color: rgba(73, 80, 87, 0.95);
+  padding-top: 0;
+  padding-bottom: 0; }
+
+.ticket-reply-label {
+  width: 100px;
+  padding-left: 1.15rem;
+  margin-bottom: 0; }
+
+.ticket-reply-content-field .form-control {
+  min-height: 8rem; }
+
+[data-rid=ticket-reply-form] {
+  border: 1px solid #e9ecef;
+  margin-bottom: 1.15rem;
+  border-radius: 0.35rem;
+  border-bottom: 0; }
+  [data-rid=ticket-reply-form] .form-action {
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #e9ecef; }
+
+[data-rid=card-field-ticketreply-general_section] {
+  border: 5px solid #468bef;
+  border-radius: 0.35rem; }
+
+[data-rid=active-field-ticketreply-blind_carbon_copy],
+[data-rid=active-field-ticketreply-carbon_copy] {
+  display: none; }
+
+/*# sourceMappingURL=ticket-reply-form.css.map */

@@ -26,8 +26,7 @@ phpunit.phar
 #vagrant folder
 /.vagrant
 
-public
-protected
-assets
-app/runtime
-app/vendor
+/protected
+/assets
+/app/runtime
+/app/vendor

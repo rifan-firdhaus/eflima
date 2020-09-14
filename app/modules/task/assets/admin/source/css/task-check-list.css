@@ -1,0 +1,43 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+.task-check-list-item .text-wrapper {
+  flex-grow: 1;
+  margin-left: 1.15rem; }
+
+.task-check-list-item {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+  align-items: center;
+  padding-top: 2px;
+  position: relative;
+  padding-left: 15px; }
+  .task-check-list-item.sortable-chosen {
+    background: #fff5e6; }
+
+.task-check-list-item > .handle {
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  bottom: 6px;
+  width: 7px;
+  border-left: 2px dotted #adb5bd;
+  border-right: 2px dotted #adb5bd;
+  cursor: move; }
+
+.task-check-list-item .text-wrapper input {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 5px 0; }
+
+.task-check-list-item .text-wrapper input:focus {
+  outline: 0;
+  border-bottom: 2px solid #468bef; }
+
+.task-check-list-item .checkbox-wrapper {
+  margin-top: -5px; }
+
+/*# sourceMappingURL=task-check-list.css.map */

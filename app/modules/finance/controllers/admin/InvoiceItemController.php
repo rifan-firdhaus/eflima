@@ -7,14 +7,18 @@ use modules\account\widgets\lazy\LazyResponse;
 use modules\finance\models\Invoice;
 use modules\finance\models\InvoiceItem;
 use modules\finance\models\InvoiceItemTax;
+use modules\finance\models\queries\InvoiceItemQuery;
+use modules\task\models\TaskChecklist;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
+use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
 
 /**
@@ -318,5 +322,54 @@ class InvoiceItemController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+    public function actionSort($invoice_id)
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('It is only served ajax request');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = new DynamicModel([
+            'sort' => Yii::$app->request->post('sort'),
+            'invoice_id' => $invoice_id,
+        ]);
+
+        $model->addRule(['sort', 'invoice_id'], 'required')
+            ->addRule('sort', 'exist', [
+                'allowArray' => true,
+                'targetClass' => InvoiceItem::class,
+                'targetAttribute' => 'id',
+                'filter' => function ($query) use ($invoice_id) {
+                    /** @var InvoiceItemQuery $query */
+
+                    return $query->andWhere(['invoice_id' => $invoice_id]);
+                },
+            ])
+            ->addRule('invoice_id', 'exist', [
+                'targetClass' => Invoice::class,
+                'targetAttribute' => 'id',
+            ]);
+
+
+
+        if ($model->validate() && InvoiceItem::sort($invoice_id, $model->sort)) {
+            return [
+                'successs' => true,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'messages' => [
+                'danger' => [
+                    Yii::t('app', 'Failed to sort {object}', [
+                        'object' => Yii::t('app', 'Items'),
+                    ]),
+                ],
+            ],
+        ];
     }
 }

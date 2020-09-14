@@ -1,0 +1,44 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+.ticket-reply-avatar {
+  height: 40px;
+  width: 40px;
+  overflow: hidden;
+  border-radius: 50%; }
+
+.ticket-reply-name {
+  font-weight: 700; }
+
+.ticket-reply-header {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.15rem;
+  margin-top: -1.15rem;
+  margin-left: -1.15rem;
+  margin-right: -1.15rem; }
+
+.ticket-reply-avatar > img {
+  max-width: 100%; }
+
+.ticket-reply {
+  border-width: 0px 0px 0px 7px;
+  border-style: solid; }
+
+.ticket-reply.ticket-reply-contact,
+.ticket-reply.ticket-starter {
+  background-color: #fffcf7;
+  border-color: #ffcc83; }
+  .ticket-reply.ticket-reply-contact .ticket-reply-header,
+  .ticket-reply.ticket-starter .ticket-reply-header {
+    border-color: #ffcc83;
+    background-color: #fffcf7; }
+
+.ticket-reply.ticket-reply-staff {
+  background-color: #f8fafe;
+  border-color: #90b9f5; }
+  .ticket-reply.ticket-reply-staff .ticket-reply-header {
+    border-color: #90b9f5;
+    background-color: #f8fafe; }
+
+/*# sourceMappingURL=ticket-view.css.map */

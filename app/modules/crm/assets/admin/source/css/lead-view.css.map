@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"file": "lead-view.css",
+	"sources": [
+		"lead-view.scss"
+	],
+	"names": [],
+	"mappings": "AAAA,AAAA,8BAA8B,CAAC,QAAQ,CAAC;EACtC,KAAK,EAAE,YAAY;EACnB,QAAQ,EAAE,MAAM;EAChB,UAAU,EAAE,MAAM,GACnB"
+}

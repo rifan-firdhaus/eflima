@@ -1,0 +1,106 @@
+.history-timeline {
+  position: relative;
+  display: table;
+  height: 100%;
+  margin: 0;
+  width: 100%; }
+  .history-timeline .history-timeline-wrapper:after {
+    content: '';
+    width: 2px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 132.5px;
+    z-index: 1;
+    background: #C5C5C5; }
+  .history-timeline h3 {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 10px;
+    margin: 0;
+    font-weight: 400;
+    font-size: 1rem;
+    padding: 6px;
+    width: 95px;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #468bef;
+    color: #fff; }
+    .history-timeline h3 .history-timeline-group-date {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 3px;
+      font-weight: 600; }
+    .history-timeline h3:after {
+      top: calc(50% - 5px);
+      right: -6px;
+      content: "";
+      display: block;
+      border-left: 6px solid #468bef;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      position: absolute; }
+  .history-timeline section.year {
+    position: relative; }
+    .history-timeline section.year section {
+      position: relative; }
+      .history-timeline section.year section:first-of-type {
+        margin-top: -4rem; }
+        .history-timeline section.year section:first-of-type > .history-timeline-item-content {
+          padding-top: 0; }
+      .history-timeline section.year section:last-child {
+        margin-bottom: 0; }
+      .history-timeline section.year section .history-timeline-item-content {
+        list-style-type: none;
+        padding: 10px 0;
+        margin: 0 0 0 170px;
+        display: flex;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #DDD; }
+        .history-timeline section.year section .history-timeline-item-content .history-timeline-item-description {
+          flex-grow: 1;
+          flex-shrink: 2;
+          flex-basis: 50%; }
+        .history-timeline section.year section .history-timeline-item-content .history-timeline-item-time {
+          flex-shrink: 0;
+          padding-left: 20px;
+          font-size: smaller;
+          text-align: right;
+          line-height: 1rem; }
+        .history-timeline section.year section .history-timeline-item-content .history-timeline-item-executor {
+          flex-basis: 100%;
+          margin-top: 3px; }
+        .history-timeline section.year section .history-timeline-item-content .history-timeline-item-executor-avatar {
+          border-radius: 50%;
+          max-width: 25px;
+          margin-right: 10px;
+          vertical-align: middle; }
+        .history-timeline section.year section .history-timeline-item-content > .icon {
+          background: #468bef;
+          width: 40px;
+          height: 40px;
+          text-align: center;
+          border: 6px solid #FFF;
+          padding: 2px;
+          border-radius: 50%;
+          color: #FFF;
+          position: absolute;
+          left: 112.5px;
+          top: -7px;
+          z-index: 9;
+          font-size: 18px; }
+        .history-timeline section.year section .history-timeline-item-content:last-child {
+          margin-bottom: 0; }
+        .history-timeline section.year section .history-timeline-item-content:first-of-type:after {
+          content: '';
+          width: 17px;
+          height: 17px;
+          background: #C5C5C5;
+          border: 4px solid #FFFFFF;
+          position: absolute;
+          border-radius: 50%;
+          left: 124px;
+          top: 2px;
+          z-index: 2; }
+
+/*# sourceMappingURL=history.css.map */

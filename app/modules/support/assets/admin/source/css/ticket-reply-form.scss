@@ -1,0 +1,86 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.ticket-reply-predefined-reply > .select2 {
+  width: 0 !important;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.ticket-reply-predefined-reply {
+  display: flex;
+  align-items: center;
+}
+
+#ticket-reply-tinymce-toolbar .tox .tox-toolbar__primary {
+  background: transparent;
+  border: 0;
+  max-width: none;
+}
+
+#ticket-reply-tinymce-toolbar .tox.tox-tinymce-inline {
+  max-width: none;
+  border: 0;
+  display: block !important;
+}
+
+#ticket-reply-tinymce-toolbar {
+  border-bottom: 1px solid #e9ecef;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.ticket-reply-field {
+  margin-bottom: 0;
+  border-bottom: 1px solid $border-color;
+}
+
+.eflima .ticket-reply-field {
+  .select2-container--default .select2-selection--multiple,
+  .form-control {
+    background: transparent;
+    border: 0;
+  }
+
+  .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    border: 1px solid $border-color;
+    background-color: transparent;
+    color: $body-color;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.ticket-reply-label {
+  width: 100px;
+  padding-left: map-get($spacers, 3);
+  margin-bottom: 0;
+}
+
+.ticket-reply-content-field .form-control {
+  min-height: 8rem;
+}
+
+[data-rid=ticket-reply-form] {
+  border: 1px solid $border-color;
+  margin-bottom: map-get($spacers, 3);
+  border-radius: $border-radius;
+  border-bottom: 0;
+
+  .form-action {
+    padding: 0;
+    border: 0;
+    border-top: 1px solid $border-color;
+  }
+}
+
+[data-rid=card-field-ticketreply-general_section] {
+  border: 5px solid $primary;
+  border-radius: $border-radius;
+}
+
+[data-rid=active-field-ticketreply-blind_carbon_copy],
+[data-rid=active-field-ticketreply-carbon_copy] {
+  display: none;
+}

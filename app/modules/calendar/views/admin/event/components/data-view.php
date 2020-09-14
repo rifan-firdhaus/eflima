@@ -90,6 +90,7 @@ if ($view === 'calendar') {
         'fetchEventUrl' => Url::to($fetchUrl),
         'updateEventDateUrl' => Url::to(['/calendar/admin/event/update', 'scenario' => 'admin/update/date']),
         'addEventUrl' => Url::to($addUrl),
+        'viewEventUrl' => Url::to(['/calendar/admin/event/view']),
     ]);
 
     $this->registerJs("$('#event-data-view-{$this->uniqueId}').eventCalendar({$jsOptions})");

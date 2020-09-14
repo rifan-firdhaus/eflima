@@ -2,15 +2,13 @@
 
 use modules\account\web\admin\View;
 use modules\calendar\models\forms\event\EventSearch;
-use modules\crm\models\Customer;
-use yii\data\ActiveDataProvider;
+use modules\crm\models\Lead;
 use yii\helpers\ReplaceArrayValue;
 
 /**
- * @var Customer           $model
- * @var EventSearch        $searchModel
- * @var ActiveDataProvider $dataProvider
- * @var View               $this
+ * @var Lead        $model
+ * @var EventSearch $eventSearchModel
+ * @var View        $this
  */
 
 $active = 'event';
@@ -20,10 +18,9 @@ $this->beginContent('@modules/crm/views/admin/lead/components/view-layout.php', 
 echo $this->block('@begin');
 
 echo $this->render('@modules/calendar/views/admin/event/components/data-view', [
-    'dataProvider' => $dataProvider,
-    'searchModel' => $searchModel,
+    'searchModel' => $eventSearchModel,
     'dataViewOptions' => [
-        'searchAction' => new ReplaceArrayValue($searchModel->searchUrl('/crm/admin/lead/view', [
+        'searchAction' => new ReplaceArrayValue($eventSearchModel->searchUrl('/crm/admin/lead/view', [
             'id' => $model->id,
             'action' => 'event',
         ], false)),

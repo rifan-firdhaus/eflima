@@ -1,0 +1,290 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.task-avatar-more,
+.task-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-block;
+  margin-right: -15px;
+  border: 4px solid $white;
+  transition: 0.3s;
+}
+
+.task-avatar-more {
+  background-color: $primary;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  line-height: 27px;
+  color: #FFF;
+}
+
+.task-avatar img {
+  max-width: 100%;
+}
+
+.task-avatar:hover {
+  z-index: 999999999999999999;
+  transform: scale(1);
+}
+
+/***** LIST *****/
+.column-detail {
+  margin-right: map-get($spacers, 2);
+
+  .label {
+    text-transform: uppercase;
+    font-size: 75%;
+    font-weight: $font-weight-semi-bold;
+    color: $gray-500;
+    margin-bottom: map-get($spacers, 1);
+  }
+
+  .value {
+    font-weight: 600;
+    min-height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    & > small {
+      margin-top: map-get($spacers, 1);
+    }
+  }
+}
+
+.task-list-item {
+  border-bottom: 5px solid $gray-300;
+  padding: map-get($spacers, 3);
+
+  .column-detail {
+    flex-grow: 1;
+    flex-basis: 200px;
+  }
+
+  .title {
+    font-weight: 500;
+    margin-bottom: map-get($spacers, 2);
+    font-size: 1.2rem;
+  }
+
+  .assignees {
+    margin-bottom: map-get($spacers, 1);
+  }
+
+  .task-list-progress-label {
+    font-weight: $font-weight-bold;
+    color: $primary
+  }
+}
+
+/***** VIEW TASK *****/
+.view-task {
+  position: relative;
+}
+
+.task-view-wrapper .column-detail {
+  flex-grow: 1;
+  text-align: center;
+  max-width: 20%;
+}
+
+.task-view-wrapper .column-detail .value {
+  min-height: 41px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  line-height: $line-height-base;
+}
+
+.task-view-wrapper .metas {
+  padding: map-get($spacers, 3) 0;
+  border-bottom: 1px solid $border-color;
+  background: $body-bg;
+}
+
+.task-view-wrapper .content {
+  padding: map-get($spacers, 3);
+}
+
+/***** TASK TIMER *****/
+.task-item-timer > .is-countdown {
+  overflow: hidden;
+  background: transparent;
+  border: transparent;
+}
+
+.timer-panel-show #timer-panel {
+  left: $sidenav-width;
+  overflow: auto;
+}
+
+.task-timer-item {
+  padding: map-get($spacers, 3);
+  background-color: $white;
+  border-bottom: 1px solid $border-color;
+  border-top: 1px solid $border-color;
+
+  .title {
+    margin-bottom: map-get($spacers, 2);
+    font-weight: $font-weight-semi-bold;
+    font-size: 1.2rem;
+  }
+}
+
+/***** TASK INTERACTION *****/
+.task-interaction-item {
+  margin-bottom: map-get($spacers, 2);
+
+  .task-interaction-avatar {
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    margin-right: 1rem;
+    padding: 2px;
+    border: 1px solid $primary;
+
+    img {
+      width: 100%;
+      border-radius: 50%;
+    }
+  }
+
+  .task-interaction-content {
+    background: $white;
+    padding: map-get($spacers, 1) * 1.25 map-get($spacers, 3);
+    position: relative;
+    border-radius: 0px 8px 8px 8px;
+    min-width: 200px;
+    max-width: 100%;
+    border: 1px solid $primary;
+
+
+    .task-interaction-comment p {
+      margin-bottom: map-get($spacers, 2);
+    }
+
+    .task-interaction-status {
+      font-size: $font-size-sm;
+    }
+
+    .task-interaction-progress-wrapper {
+      max-width: 150px;
+    }
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: -10px;
+      border-right: 10px solid $primary;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      transform: rotate(135deg);
+    }
+  }
+
+  &.task-interaction-item-me {
+    .task-interaction-avatar {
+      border-color: $warning;
+    }
+
+    .task-interaction-content {
+      border-color: $warning;
+
+      &:after {
+        border-right-color: $warning;
+      }
+    }
+  }
+}
+
+.task-view-wrapper .interactions {
+  background: $really-light;
+  padding: map-get($spacers, 3) 0 0;
+  border-top: 2px solid $border-color;
+
+  & > div > h3 {
+    font-size: $font-size-lg;
+    text-transform: uppercase;
+    margin-bottom: map-get($spacers, 3);
+  }
+
+  .form-wrapper {
+    //box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.1);
+    background: $white;
+    border: 2px solid $primary;
+    border-radius: 0 8px 8px 8px;
+    position: relative;
+
+    .task-interaction-progress-wrapper {
+      min-width: 135px;
+      padding: 0 15px;
+
+      .irs--flat {
+        height: $input-height;
+      }
+
+      .irs--flat .irs-bar,
+      .irs--flat .irs-line {
+        top: 18px;
+      }
+
+      .irs--flat .irs-handle {
+        top: 11px
+      }
+
+      .irs--flat .irs-from,
+      .irs--flat .irs-to,
+      .irs--flat .irs-single {
+        top: -15px;
+        transform: scale(0);
+        transition: 0.2s transform;
+        font-size: $font-size-sm;
+        padding: 3px 5px;
+      }
+
+      &:hover .irs--flat .irs-from,
+      &:hover .irs--flat .irs-to,
+      &:hover .irs--flat .irs-single {
+        transform: scale(1)
+      }
+    }
+
+    .form-action {
+      border: 0;
+      border-top: 1px solid $gray-200;
+      padding: 0;
+      background: transparent;
+    }
+
+    [data-rid=taskinteraction-comment] {
+      background-color: $white;
+      border: 0;
+    }
+
+    .select2-container--default .select2-selection--single {
+      background-color: transparent;
+      border: 0;
+      min-width: 125px;
+      display: flex;
+      align-items: center;
+    }
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: -10px;
+      border-right: 10px solid $primary;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      transform: rotate(135deg);
+    }
+  }
+}

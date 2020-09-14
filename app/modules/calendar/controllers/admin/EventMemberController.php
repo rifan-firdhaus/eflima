@@ -2,7 +2,9 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
+use modules\account\models\Staff;
 use modules\account\web\admin\Controller;
+use modules\calendar\models\Event;
 use modules\calendar\models\EventMember;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -73,6 +75,34 @@ class EventMemberController extends Controller
             ]));
         }
 
-        return $this->goBack(['index']);
+        return $this->redirect(['/calendar/admin/event/view','id' => $model->event_id]);
+    }
+
+    public function actionInvite($id,$staff_id){
+        $model = Event::find()->andWhere(['id' => $id])->one();
+
+        if (!($model instanceof Event)) {
+            return $this->notFound(Yii::t('app', '{object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Event'),
+            ]));
+        }
+
+        $staff = Staff::find()->andWhere(['id' => $staff_id])->one();
+
+        if (!$staff) {
+            return $this->notFound(Yii::t('app', '{object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Staff'),
+            ]));
+        }
+
+        if ($model->invite($staff_id)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{staff} invited to this event', [
+                'staff' => $staff->name,
+            ]));
+        } else {
+            Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to invite to event'));
+        }
+
+        return $this->redirect(['/calendar/admin/event/view','id' => $model->id]);
     }
 }

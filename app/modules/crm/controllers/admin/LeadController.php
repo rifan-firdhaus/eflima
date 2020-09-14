@@ -3,19 +3,24 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\models\forms\history\HistorySearch;
+use modules\account\models\forms\staff\StaffSearch;
+use modules\account\models\queries\HistoryQuery;
+use modules\account\models\Staff;
 use modules\account\web\admin\Controller;
+use modules\calendar\models\Event;
 use modules\calendar\models\forms\event\EventSearch;
-use modules\crm\models\Customer;
 use modules\crm\models\forms\lead\LeadSearch;
 use modules\crm\models\forms\lead_follow_up\LeadFollowUpSearch;
 use modules\crm\models\Lead;
 use modules\task\models\forms\task\TaskSearch;
+use modules\task\models\Task;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
+use yii\db\Expression;
 use yii\db\StaleObjectException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
@@ -144,11 +149,11 @@ class LeadController extends Controller
 
         switch ($action) {
             case 'history':
-                return $this->history(compact('model'));
+                return $this->history($model);
             case 'task':
-                return $this->task(compact('model'));
+                return $this->task($model);
             case 'event':
-                return $this->event(compact('model'));
+                return $this->event($model);
         }
 
         $followUpSearchModel = new LeadFollowUpSearch([
@@ -161,59 +166,85 @@ class LeadController extends Controller
     }
 
     /**
-     * @param array $params
+     * @param Lead $model
      *
      * @return string
      */
-    public function history($params)
+    public function history($model)
     {
-        /** @var Lead $model */
-        $model = $params['model']->id;
-        $params['searchModel'] = new HistorySearch([
-            'params' => [
-                'model' => Lead::class,
-                'model_id' => $model,
-            ],
+        $historySearchParams = [
+            'model' => Lead::class,
+            'model_id' => $model->id,
+        ];
+
+        if (Yii::$app->hasModule('task')) {
+            $historySearchParams['models'][] = function ($query) use ($model) {
+                /** @var HistoryQuery $query */
+
+                $query->leftJoin(Task::tableName(), [
+                    'task.id' => new Expression('[[history.model_id]]'),
+                    'history.model' => Task::class,
+                    'task.model_id' => $model->id,
+                    'task.model' => 'lead',
+                ]);
+
+                return ['IS NOT', 'task.id', null];
+            };
+        }
+
+        if (Yii::$app->hasModule('calendar')) {
+            $historySearchParams['models'][] = function ($query) use ($model) {
+                /** @var HistoryQuery $query */
+
+                $query->leftJoin(Event::tableName(), [
+                    'history.model' => Event::class,
+                    'event.id' => new Expression('[[history.model_id]]'),
+                    'event.model' => 'lead',
+                    'event.model_id' => $model->id,
+                ]);
+
+                return ['IS NOT', 'event.id', null];
+            };
+        }
+
+        $historySearchModel = new HistorySearch([
+            'params' => $historySearchParams,
         ]);
 
-        return $this->render('history', $params);
+        return $this->render('history', compact('model', 'historySearchModel'));
     }
 
     /**
-     * @param array $params
+     * @param Lead $model
      *
      * @return string
      */
-    public function task($params)
+    public function task($model)
     {
-        /** @var Customer $model */
-        $model = $params['model'];
-        $searchModel = $params['searchModel'] = new TaskSearch([
+        $taskSearchModel = new TaskSearch([
             'params' => [
                 'model' => 'lead',
                 'model_id' => $model->id,
             ],
         ]);
 
-        $params['dataProvider'] = $searchModel->apply(Yii::$app->request->get());
+        $taskSearchModel->apply(Yii::$app->request->get());
 
-        return $this->render('task', $params);
+        return $this->render('task', compact('model', 'taskSearchModel'));
     }
 
 
     /**
-     * @param array $params
+     * @param Lead $model
      *
      * @return string|array
      *
      * @throws InvalidConfigException
      */
-    public function event($params)
+    public function event($model)
     {
-        /** @var Customer $model */
         $view = Yii::$app->request->get('view', 'default');
-        $model = $params['model'];
-        $searchModel = new EventSearch([
+        $eventSearchModel = new EventSearch([
             'params' => [
                 'view' => $view,
                 'model' => 'lead',
@@ -232,12 +263,12 @@ class LeadController extends Controller
         if ($view === 'calendar' && Yii::$app->request->get('query')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            return $searchModel->fullCalendar(Yii::$app->request->queryParams);
+            return $eventSearchModel->fullCalendar(Yii::$app->request->queryParams);
         }
 
-        $dataProvider = $searchModel->apply(Yii::$app->request->queryParams);
+        $eventSearchModel->apply(Yii::$app->request->queryParams);
 
-        return $this->render('event', compact('model', 'searchModel', 'dataProvider'));
+        return $this->render('event', compact('model', 'eventSearchModel'));
     }
 
     /**
@@ -333,6 +364,80 @@ class LeadController extends Controller
         return $this->goBack(['index']);
     }
 
+
+    /**
+     * @param $id
+     * @param $staff_id
+     *
+     * @return array|Task|string|Response
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionAssign($id, $staff_id)
+    {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Lead)) {
+            return $model;
+        }
+
+        $staff = Staff::find()->andWhere(['id' => $staff_id])->one();
+
+        if (!$staff) {
+            return $this->notFound(Yii::t('app', '{object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Staff'),
+            ]));
+        }
+
+        if ($model->assign($staff_id)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{object} assigned to {staff}', [
+                'staff' => $staff->name,
+                'object' => Yii::t('app', 'Lead'),
+            ]));
+        } else {
+            Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to assign {object}', [
+                'object' => Yii::t('app', 'Lead'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array|Lead|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionStaffAssignableAutoComplete($id){
+
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $searchModel = new StaffSearch();
+
+        $model = $this->getModel($id);
+
+        if(!$model instanceof Lead){
+            return $model;
+        }
+
+        $assigned = $model->getAssigneesRelationship()
+            ->select('assignee_id')
+            ->createCommand()
+            ->queryColumn();
+
+        $searchModel->getQuery()
+            ->andWhere(['NOT IN','staff.id',$assigned]);
+
+        return $searchModel->autoComplete(Yii::$app->request->queryParams);
+    }
     /**
      * @return array
      *

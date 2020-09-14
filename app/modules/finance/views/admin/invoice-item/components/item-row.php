@@ -19,6 +19,7 @@ if (!isset($temp)) {
 <?php if (in_array($model->type, ['raw', 'product'])): ?>
     <tr data-id="<?= $model->id ?>">
         <td class="align-middle text-center text-nowrap">
+            <div class="handle"></div>
             <?= Html::a(Icon::show('i8:edit'), $temp ? ['/finance/admin/invoice-item/add'] : ['/finance/admin/invoice-item/update', 'id' => $model->id], [
                 'class' => 'text-primary align-middle update-invoice-item-button m-0 h4',
                 'data-lazy' => 0,

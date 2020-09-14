@@ -3,12 +3,12 @@
 use modules\account\models\forms\history\HistorySearch;
 use modules\account\web\admin\View;
 use modules\account\widgets\history\HistoryWidget;
-use modules\crm\models\Customer;
+use modules\crm\models\Lead;
 
 /**
- * @var Customer      $model
+ * @var Lead          $model
  * @var View          $this
- * @var HistorySearch $searchModel
+ * @var HistorySearch $historySearchModel
  */
 
 $active = 'history';
@@ -22,7 +22,7 @@ echo $this->block('@begin');
         <div class="col-md-12 py-3">
             <?= HistoryWidget::widget([
                 'id' => 'lead-history',
-                'dataProvider' => $searchModel->dataProvider,
+                'dataProvider' => $historySearchModel->dataProvider,
             ]); ?>
         </div>
     </div>

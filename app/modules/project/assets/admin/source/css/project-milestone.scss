@@ -1,0 +1,149 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.project-milestone-item {
+  max-width: 300px;
+  min-width: 300px;
+  width: 100%;
+  margin-right: map-get($spacers, 3);
+  border-radius: $border-radius;
+  overflow: hidden;
+}
+
+.project-milestone-item-header {
+  padding: map-get($spacers, 3);
+  background: color-level($yellow, -3);
+  color: $white;
+
+  & .btn-menu {
+    color: $white;
+  }
+
+  & > .handle {
+    margin-top: map-get($spacers,3) * -1;
+    margin-bottom: map-get($spacers,3) * -1;
+    margin-left: map-get($spacers,3) * -1;
+    padding: map-get($spacers, 3);
+    cursor: move;
+    transition: 0.3s;
+    font-size: $font-size-lg;
+  }
+}
+
+.project-milestone-item-title {
+  font-weight: $font-weight-semi-bold;
+  color: $white;
+
+  &:hover {
+    color: $white;
+  }
+}
+
+.project-milestone-item-content {
+  border-color: $border-color;
+  border-style: solid;
+  flex-shrink: 1;
+  flex-basis: 100vh;
+  border-width: 0 1px 1px;
+  padding: map-get($spacers, 2);
+}
+
+.project-milestone-colors {
+  max-width: $dropdown-min-width;
+}
+
+.project-milestone-colors > a {
+  max-width: 20%;
+  padding-top: map-get($spacers, 2);
+  padding-bottom: map-get($spacers, 2);
+  border-radius: $border-radius;
+  background: transparent !important;
+
+  &:hover > .project-milestone-color {
+    transform: scale(1.2);
+  }
+}
+
+.project-milestone-color {
+  width: 20px;
+  height: 20px;
+  background: color-level($yellow, -3);
+  border-radius: 50%;
+  margin: auto;
+  transition: 0.1s;
+}
+
+.project-milestone-color-yellow {
+  background: color-level($yellow, -3);
+}
+
+.project-milestone-color-red {
+  background: color-level($red, -3);
+}
+
+.project-milestone-color-blue {
+  background: color-level($blue, -3);
+}
+
+.project-milestone-color-green {
+  background: color-level($green, -3);
+}
+
+.project-milestone-color-purple {
+  background: color-level($purple, -3);
+}
+
+.project-milestone-color-orange {
+  background: color-level($orange, -3);
+}
+
+.project-milestone-color-indigo {
+  background: color-level($indigo, -3);
+}
+
+.project-milestone-color-cyan {
+  background: color-level($cyan, -3);
+}
+
+.project-milestone-color-teal {
+  background: color-level($teal, -3);
+}
+
+.project-milestone-color-pink {
+  background: color-level($pink, -3);
+}
+
+.project-milestone-item-task {
+  $spacer2: map-get($spacers, 2);
+
+  margin-bottom: map-get($spacers,3);
+  border: 1px solid $border-color;
+  padding: $spacer2 $spacer2 $spacer2 calc(#{$spacer2} + 5px);
+  position: relative;
+}
+
+.project-milestone-item-task-status {
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  top: 0;
+}
+
+.project-milestone-item-task-header {
+  font-weight: bold;
+  margin-bottom: map-get($spacers, 2);
+}
+
+.project-milestone-item-task-title {
+  min-width: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.project-milestone-item-task-label {
+  text-transform: uppercase;
+  font-size: $font-size-sm * 0.75;
+  font-weight: bold;
+  color: $text-muted;
+}

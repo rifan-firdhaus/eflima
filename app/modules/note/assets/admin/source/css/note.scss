@@ -1,0 +1,171 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.note-container-overlay {
+  background-color: $modal-backdrop-bg;
+}
+
+.note-container-overlay,
+.note-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.note-container-overlay {
+  z-index: -1;
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.note-container {
+  z-index: 9999;
+  flex-direction: column;
+  display: flex;
+  padding-left: $sidenav-width;
+}
+
+.note-container.note-container-inline {
+  position: static;
+  padding: 0;
+}
+
+.note-toolbar {
+  $spacer5: map-get($spacers, 3);
+  $spacers3: map-get($spacers, 3);
+
+  max-width: 700px;
+  margin: auto;
+  transform: translateY(calc((#{$input-height-lg} + #{$spacer5}) * -2));
+  transition: 0.3s;
+  flex-shrink: 0;
+  flex-grow: 0;
+  height: calc(#{$input-height-lg} + #{$spacers3} * 2);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: $spacers3;
+}
+
+.note-container.note-container-inline .note-toolbar {
+  $spacers2: map-get($spacers, 2);
+
+  height: calc(#{$input-height-lg} + #{$spacers2} * 2);
+  padding: map-get($spacers, 2);
+}
+
+.note-container.note-container-inline .note-toolbar,
+.note-container.note-open .note-toolbar {
+  $spacers3: map-get($spacers, 3);
+
+  transform: translateY(0);
+}
+
+.note-container.note-open .note-container-overlay {
+  opacity: 0.88;
+}
+
+/**** NOTE ITEM ****/
+.note-items {
+  margin: auto;
+  max-width: map-get($grid-breakpoints, 'xl');
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  flex-shrink: 1;
+  flex-grow: 50;
+  opacity: 0;
+  transition: 0.3s;
+  transform: translateY(40%);
+  min-height: 0;
+
+  .note-item-container {
+    width: 25%;
+    padding: map-get($spacers, 2);
+
+    .note-item {
+      background: color-level($yellow, -10);
+      border: 1px solid color-level($yellow, -3);
+      border-radius: $border-radius;
+      padding: map-get($spacers, 3);
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      word-break: break-word;
+      transition: 0.3s;
+    }
+
+    .note-content-input {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      outline: none;
+    }
+
+    .form-action {
+      background: transparent;
+      padding: 0;
+      border: 0;
+      margin-bottom: map-get($spacers,3) * -1;
+      margin-left: map-get($spacers,3) * -1;
+      margin-right: map-get($spacers,3) * -1;
+      opacity: 0;
+      transform: translateY(1rem);
+      transition: 0.3s;
+      position: relative;
+    }
+
+    .note-item-title,
+    .note-title-input {
+      background: transparent;
+      border: transparent;
+      width: 100%;
+      outline: none;
+      font-weight: $font-weight-semi-bold;
+      font-size: $font-size-lg;
+      line-height: $line-height-lg;
+      padding: 0;
+      margin-bottom: map-get($spacers, 2);
+    }
+
+    .note-title-input {
+      resize: none;
+      overflow: hidden;
+      box-sizing: content-box;
+      height: $line-height-lg * $font-size-lg;
+    }
+
+    .file-uploader-thumbnail {
+      width: 30px;
+      height: 30px;
+
+      & > img {
+        width: 100%;
+      }
+    }
+
+    &.focus,
+    &:hover {
+      .form-action {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .note-item {
+        $note-item-color: color-level($yellow, 4);
+
+        border-color: $note-item-color;
+        box-shadow: 0px 0px 0px 2px $note-item-color;
+      }
+    }
+  }
+}
+
+.note-container.note-container-inline .note-items .note-item-container {
+  width: 100%;
+}
+
+.note-container.note-container-inline .note-items,
+.note-container.note-open .note-items {
+  transform: translateY(0);
+  opacity: 1;
+}

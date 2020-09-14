@@ -1,0 +1,65 @@
+.file-uploader-name {
+  font-weight: bold;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+}
+
+.file-uploader-metadata {
+  min-width: 0px;
+}
+
+.file-uploader-action {
+  white-space: nowrap;
+}
+
+.file-uploader-thumbnail {
+  line-height: 0;
+  width: 50px;
+  height: 50px;
+  overflow: hidden;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.file-uploader-size {
+  font-size: smaller;
+  opacity: 0.8;
+}
+
+.file-uploader-inpu {
+  cursor: pointer;
+}
+
+.file-uploader-input-field {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.picture-uploader-thumbnail-custom {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  background: #468bef;
+  color: #FFF;
+  border-radius: 6px;
+  padding: 5px;
+  font-weight: bold;
+  text-transform: uppercase;
+  justify-content: center;
+}
+
+.file-uploader-input {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -186,9 +186,11 @@ class InvoiceController extends Controller
                 $query->leftJoin(Task::tableName(), [
                     'task.id' => new Expression('[[history.model_id]]'),
                     'history.model' => Task::class,
+                    'task.model_id' => $model->id,
+                    'task.model' => 'invoice',
                 ]);
 
-                return ['task.model_id' => $model->id, 'task.model' => 'invoice'];
+                return ['IS NOT', 'task.id', null];
             };
         }
 

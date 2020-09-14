@@ -1,0 +1,5042 @@
+/*
+ * Icon Font Eflima
+ * Made with love by Icons8 [ https://icons8.com/ ] using FontCustom [ https://github.com/FontCustom/fontcustom ]
+ *
+ * Contacts:
+ *    [ https://icons8.com/contact ]
+ *
+ * Follow Icon8 on
+ *    Twitter [ https://twitter.com/icons_8 ]
+ *    Facebook [ https://www.facebook.com/Icons8 ]
+ *    Google+ [ https://plus.google.com/+Icons8 ]
+ *    GitHub [ https://github.com/icons8 ]
+ */
+
+
+@font-face {
+  font-family: "Eflima";
+  src: url("../fonts/Eflima.eot");
+  src: url("../fonts/Eflima.eot?#iefix") format("embedded-opentype"),
+  url("../fonts/Eflima.woff2") format("woff2"),
+  url("../fonts/Eflima.woff") format("woff"),
+  url("../fonts/Eflima.ttf") format("truetype"),
+  url("../fonts/Eflima.svg#Eflima") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @font-face {
+    font-family: "Eflima";
+    src: url("../fonts/Eflima.svg#Eflima") format("svg");
+  }
+}
+
+[data-icons8]:before {
+  content: attr(data-icons8);
+}
+
+.icons8, [data-icons8]:before,
+.icons8-3d-rotate:before,
+.icons8-about:before,
+.icons8-access:before,
+.icons8-access-denied:before,
+.icons8-account:before,
+.icons8-account-2:before,
+.icons8-accounting:before,
+.icons8-activity-feed:before,
+.icons8-activity-history:before,
+.icons8-add:before,
+.icons8-add-database:before,
+.icons8-add-link:before,
+.icons8-add-phone:before,
+.icons8-add-shopping-cart:before,
+.icons8-add-to-favorites:before,
+.icons8-address:before,
+.icons8-address-book:before,
+.icons8-adjust:before,
+.icons8-advance:before,
+.icons8-advanced-search:before,
+.icons8-adventures:before,
+.icons8-age:before,
+.icons8-agreement:before,
+.icons8-aircraft:before,
+.icons8-airplane-landing:before,
+.icons8-airplane-take-off:before,
+.icons8-airport:before,
+.icons8-alarm-clock:before,
+.icons8-alert:before,
+.icons8-align-bottom:before,
+.icons8-align-center:before,
+.icons8-align-justify:before,
+.icons8-align-left:before,
+.icons8-align-right:before,
+.icons8-align-top:before,
+.icons8-alphabetical-sorting:before,
+.icons8-alphabetical-sorting-2:before,
+.icons8-american-express:before,
+.icons8-anchor:before,
+.icons8-android:before,
+.icons8-android-tablet:before,
+.icons8-answers:before,
+.icons8-apple-logo:before,
+.icons8-apply:before,
+.icons8-approval:before,
+.icons8-approximately-equal:before,
+.icons8-approximately-not-equal:before,
+.icons8-area-chart:before,
+.icons8-art-prices:before,
+.icons8-ascending-sorting:before,
+.icons8-ask-question:before,
+.icons8-aspect-ratio:before,
+.icons8-asterisk:before,
+.icons8-atm:before,
+.icons8-attach:before,
+.icons8-auction:before,
+.icons8-audio:before,
+.icons8-audio-file:before,
+.icons8-australian-dollar:before,
+.icons8-available-updates:before,
+.icons8-average-math:before,
+.icons8-babys-room:before,
+.icons8-back:before,
+.icons8-back-to:before,
+.icons8-badge:before,
+.icons8-bank:before,
+.icons8-bank-building:before,
+.icons8-bank-cards:before,
+.icons8-bank-euro:before,
+.icons8-bar:before,
+.icons8-bar-chart:before,
+.icons8-barcode:before,
+.icons8-barcode-reader:before,
+.icons8-barcode-scanner:before,
+.icons8-basket:before,
+.icons8-beach-ball:before,
+.icons8-behance:before,
+.icons8-bell-curve:before,
+.icons8-best-seller:before,
+.icons8-bill:before,
+.icons8-billing:before,
+.icons8-bing:before,
+.icons8-binoculars:before,
+.icons8-bios:before,
+.icons8-birthday:before,
+.icons8-bitcoin:before,
+.icons8-block:before,
+.icons8-block-microphone:before,
+.icons8-blockchain:before,
+.icons8-blockchain-new-logo:before,
+.icons8-boarding-pass:before,
+.icons8-bold:before,
+.icons8-book:before,
+.icons8-bookmark:before,
+.icons8-bookmark-2:before,
+.icons8-bounced-check:before,
+.icons8-box:before,
+.icons8-box-important:before,
+.icons8-breakable:before,
+.icons8-brick:before,
+.icons8-brief:before,
+.icons8-briefcase:before,
+.icons8-british-pound:before,
+.icons8-broadcasting:before,
+.icons8-brochure:before,
+.icons8-broken-link:before,
+.icons8-bronze-medal:before,
+.icons8-browse-page:before,
+.icons8-bug:before,
+.icons8-bus:before,
+.icons8-business:before,
+.icons8-business-building:before,
+.icons8-buy:before,
+.icons8-buy-upgrade:before,
+.icons8-buying:before,
+.icons8-cafe:before,
+.icons8-calculator:before,
+.icons8-calendar:before,
+.icons8-calendar-delete:before,
+.icons8-calendar-minus:before,
+.icons8-calendar-plus:before,
+.icons8-call:before,
+.icons8-camper:before,
+.icons8-campfire:before,
+.icons8-canadian-dollar:before,
+.icons8-cancel:before,
+.icons8-cancel-last-digit:before,
+.icons8-cancel-subscription:before,
+.icons8-capital:before,
+.icons8-captcha:before,
+.icons8-card-payment:before,
+.icons8-card-security:before,
+.icons8-card-security-code:before,
+.icons8-card-verification-value:before,
+.icons8-cash:before,
+.icons8-cash-in-hand:before,
+.icons8-cash-register:before,
+.icons8-cashbook:before,
+.icons8-category:before,
+.icons8-cd:before,
+.icons8-center-of-gravity:before,
+.icons8-charging-battery:before,
+.icons8-chat:before,
+.icons8-chat-bubble:before,
+.icons8-check-book:before,
+.icons8-check-file:before,
+.icons8-checked:before,
+.icons8-checked-checkbox:before,
+.icons8-checkmark:before,
+.icons8-checkout:before,
+.icons8-choice:before,
+.icons8-chrome:before,
+.icons8-clear-filters:before,
+.icons8-clear-shopping-cart:before,
+.icons8-clear-symbol:before,
+.icons8-click---collect:before,
+.icons8-clipboard:before,
+.icons8-clock:before,
+.icons8-close-up:before,
+.icons8-close-window:before,
+.icons8-closed-topic:before,
+.icons8-clothes:before,
+.icons8-cloud:before,
+.icons8-cloud-lightning:before,
+.icons8-clouds:before,
+.icons8-code-file:before,
+.icons8-coin-in-hand:before,
+.icons8-coins:before,
+.icons8-collapse:before,
+.icons8-collapse-arrow:before,
+.icons8-collect:before,
+.icons8-collectibles:before,
+.icons8-combo-chart:before,
+.icons8-comments:before,
+.icons8-commercial:before,
+.icons8-compare:before,
+.icons8-compass:before,
+.icons8-compress:before,
+.icons8-computer:before,
+.icons8-computer-support:before,
+.icons8-conference:before,
+.icons8-confirm:before,
+.icons8-connect:before,
+.icons8-contact:before,
+.icons8-contact-details:before,
+.icons8-contacts:before,
+.icons8-content:before,
+.icons8-conversion:before,
+.icons8-cooling:before,
+.icons8-copy:before,
+.icons8-copy-link:before,
+.icons8-copy-to-clipboard:before,
+.icons8-copyleft:before,
+.icons8-copyright:before,
+.icons8-coupon:before,
+.icons8-create:before,
+.icons8-create-document:before,
+.icons8-create-new-child-post:before,
+.icons8-creative-commons:before,
+.icons8-credit-card:before,
+.icons8-credit-control:before,
+.icons8-crime:before,
+.icons8-crop:before,
+.icons8-crowdfunding:before,
+.icons8-crown:before,
+.icons8-cruise-ship:before,
+.icons8-currency:before,
+.icons8-currency-exchange:before,
+.icons8-cursor:before,
+.icons8-customer-support:before,
+.icons8-cut:before,
+.icons8-cv:before,
+.icons8-data-backup:before,
+.icons8-data-encryption:before,
+.icons8-data-protection:before,
+.icons8-data-quality:before,
+.icons8-data-recovery:before,
+.icons8-data-setting:before,
+.icons8-data-transfer:before,
+.icons8-database:before,
+.icons8-database-staff:before,
+.icons8-database-view:before,
+.icons8-date-from:before,
+.icons8-date-span:before,
+.icons8-date-to:before,
+.icons8-day-off:before,
+.icons8-debit-card:before,
+.icons8-debt:before,
+.icons8-decline:before,
+.icons8-defense:before,
+.icons8-delete:before,
+.icons8-delete-database:before,
+.icons8-delete-database-2:before,
+.icons8-delete-link:before,
+.icons8-delete-message:before,
+.icons8-delete-shield:before,
+.icons8-delete-ticket:before,
+.icons8-deleted-message:before,
+.icons8-delicious:before,
+.icons8-delivered:before,
+.icons8-delivery:before,
+.icons8-department:before,
+.icons8-deposit:before,
+.icons8-descending-sorting:before,
+.icons8-details:before,
+.icons8-deviantart:before,
+.icons8-deviation:before,
+.icons8-dictionary:before,
+.icons8-digg:before,
+.icons8-discount:before,
+.icons8-discover:before,
+.icons8-discussion-forum:before,
+.icons8-dislike:before,
+.icons8-divide:before,
+.icons8-divider:before,
+.icons8-do-not-disturb:before,
+.icons8-do-not-stack:before,
+.icons8-do-not-tilt:before,
+.icons8-document:before,
+.icons8-documentary:before,
+.icons8-documents:before,
+.icons8-donate:before,
+.icons8-donation:before,
+.icons8-double-down:before,
+.icons8-double-left:before,
+.icons8-double-right:before,
+.icons8-double-tick:before,
+.icons8-double-up:before,
+.icons8-doughnut-chart:before,
+.icons8-down-button:before,
+.icons8-download:before,
+.icons8-download-from-the-cloud:before,
+.icons8-download-pie-chart-report:before,
+.icons8-downloading-updates:before,
+.icons8-downloads:before,
+.icons8-drag:before,
+.icons8-dribbble:before,
+.icons8-e-commerce:before,
+.icons8-edit:before,
+.icons8-edit-pie-chart-report:before,
+.icons8-eject:before,
+.icons8-electricity:before,
+.icons8-ellipsis:before,
+.icons8-email:before,
+.icons8-email-sign:before,
+.icons8-empty-battery:before,
+.icons8-empty-trash:before,
+.icons8-encashment-car:before,
+.icons8-end:before,
+.icons8-enlarge:before,
+.icons8-enter:before,
+.icons8-equal-sign:before,
+.icons8-erase:before,
+.icons8-error:before,
+.icons8-estimate:before,
+.icons8-euro:before,
+.icons8-event:before,
+.icons8-event-accepted:before,
+.icons8-event-accepted-tentatively:before,
+.icons8-event-declined:before,
+.icons8-exchange:before,
+.icons8-exclamation-mark:before,
+.icons8-exit:before,
+.icons8-expand:before,
+.icons8-expand-arrow:before,
+.icons8-expensive-price:before,
+.icons8-experiment:before,
+.icons8-expired:before,
+.icons8-export:before,
+.icons8-external-link:before,
+.icons8-eye:before,
+.icons8-face-id:before,
+.icons8-facebook:before,
+.icons8-facebook-like:before,
+.icons8-facebook-messenger:before,
+.icons8-factory:before,
+.icons8-fairytale:before,
+.icons8-fantasy:before,
+.icons8-fast-forward:before,
+.icons8-fee:before,
+.icons8-feedback:before,
+.icons8-female-user:before,
+.icons8-file:before,
+.icons8-filled-bookmark-ribbon:before,
+.icons8-filter:before,
+.icons8-filtration:before,
+.icons8-find-and-replace:before,
+.icons8-fingerprint:before,
+.icons8-fingerprint-scan:before,
+.icons8-firefox:before,
+.icons8-firewall:before,
+.icons8-fit-to-width:before,
+.icons8-flash-light:before,
+.icons8-flash-on:before,
+.icons8-flickr:before,
+.icons8-float:before,
+.icons8-flow:before,
+.icons8-flow-chart:before,
+.icons8-fog:before,
+.icons8-folder:before,
+.icons8-food:before,
+.icons8-forest:before,
+.icons8-forgot-password:before,
+.icons8-form:before,
+.icons8-forward:before,
+.icons8-forward-arrow:before,
+.icons8-forward-message:before,
+.icons8-foursquare:before,
+.icons8-fragile:before,
+.icons8-frame:before,
+.icons8-free-shipping:before,
+.icons8-front-desk:before,
+.icons8-full-battery:before,
+.icons8-full-image:before,
+.icons8-full-trash:before,
+.icons8-game-controller:before,
+.icons8-gantt-chart:before,
+.icons8-genealogy:before,
+.icons8-general-ledger:before,
+.icons8-get-cash:before,
+.icons8-get-quote:before,
+.icons8-gg:before,
+.icons8-gift:before,
+.icons8-gift-card:before,
+.icons8-github:before,
+.icons8-globe:before,
+.icons8-gmail-login:before,
+.icons8-goal:before,
+.icons8-gold-medal:before,
+.icons8-google:before,
+.icons8-google-maps:before,
+.icons8-google-play:before,
+.icons8-google-plus:before,
+.icons8-google-wallet:before,
+.icons8-gps:before,
+.icons8-graduation-cap:before,
+.icons8-graph-report:before,
+.icons8-graph-report-script:before,
+.icons8-grid-view:before,
+.icons8-group-message:before,
+.icons8-guitar:before,
+.icons8-hammer:before,
+.icons8-hand-cursor:before,
+.icons8-hand-with-pen:before,
+.icons8-handle-with-care:before,
+.icons8-handshake:before,
+.icons8-happy:before,
+.icons8-hashtag:before,
+.icons8-hashtag-large:before,
+.icons8-haze:before,
+.icons8-headset:before,
+.icons8-heart:before,
+.icons8-heavy-rain:before,
+.icons8-heavy-rain-2:before,
+.icons8-help:before,
+.icons8-hide:before,
+.icons8-hierarchy:before,
+.icons8-high-importance:before,
+.icons8-high-priority:before,
+.icons8-high-priority-message:before,
+.icons8-home:before,
+.icons8-hongkong-dollar:before,
+.icons8-horn:before,
+.icons8-hotel-bed:before,
+.icons8-hotel-building:before,
+.icons8-hourglass:before,
+.icons8-humidity:before,
+.icons8-id-not-verified:before,
+.icons8-id-verified:before,
+.icons8-idea:before,
+.icons8-idea-bank:before,
+.icons8-idea-sharing:before,
+.icons8-identification-documents:before,
+.icons8-imac:before,
+.icons8-image-file:before,
+.icons8-import:before,
+.icons8-in-transit:before,
+.icons8-inbox:before,
+.icons8-inconsistency:before,
+.icons8-indeterminate-checkbox:before,
+.icons8-index:before,
+.icons8-infinity:before,
+.icons8-info:before,
+.icons8-information:before,
+.icons8-initial-state:before,
+.icons8-initiate-money-transfer:before,
+.icons8-innovation:before,
+.icons8-insert-credit-card:before,
+.icons8-insert-money-euro:before,
+.icons8-inspection:before,
+.icons8-instagram:before,
+.icons8-instagram-old:before,
+.icons8-installing-updates:before,
+.icons8-internet:before,
+.icons8-internet-explorer:before,
+.icons8-invisible:before,
+.icons8-invite:before,
+.icons8-invoice:before,
+.icons8-ios-logo:before,
+.icons8-ipad:before,
+.icons8-italic:before,
+.icons8-japanese-yen:before,
+.icons8-jcb:before,
+.icons8-job:before,
+.icons8-job-seeker:before,
+.icons8-keep-dry:before,
+.icons8-key:before,
+.icons8-key-2:before,
+.icons8-keyboard:before,
+.icons8-keypad:before,
+.icons8-king:before,
+.icons8-knowledge-sharing:before,
+.icons8-lady:before,
+.icons8-laptop:before,
+.icons8-last-24-hours:before,
+.icons8-law:before,
+.icons8-layers:before,
+.icons8-leaderboard:before,
+.icons8-leave:before,
+.icons8-length:before,
+.icons8-less-or-equal:before,
+.icons8-less-than:before,
+.icons8-letterbox:before,
+.icons8-library:before,
+.icons8-light-rain:before,
+.icons8-light-snow:before,
+.icons8-line:before,
+.icons8-line-chart:before,
+.icons8-link:before,
+.icons8-linked-mailbox:before,
+.icons8-linkedin:before,
+.icons8-list:before,
+.icons8-list-of-thumbnails:before,
+.icons8-loader:before,
+.icons8-lock:before,
+.icons8-lock-2:before,
+.icons8-lock-orientation:before,
+.icons8-login:before,
+.icons8-login-rounded-up:before,
+.icons8-love:before,
+.icons8-low-battery:before,
+.icons8-low-importance:before,
+.icons8-low-priority:before,
+.icons8-low-volume:before,
+.icons8-loyalty-card:before,
+.icons8-luggage-trolley:before,
+.icons8-magnet:before,
+.icons8-magnetic:before,
+.icons8-mailbox:before,
+.icons8-mailbox-opened-flag-up:before,
+.icons8-maintenance:before,
+.icons8-management:before,
+.icons8-manager:before,
+.icons8-map:before,
+.icons8-map-editing:before,
+.icons8-map-marker:before,
+.icons8-marker:before,
+.icons8-mastercard:before,
+.icons8-mastercard-credit-card:before,
+.icons8-math:before,
+.icons8-measurement-tool:before,
+.icons8-medal-first-place:before,
+.icons8-medal-second-place:before,
+.icons8-medal-third-place:before,
+.icons8-medium:before,
+.icons8-medium-icons:before,
+.icons8-medium-priority:before,
+.icons8-megaphone:before,
+.icons8-menu:before,
+.icons8-menu-vertical:before,
+.icons8-merge-horizontal:before,
+.icons8-merge-vertical:before,
+.icons8-micro-sd:before,
+.icons8-microscope:before,
+.icons8-microsoft-edge:before,
+.icons8-mind-map:before,
+.icons8-missed-call:before,
+.icons8-mobile:before,
+.icons8-mobile-payment:before,
+.icons8-mockup:before,
+.icons8-moderator:before,
+.icons8-monarch:before,
+.icons8-money:before,
+.icons8-money-bag:before,
+.icons8-money-box:before,
+.icons8-money-transfer:before,
+.icons8-money-yours:before,
+.icons8-monitor:before,
+.icons8-monument:before,
+.icons8-more:before,
+.icons8-more-or-equal:before,
+.icons8-more-than:before,
+.icons8-motorbike-helmet:before,
+.icons8-motorcycle:before,
+.icons8-mouse:before,
+.icons8-mouse-pointer:before,
+.icons8-move:before,
+.icons8-move-stock:before,
+.icons8-movie-ticket:before,
+.icons8-multichannel:before,
+.icons8-multiply:before,
+.icons8-museum:before,
+.icons8-music:before,
+.icons8-musical:before,
+.icons8-mute:before,
+.icons8-myspace:before,
+.icons8-myspace-app:before,
+.icons8-name-tag:before,
+.icons8-navigate:before,
+.icons8-new-document:before,
+.icons8-new-job:before,
+.icons8-new-message:before,
+.icons8-new-post:before,
+.icons8-new-ticket:before,
+.icons8-new-topic:before,
+.icons8-new-window:before,
+.icons8-news:before,
+.icons8-news-feed:before,
+.icons8-next-page:before,
+.icons8-night:before,
+.icons8-night-landscape:before,
+.icons8-no-audio:before,
+.icons8-no-baggage:before,
+.icons8-no-barcode:before,
+.icons8-no-battery:before,
+.icons8-no-camera:before,
+.icons8-no-cash:before,
+.icons8-no-chat:before,
+.icons8-no-credit-cards:before,
+.icons8-no-idea:before,
+.icons8-no-mobile:before,
+.icons8-no-rain:before,
+.icons8-no-reminders:before,
+.icons8-no-synchronize:before,
+.icons8-noise:before,
+.icons8-normal-distribution-histogram:before,
+.icons8-not-applicable:before,
+.icons8-not-equal:before,
+.icons8-note:before,
+.icons8-nothing-found:before,
+.icons8-notification:before,
+.icons8-numbered-list:before,
+.icons8-numeric:before,
+.icons8-octocat:before,
+.icons8-office-phone:before,
+.icons8-offline:before,
+.icons8-ok:before,
+.icons8-one-to-one:before,
+.icons8-one-way-transition:before,
+.icons8-online:before,
+.icons8-online-money-transfer:before,
+.icons8-online-payment:before,
+.icons8-online-payment-with-a-credit-card:before,
+.icons8-online-store:before,
+.icons8-online-support:before,
+.icons8-open-archive:before,
+.icons8-open-book:before,
+.icons8-open-envelope:before,
+.icons8-open-in-popup:before,
+.icons8-opened-folder:before,
+.icons8-opera:before,
+.icons8-organization:before,
+.icons8-original-size:before,
+.icons8-out-of-stock:before,
+.icons8-outbox:before,
+.icons8-padlock:before,
+.icons8-page:before,
+.icons8-paid:before,
+.icons8-paint-brush:before,
+.icons8-paint-roller:before,
+.icons8-palm-tree:before,
+.icons8-paper:before,
+.icons8-paper-money:before,
+.icons8-paper-plane:before,
+.icons8-partly-cloudy-day:before,
+.icons8-party-balloons:before,
+.icons8-password:before,
+.icons8-password-1:before,
+.icons8-paste:before,
+.icons8-paste-special:before,
+.icons8-pause:before,
+.icons8-paycheque:before,
+.icons8-payment-history:before,
+.icons8-paypal:before,
+.icons8-payroll:before,
+.icons8-pdf:before,
+.icons8-pdf-2:before,
+.icons8-percentage:before,
+.icons8-performance-macbook:before,
+.icons8-permanent-job:before,
+.icons8-phone:before,
+.icons8-photo-gallery:before,
+.icons8-picture:before,
+.icons8-pie-chart:before,
+.icons8-pin-code:before,
+.icons8-pinterest:before,
+.icons8-planner:before,
+.icons8-play:before,
+.icons8-play-button:before,
+.icons8-play-record:before,
+.icons8-plugin:before,
+.icons8-plus:before,
+.icons8-plus-math:before,
+.icons8-plus-minus:before,
+.icons8-point-of-interest:before,
+.icons8-poison:before,
+.icons8-poll:before,
+.icons8-poo:before,
+.icons8-popular:before,
+.icons8-pos-terminal:before,
+.icons8-post:before,
+.icons8-post-box:before,
+.icons8-postal:before,
+.icons8-postcard:before,
+.icons8-poster:before,
+.icons8-ppt:before,
+.icons8-presentation-filled:before,
+.icons8-pressure:before,
+.icons8-print:before,
+.icons8-printer:before,
+.icons8-prison:before,
+.icons8-privacy:before,
+.icons8-private:before,
+.icons8-proactivity:before,
+.icons8-process:before,
+.icons8-processor:before,
+.icons8-product:before,
+.icons8-profile:before,
+.icons8-profit:before,
+.icons8-protect:before,
+.icons8-prototype:before,
+.icons8-public:before,
+.icons8-public-transportation:before,
+.icons8-purchase-order:before,
+.icons8-purse:before,
+.icons8-push-notifications:before,
+.icons8-push-pin:before,
+.icons8-puzzle:before,
+.icons8-qr-code:before,
+.icons8-query:before,
+.icons8-quest:before,
+.icons8-question-mark:before,
+.icons8-questionnaire:before,
+.icons8-questions:before,
+.icons8-quote:before,
+.icons8-quote-left:before,
+.icons8-rain:before,
+.icons8-rain-cloud:before,
+.icons8-rain-cloud-2:before,
+.icons8-rainfall:before,
+.icons8-rainy-night:before,
+.icons8-rainy-weather:before,
+.icons8-rating:before,
+.icons8-realtime:before,
+.icons8-receipt:before,
+.icons8-receive-cash:before,
+.icons8-received:before,
+.icons8-record:before,
+.icons8-recurring-appointment-exception:before,
+.icons8-reddit:before,
+.icons8-redeem:before,
+.icons8-redo:before,
+.icons8-refresh:before,
+.icons8-refund:before,
+.icons8-refuse:before,
+.icons8-registered-trademark:before,
+.icons8-remove-ads:before,
+.icons8-remove-key:before,
+.icons8-renew:before,
+.icons8-rent:before,
+.icons8-repeat:before,
+.icons8-repeat-one:before,
+.icons8-replace:before,
+.icons8-reply:before,
+.icons8-reply-all:before,
+.icons8-reply-all-arrow:before,
+.icons8-reply-arrow:before,
+.icons8-request-money:before,
+.icons8-reservation:before,
+.icons8-reset:before,
+.icons8-resize-horizontal:before,
+.icons8-resize-vertical:before,
+.icons8-response:before,
+.icons8-restart:before,
+.icons8-restaurant:before,
+.icons8-resume-button:before,
+.icons8-return:before,
+.icons8-return-purchase:before,
+.icons8-retweet:before,
+.icons8-reversed-numerical-sorting:before,
+.icons8-rewind:before,
+.icons8-ringer-volume:before,
+.icons8-romance:before,
+.icons8-rotate:before,
+.icons8-rotate-left:before,
+.icons8-rotate-right:before,
+.icons8-rss:before,
+.icons8-rubber-stamp:before,
+.icons8-ruble:before,
+.icons8-rucksack:before,
+.icons8-ruler:before,
+.icons8-rules:before,
+.icons8-rupee:before,
+.icons8-safari:before,
+.icons8-safe:before,
+.icons8-sail-boat:before,
+.icons8-sales-performance:before,
+.icons8-satellite-in-orbit:before,
+.icons8-satellites:before,
+.icons8-save:before,
+.icons8-save-as:before,
+.icons8-save-search:before,
+.icons8-scale:before,
+.icons8-scales:before,
+.icons8-scan-stock:before,
+.icons8-scatter-plot:before,
+.icons8-schedule:before,
+.icons8-scoreboard:before,
+.icons8-screensharing:before,
+.icons8-screenshot:before,
+.icons8-sd:before,
+.icons8-search:before,
+.icons8-search-contacts:before,
+.icons8-search-more:before,
+.icons8-secure:before,
+.icons8-secure-cloud:before,
+.icons8-secured-letter:before,
+.icons8-security-ssl:before,
+.icons8-sell-stock:before,
+.icons8-send:before,
+.icons8-send-email:before,
+.icons8-send-file:before,
+.icons8-sent:before,
+.icons8-service-bell:before,
+.icons8-services:before,
+.icons8-settings:before,
+.icons8-share:before,
+.icons8-share-3:before,
+.icons8-shared-mailbox:before,
+.icons8-shekel:before,
+.icons8-shield:before,
+.icons8-shipped:before,
+.icons8-shipping-container:before,
+.icons8-shit-hits-fan:before,
+.icons8-shoes:before,
+.icons8-shop:before,
+.icons8-shopping-bag:before,
+.icons8-shopping-basket:before,
+.icons8-shopping-cart:before,
+.icons8-show-password:before,
+.icons8-shuffle:before,
+.icons8-shutdown:before,
+.icons8-shuttle:before,
+.icons8-sidebar-menu:before,
+.icons8-sigma:before,
+.icons8-sign-out:before,
+.icons8-sign-up:before,
+.icons8-signature:before,
+.icons8-signin:before,
+.icons8-signpost:before,
+.icons8-silver-medal:before,
+.icons8-skip-to-start:before,
+.icons8-skype:before,
+.icons8-sleep:before,
+.icons8-sleet:before,
+.icons8-slide-up:before,
+.icons8-slider:before,
+.icons8-sling-here:before,
+.icons8-smart-card:before,
+.icons8-smartphone-chat-female:before,
+.icons8-smartphone-chat-male:before,
+.icons8-smartphone-chat-male-2:before,
+.icons8-snapchat:before,
+.icons8-snow:before,
+.icons8-snow-storm:before,
+.icons8-software-installer:before,
+.icons8-sort:before,
+.icons8-sort-down:before,
+.icons8-sort-left:before,
+.icons8-sort-right:before,
+.icons8-sort-up:before,
+.icons8-sorting:before,
+.icons8-source-code:before,
+.icons8-spade:before,
+.icons8-spam:before,
+.icons8-speech-bubble:before,
+.icons8-speed:before,
+.icons8-speedometer:before,
+.icons8-split-transaction:before,
+.icons8-split-vertical:before,
+.icons8-square-root:before,
+.icons8-ssd:before,
+.icons8-stack-exchange:before,
+.icons8-stack-of-money:before,
+.icons8-stack-of-tweets:before,
+.icons8-stack-overflow:before,
+.icons8-stamp:before,
+.icons8-star:before,
+.icons8-star-filled:before,
+.icons8-star-half:before,
+.icons8-star-half-empty:before,
+.icons8-statistics:before,
+.icons8-stop:before,
+.icons8-stopwatch:before,
+.icons8-storage:before,
+.icons8-storm:before,
+.icons8-stormy-weather:before,
+.icons8-street-view:before,
+.icons8-stripe:before,
+.icons8-study:before,
+.icons8-stumbleupon:before,
+.icons8-subtract:before,
+.icons8-suitcase:before,
+.icons8-summer:before,
+.icons8-sun:before,
+.icons8-sunlight:before,
+.icons8-support:before,
+.icons8-survey:before,
+.icons8-swedish-krona:before,
+.icons8-swiss-franc:before,
+.icons8-sword:before,
+.icons8-synchronize:before,
+.icons8-system-information:before,
+.icons8-system-report:before,
+.icons8-system-task:before,
+.icons8-tag-window:before,
+.icons8-target:before,
+.icons8-tasklist:before,
+.icons8-tasks:before,
+.icons8-tax:before,
+.icons8-taxi:before,
+.icons8-telegram-app:before,
+.icons8-telephone:before,
+.icons8-temperature:before,
+.icons8-temperature-sensitive:before,
+.icons8-template:before,
+.icons8-tent:before,
+.icons8-test-tube:before,
+.icons8-thermometer:before,
+.icons8-this-way-up:before,
+.icons8-thumbnails:before,
+.icons8-thumbs-down:before,
+.icons8-tick-box:before,
+.icons8-ticket:before,
+.icons8-tiles:before,
+.icons8-time:before,
+.icons8-time-card:before,
+.icons8-time-machine:before,
+.icons8-time-search:before,
+.icons8-timecode:before,
+.icons8-timeline:before,
+.icons8-timer:before,
+.icons8-timezone:before,
+.icons8-today:before,
+.icons8-todo-list:before,
+.icons8-toggle-off:before,
+.icons8-toggle-on:before,
+.icons8-toolbox:before,
+.icons8-topic:before,
+.icons8-topic-moved:before,
+.icons8-torrential-rain:before,
+.icons8-touchscreen:before,
+.icons8-track-order:before,
+.icons8-tracking:before,
+.icons8-trademark:before,
+.icons8-train-ticket:before,
+.icons8-transaction:before,
+.icons8-transaction-2:before,
+.icons8-transaction-list:before,
+.icons8-transition-both-directions:before,
+.icons8-translation:before,
+.icons8-trash:before,
+.icons8-trash-can:before,
+.icons8-travel-card:before,
+.icons8-tree-structure:before,
+.icons8-trolley:before,
+.icons8-trolley-2:before,
+.icons8-trophy:before,
+.icons8-truck:before,
+.icons8-trust:before,
+.icons8-tumblr:before,
+.icons8-tune:before,
+.icons8-turkish-lira:before,
+.icons8-twitter:before,
+.icons8-two-tickets:before,
+.icons8-type:before,
+.icons8-typography:before,
+.icons8-unavailable:before,
+.icons8-unchecked-checkbox:before,
+.icons8-undo:before,
+.icons8-uninstalling-updates:before,
+.icons8-unit:before,
+.icons8-unknown-status:before,
+.icons8-unlock:before,
+.icons8-unpin:before,
+.icons8-unverified-account:before,
+.icons8-up-down-arrow:before,
+.icons8-upload:before,
+.icons8-upload-to-the-cloud:before,
+.icons8-urgent-message:before,
+.icons8-us-dollar:before,
+.icons8-usb-connector:before,
+.icons8-usb-off:before,
+.icons8-user-male:before,
+.icons8-user-manual:before,
+.icons8-user-menu-male:before,
+.icons8-user-shield:before,
+.icons8-valet-parking:before,
+.icons8-validation:before,
+.icons8-variation:before,
+.icons8-verified-account:before,
+.icons8-versions:before,
+.icons8-very-popular-topic:before,
+.icons8-video-file:before,
+.icons8-video-message:before,
+.icons8-video-playlist:before,
+.icons8-view-details:before,
+.icons8-vintage-camera:before,
+.icons8-vip:before,
+.icons8-virus-free:before,
+.icons8-visa:before,
+.icons8-visit:before,
+.icons8-visual-effects:before,
+.icons8-vk-com:before,
+.icons8-voice:before,
+.icons8-voice-recognition:before,
+.icons8-volume:before,
+.icons8-waiting-room:before,
+.icons8-wall-mount-camera:before,
+.icons8-wallet:before,
+.icons8-warning-shield:before,
+.icons8-watch:before,
+.icons8-watches-front-view:before,
+.icons8-water-transportation:before,
+.icons8-weight:before,
+.icons8-whatsapp:before,
+.icons8-windows-10:before,
+.icons8-windy-weather:before,
+.icons8-withdrawal:before,
+.icons8-withdrawal-limit:before,
+.icons8-won:before,
+.icons8-word:before,
+.icons8-wordpress:before,
+.icons8-work:before,
+.icons8-worker:before,
+.icons8-workflow:before,
+.icons8-workstation:before,
+.icons8-wrench:before,
+.icons8-xls:before,
+.icons8-yahoo:before,
+.icons8-yelp:before,
+.icons8-you-and-me:before,
+.icons8-youtube:before,
+.icons8-zip-code:before,
+.icons8-zoom-in:before,
+.icons8-zoom-out:before,
+.icons8-zoom-to-actual-size:before,
+.icons8-zoom-to-extents:before {
+  display: inline-block;
+  font-family: "Eflima";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+}
+
+.icons8-3d-rotate:before {
+  content: "\f2f8";
+}
+
+.icons8-about:before {
+  content: "\f127";
+}
+
+.icons8-access:before {
+  content: "\f2a2";
+}
+
+.icons8-access-denied:before {
+  content: "\f2b1";
+}
+
+.icons8-account:before {
+  content: "\f177";
+}
+
+.icons8-account-2:before {
+  content: "\f228";
+}
+
+.icons8-accounting:before {
+  content: "\f26a";
+}
+
+.icons8-activity-feed:before {
+  content: "\f3db";
+}
+
+.icons8-activity-history:before {
+  content: "\f3d3";
+}
+
+.icons8-add:before {
+  content: "\f4a7";
+}
+
+.icons8-add-database:before {
+  content: "\f3cd";
+}
+
+.icons8-add-link:before {
+  content: "\f166";
+}
+
+.icons8-add-phone:before {
+  content: "\f3f2";
+}
+
+.icons8-add-shopping-cart:before {
+  content: "\f372";
+}
+
+.icons8-add-to-favorites:before {
+  content: "\f1b9";
+}
+
+.icons8-address:before {
+  content: "\f33f";
+}
+
+.icons8-address-book:before {
+  content: "\f17b";
+}
+
+.icons8-adjust:before {
+  content: "\f1c7";
+}
+
+.icons8-advance:before {
+  content: "\f4ca";
+}
+
+.icons8-advanced-search:before {
+  content: "\f1d7";
+}
+
+.icons8-adventures:before {
+  content: "\f35d";
+}
+
+.icons8-age:before {
+  content: "\f1ea";
+}
+
+.icons8-agreement:before {
+  content: "\f233";
+}
+
+.icons8-aircraft:before {
+  content: "\f45e";
+}
+
+.icons8-airplane-landing:before {
+  content: "\f327";
+}
+
+.icons8-airplane-take-off:before {
+  content: "\f328";
+}
+
+.icons8-airport:before {
+  content: "\f329";
+}
+
+.icons8-alarm-clock:before {
+  content: "\f1f2";
+}
+
+.icons8-alert:before {
+  content: "\f2ae";
+}
+
+.icons8-align-bottom:before {
+  content: "\f2ff";
+}
+
+.icons8-align-center:before {
+  content: "\f2fa";
+}
+
+.icons8-align-justify:before {
+  content: "\f2fc";
+}
+
+.icons8-align-left:before {
+  content: "\f2fb";
+}
+
+.icons8-align-right:before {
+  content: "\f2fd";
+}
+
+.icons8-align-top:before {
+  content: "\f2fe";
+}
+
+.icons8-alphabetical-sorting:before {
+  content: "\f3e0";
+}
+
+.icons8-alphabetical-sorting-2:before {
+  content: "\f3e4";
+}
+
+.icons8-american-express:before {
+  content: "\f2f0";
+}
+
+.icons8-anchor:before {
+  content: "\f335";
+}
+
+.icons8-android:before {
+  content: "\f3f9";
+}
+
+.icons8-android-tablet:before {
+  content: "\f3fa";
+}
+
+.icons8-answers:before {
+  content: "\f203";
+}
+
+.icons8-apple-logo:before {
+  content: "\f42d";
+}
+
+.icons8-apply:before {
+  content: "\f175";
+}
+
+.icons8-approval:before {
+  content: "\f1d9";
+}
+
+.icons8-approximately-equal:before {
+  content: "\f27c";
+}
+
+.icons8-approximately-not-equal:before {
+  content: "\f27f";
+}
+
+.icons8-area-chart:before {
+  content: "\f22e";
+}
+
+.icons8-art-prices:before {
+  content: "\f247";
+}
+
+.icons8-ascending-sorting:before {
+  content: "\f3e5";
+}
+
+.icons8-ask-question:before {
+  content: "\f1a8";
+}
+
+.icons8-aspect-ratio:before {
+  content: "\f485";
+}
+
+.icons8-asterisk:before {
+  content: "\f4c4";
+}
+
+.icons8-atm:before {
+  content: "\f2ec";
+}
+
+.icons8-attach:before {
+  content: "\f149";
+}
+
+.icons8-auction:before {
+  content: "\f36d";
+}
+
+.icons8-audio:before {
+  content: "\f49b";
+}
+
+.icons8-audio-file:before {
+  content: "\f4de";
+}
+
+.icons8-australian-dollar:before {
+  content: "\f2db";
+}
+
+.icons8-available-updates:before {
+  content: "\f1be";
+}
+
+.icons8-average-math:before {
+  content: "\f27a";
+}
+
+.icons8-babys-room:before {
+  content: "\f3fe";
+}
+
+.icons8-back:before {
+  content: "\f4d1";
+}
+
+.icons8-back-to:before {
+  content: "\f4d6";
+}
+
+.icons8-badge:before {
+  content: "\f25d";
+}
+
+.icons8-bank:before {
+  content: "\f47b";
+}
+
+.icons8-bank-building:before {
+  content: "\f471";
+}
+
+.icons8-bank-cards:before {
+  content: "\f2be";
+}
+
+.icons8-bank-euro:before {
+  content: "\f47d";
+}
+
+.icons8-bar:before {
+  content: "\f473";
+}
+
+.icons8-bar-chart:before {
+  content: "\f226";
+}
+
+.icons8-barcode:before {
+  content: "\f37c";
+}
+
+.icons8-barcode-reader:before {
+  content: "\f377";
+}
+
+.icons8-barcode-scanner:before {
+  content: "\f37a";
+}
+
+.icons8-basket:before {
+  content: "\f1e4";
+}
+
+.icons8-beach-ball:before {
+  content: "\f440";
+}
+
+.icons8-behance:before {
+  content: "\f3ac";
+}
+
+.icons8-bell-curve:before {
+  content: "\f3c5";
+}
+
+.icons8-best-seller:before {
+  content: "\f394";
+}
+
+.icons8-bill:before {
+  content: "\f2c7";
+}
+
+.icons8-billing:before {
+  content: "\f2c4";
+}
+
+.icons8-bing:before {
+  content: "\f43b";
+}
+
+.icons8-binoculars:before {
+  content: "\f139";
+}
+
+.icons8-bios:before {
+  content: "\f345";
+}
+
+.icons8-birthday:before {
+  content: "\f1fb";
+}
+
+.icons8-bitcoin:before {
+  content: "\f2f2";
+}
+
+.icons8-block:before {
+  content: "\f4a3";
+}
+
+.icons8-block-microphone:before {
+  content: "\f49f";
+}
+
+.icons8-blockchain:before {
+  content: "\f245";
+}
+
+.icons8-blockchain-new-logo:before {
+  content: "\f254";
+}
+
+.icons8-boarding-pass:before {
+  content: "\f333";
+}
+
+.icons8-bold:before {
+  content: "\f31e";
+}
+
+.icons8-book:before {
+  content: "\f283";
+}
+
+.icons8-bookmark:before {
+  content: "\f108";
+}
+
+.icons8-bookmark-2:before {
+  content: "\f10d";
+}
+
+.icons8-bounced-check:before {
+  content: "\f24c";
+}
+
+.icons8-box:before {
+  content: "\f125";
+}
+
+.icons8-box-important:before {
+  content: "\f39b";
+}
+
+.icons8-breakable:before {
+  content: "\f38b";
+}
+
+.icons8-brick:before {
+  content: "\f401";
+}
+
+.icons8-brief:before {
+  content: "\f40c";
+}
+
+.icons8-briefcase:before {
+  content: "\f126";
+}
+
+.icons8-british-pound:before {
+  content: "\f2d5";
+}
+
+.icons8-broadcasting:before {
+  content: "\f3d0";
+}
+
+.icons8-brochure:before {
+  content: "\f24a";
+}
+
+.icons8-broken-link:before {
+  content: "\f169";
+}
+
+.icons8-bronze-medal:before {
+  content: "\f467";
+}
+
+.icons8-browse-page:before {
+  content: "\f1d3";
+}
+
+.icons8-bug:before {
+  content: "\f4ee";
+}
+
+.icons8-bus:before {
+  content: "\f45a";
+}
+
+.icons8-business:before {
+  content: "\f267";
+}
+
+.icons8-business-building:before {
+  content: "\f406";
+}
+
+.icons8-buy:before {
+  content: "\f35e";
+}
+
+.icons8-buy-upgrade:before {
+  content: "\f36c";
+}
+
+.icons8-buying:before {
+  content: "\f365";
+}
+
+.icons8-cafe:before {
+  content: "\f472";
+}
+
+.icons8-calculator:before {
+  content: "\f29e";
+}
+
+.icons8-calendar:before {
+  content: "\f134";
+}
+
+.icons8-calendar-delete:before {
+  content: "\f1ee";
+}
+
+.icons8-calendar-minus:before {
+  content: "\f1ec";
+}
+
+.icons8-calendar-plus:before {
+  content: "\f1ed";
+}
+
+.icons8-call:before {
+  content: "\f3f0";
+}
+
+.icons8-camper:before {
+  content: "\f457";
+}
+
+.icons8-campfire:before {
+  content: "\f445";
+}
+
+.icons8-canadian-dollar:before {
+  content: "\f2e2";
+}
+
+.icons8-cancel:before {
+  content: "\f11f";
+}
+
+.icons8-cancel-last-digit:before {
+  content: "\f150";
+}
+
+.icons8-cancel-subscription:before {
+  content: "\f18c";
+}
+
+.icons8-capital:before {
+  content: "\f2ca";
+}
+
+.icons8-captcha:before {
+  content: "\f2b7";
+}
+
+.icons8-card-payment:before {
+  content: "\f2bf";
+}
+
+.icons8-card-security:before {
+  content: "\f2c0";
+}
+
+.icons8-card-security-code:before {
+  content: "\f2bc";
+}
+
+.icons8-card-verification-value:before {
+  content: "\f2bd";
+}
+
+.icons8-cash:before {
+  content: "\f2d4";
+}
+
+.icons8-cash-in-hand:before {
+  content: "\f2d2";
+}
+
+.icons8-cash-register:before {
+  content: "\f368";
+}
+
+.icons8-cashbook:before {
+  content: "\f24d";
+}
+
+.icons8-category:before {
+  content: "\f4c1";
+}
+
+.icons8-cd:before {
+  content: "\f34a";
+}
+
+.icons8-center-of-gravity:before {
+  content: "\f46b";
+}
+
+.icons8-charging-battery:before {
+  content: "\f3ed";
+}
+
+.icons8-chat:before {
+  content: "\f1a9";
+}
+
+.icons8-chat-bubble:before {
+  content: "\f1ad";
+}
+
+.icons8-check-book:before {
+  content: "\f2c3";
+}
+
+.icons8-check-file:before {
+  content: "\f4e5";
+}
+
+.icons8-checked:before {
+  content: "\f120";
+}
+
+.icons8-checked-checkbox:before {
+  content: "\f4ab";
+}
+
+.icons8-checkmark:before {
+  content: "\f133";
+}
+
+.icons8-checkout:before {
+  content: "\f364";
+}
+
+.icons8-choice:before {
+  content: "\f4f5";
+}
+
+.icons8-chrome:before {
+  content: "\f434";
+}
+
+.icons8-clear-filters:before {
+  content: "\f3d9";
+}
+
+.icons8-clear-shopping-cart:before {
+  content: "\f361";
+}
+
+.icons8-clear-symbol:before {
+  content: "\f1c9";
+}
+
+.icons8-click---collect:before {
+  content: "\f373";
+}
+
+.icons8-clipboard:before {
+  content: "\f324";
+}
+
+.icons8-clock:before {
+  content: "\f11c";
+}
+
+.icons8-close-up:before {
+  content: "\f483";
+}
+
+.icons8-close-window:before {
+  content: "\f4bf";
+}
+
+.icons8-closed-topic:before {
+  content: "\f1a3";
+}
+
+.icons8-clothes:before {
+  content: "\f391";
+}
+
+.icons8-cloud:before {
+  content: "\f414";
+}
+
+.icons8-cloud-lightning:before {
+  content: "\f415";
+}
+
+.icons8-clouds:before {
+  content: "\f416";
+}
+
+.icons8-code-file:before {
+  content: "\f4df";
+}
+
+.icons8-coin-in-hand:before {
+  content: "\f2eb";
+}
+
+.icons8-coins:before {
+  content: "\f238";
+}
+
+.icons8-collapse:before {
+  content: "\f31c";
+}
+
+.icons8-collapse-arrow:before {
+  content: "\f4d0";
+}
+
+.icons8-collect:before {
+  content: "\f214";
+}
+
+.icons8-collectibles:before {
+  content: "\f1ff";
+}
+
+.icons8-combo-chart:before {
+  content: "\f3c2";
+}
+
+.icons8-comments:before {
+  content: "\f145";
+}
+
+.icons8-commercial:before {
+  content: "\f261";
+}
+
+.icons8-compare:before {
+  content: "\f304";
+}
+
+.icons8-compass:before {
+  content: "\f340";
+}
+
+.icons8-compress:before {
+  content: "\f319";
+}
+
+.icons8-computer:before {
+  content: "\f351";
+}
+
+.icons8-computer-support:before {
+  content: "\f4b2";
+}
+
+.icons8-conference:before {
+  content: "\f200";
+}
+
+.icons8-confirm:before {
+  content: "\f176";
+}
+
+.icons8-connect:before {
+  content: "\f10f";
+}
+
+.icons8-contact:before {
+  content: "\f17a";
+}
+
+.icons8-contact-details:before {
+  content: "\f201";
+}
+
+.icons8-contacts:before {
+  content: "\f128";
+}
+
+.icons8-content:before {
+  content: "\f4b7";
+}
+
+.icons8-conversion:before {
+  content: "\f3d7";
+}
+
+.icons8-cooling:before {
+  content: "\f298";
+}
+
+.icons8-copy:before {
+  content: "\f307";
+}
+
+.icons8-copy-link:before {
+  content: "\f168";
+}
+
+.icons8-copy-to-clipboard:before {
+  content: "\f309";
+}
+
+.icons8-copyleft:before {
+  content: "\f408";
+}
+
+.icons8-copyright:before {
+  content: "\f407";
+}
+
+.icons8-coupon:before {
+  content: "\f393";
+}
+
+.icons8-create:before {
+  content: "\f302";
+}
+
+.icons8-create-document:before {
+  content: "\f232";
+}
+
+.icons8-create-new-child-post:before {
+  content: "\f15e";
+}
+
+.icons8-creative-commons:before {
+  content: "\f40b";
+}
+
+.icons8-credit-card:before {
+  content: "\f2ba";
+}
+
+.icons8-credit-control:before {
+  content: "\f24e";
+}
+
+.icons8-crime:before {
+  content: "\f35a";
+}
+
+.icons8-crop:before {
+  content: "\f30d";
+}
+
+.icons8-crowdfunding:before {
+  content: "\f2f5";
+}
+
+.icons8-crown:before {
+  content: "\f173";
+}
+
+.icons8-cruise-ship:before {
+  content: "\f45b";
+}
+
+.icons8-currency:before {
+  content: "\f2da";
+}
+
+.icons8-currency-exchange:before {
+  content: "\f23c";
+}
+
+.icons8-cursor:before {
+  content: "\f12c";
+}
+
+.icons8-customer-support:before {
+  content: "\f263";
+}
+
+.icons8-cut:before {
+  content: "\f30a";
+}
+
+.icons8-cv:before {
+  content: "\f300";
+}
+
+.icons8-data-backup:before {
+  content: "\f3ca";
+}
+
+.icons8-data-encryption:before {
+  content: "\f3c7";
+}
+
+.icons8-data-protection:before {
+  content: "\f3c8";
+}
+
+.icons8-data-quality:before {
+  content: "\f3dd";
+}
+
+.icons8-data-recovery:before {
+  content: "\f3cf";
+}
+
+.icons8-data-setting:before {
+  content: "\f3e8";
+}
+
+.icons8-data-transfer:before {
+  content: "\f3d5";
+}
+
+.icons8-database:before {
+  content: "\f3c6";
+}
+
+.icons8-database-staff:before {
+  content: "\f3c9";
+}
+
+.icons8-database-view:before {
+  content: "\f3ce";
+}
+
+.icons8-date-from:before {
+  content: "\f1f8";
+}
+
+.icons8-date-span:before {
+  content: "\f1fa";
+}
+
+.icons8-date-to:before {
+  content: "\f1f9";
+}
+
+.icons8-day-off:before {
+  content: "\f1eb";
+}
+
+.icons8-debit-card:before {
+  content: "\f2bb";
+}
+
+.icons8-debt:before {
+  content: "\f23d";
+}
+
+.icons8-decline:before {
+  content: "\f229";
+}
+
+.icons8-defense:before {
+  content: "\f488";
+}
+
+.icons8-delete:before {
+  content: "\f107";
+}
+
+.icons8-delete-database:before {
+  content: "\f3cb";
+}
+
+.icons8-delete-database-2:before {
+  content: "\f3cc";
+}
+
+.icons8-delete-link:before {
+  content: "\f167";
+}
+
+.icons8-delete-message:before {
+  content: "\f1aa";
+}
+
+.icons8-delete-shield:before {
+  content: "\f2b2";
+}
+
+.icons8-delete-ticket:before {
+  content: "\f330";
+}
+
+.icons8-deleted-message:before {
+  content: "\f158";
+}
+
+.icons8-delicious:before {
+  content: "\f3ba";
+}
+
+.icons8-delivered:before {
+  content: "\f32d";
+}
+
+.icons8-delivery:before {
+  content: "\f266";
+}
+
+.icons8-department:before {
+  content: "\f223";
+}
+
+.icons8-deposit:before {
+  content: "\f23f";
+}
+
+.icons8-descending-sorting:before {
+  content: "\f3e1";
+}
+
+.icons8-details:before {
+  content: "\f4b4";
+}
+
+.icons8-deviantart:before {
+  content: "\f3ad";
+}
+
+.icons8-deviation:before {
+  content: "\f4c3";
+}
+
+.icons8-dictionary:before {
+  content: "\f282";
+}
+
+.icons8-digg:before {
+  content: "\f3b8";
+}
+
+.icons8-discount:before {
+  content: "\f392";
+}
+
+.icons8-discover:before {
+  content: "\f2f7";
+}
+
+.icons8-discussion-forum:before {
+  content: "\f1a4";
+}
+
+.icons8-dislike:before {
+  content: "\f16c";
+}
+
+.icons8-divide:before {
+  content: "\f276";
+}
+
+.icons8-divider:before {
+  content: "\f4d7";
+}
+
+.icons8-do-not-disturb:before {
+  content: "\f174";
+}
+
+.icons8-do-not-stack:before {
+  content: "\f389";
+}
+
+.icons8-do-not-tilt:before {
+  content: "\f38c";
+}
+
+.icons8-document:before {
+  content: "\f116";
+}
+
+.icons8-documentary:before {
+  content: "\f35b";
+}
+
+.icons8-documents:before {
+  content: "\f230";
+}
+
+.icons8-donate:before {
+  content: "\f239";
+}
+
+.icons8-donation:before {
+  content: "\f250";
+}
+
+.icons8-double-down:before {
+  content: "\f143";
+}
+
+.icons8-double-left:before {
+  content: "\f142";
+}
+
+.icons8-double-right:before {
+  content: "\f141";
+}
+
+.icons8-double-tick:before {
+  content: "\f4ad";
+}
+
+.icons8-double-up:before {
+  content: "\f144";
+}
+
+.icons8-doughnut-chart:before {
+  content: "\f3c3";
+}
+
+.icons8-down-button:before {
+  content: "\f4d5";
+}
+
+.icons8-download:before {
+  content: "\f1bc";
+}
+
+.icons8-download-from-the-cloud:before {
+  content: "\f10b";
+}
+
+.icons8-download-pie-chart-report:before {
+  content: "\f26c";
+}
+
+.icons8-downloading-updates:before {
+  content: "\f1b5";
+}
+
+.icons8-downloads:before {
+  content: "\f1e6";
+}
+
+.icons8-drag:before {
+  content: "\f317";
+}
+
+.icons8-dribbble:before {
+  content: "\f3aa";
+}
+
+.icons8-e-commerce:before {
+  content: "\f374";
+}
+
+.icons8-edit:before {
+  content: "\f106";
+}
+
+.icons8-edit-pie-chart-report:before {
+  content: "\f26d";
+}
+
+.icons8-eject:before {
+  content: "\f499";
+}
+
+.icons8-electricity:before {
+  content: "\f4e8";
+}
+
+.icons8-ellipsis:before {
+  content: "\f4c5";
+}
+
+.icons8-email:before {
+  content: "\f1b8";
+}
+
+.icons8-email-sign:before {
+  content: "\f4a8";
+}
+
+.icons8-empty-battery:before {
+  content: "\f3e9";
+}
+
+.icons8-empty-trash:before {
+  content: "\f323";
+}
+
+.icons8-encashment-car:before {
+  content: "\f2e7";
+}
+
+.icons8-end:before {
+  content: "\f494";
+}
+
+.icons8-enlarge:before {
+  content: "\f31a";
+}
+
+.icons8-enter:before {
+  content: "\f1ba";
+}
+
+.icons8-equal-sign:before {
+  content: "\f278";
+}
+
+.icons8-erase:before {
+  content: "\f30b";
+}
+
+.icons8-error:before {
+  content: "\f1b1";
+}
+
+.icons8-estimate:before {
+  content: "\f26b";
+}
+
+.icons8-euro:before {
+  content: "\f23b";
+}
+
+.icons8-event:before {
+  content: "\f1e9";
+}
+
+.icons8-event-accepted:before {
+  content: "\f1ef";
+}
+
+.icons8-event-accepted-tentatively:before {
+  content: "\f1f1";
+}
+
+.icons8-event-declined:before {
+  content: "\f1f0";
+}
+
+.icons8-exchange:before {
+  content: "\f3d1";
+}
+
+.icons8-exclamation-mark:before {
+  content: "\f4c7";
+}
+
+.icons8-exit:before {
+  content: "\f1b7";
+}
+
+.icons8-expand:before {
+  content: "\f31d";
+}
+
+.icons8-expand-arrow:before {
+  content: "\f4cf";
+}
+
+.icons8-expensive-price:before {
+  content: "\f38f";
+}
+
+.icons8-experiment:before {
+  content: "\f29b";
+}
+
+.icons8-expired:before {
+  content: "\f21a";
+}
+
+.icons8-export:before {
+  content: "\f3de";
+}
+
+.icons8-external-link:before {
+  content: "\f12a";
+}
+
+.icons8-eye:before {
+  content: "\f171";
+}
+
+.icons8-face-id:before {
+  content: "\f2b9";
+}
+
+.icons8-facebook:before {
+  content: "\f39e";
+}
+
+.icons8-facebook-like:before {
+  content: "\f3bc";
+}
+
+.icons8-facebook-messenger:before {
+  content: "\f3b0";
+}
+
+.icons8-factory:before {
+  content: "\f4e7";
+}
+
+.icons8-fairytale:before {
+  content: "\f3ff";
+}
+
+.icons8-fantasy:before {
+  content: "\f35c";
+}
+
+.icons8-fast-forward:before {
+  content: "\f492";
+}
+
+.icons8-fee:before {
+  content: "\f20b";
+}
+
+.icons8-feedback:before {
+  content: "\f15d";
+}
+
+.icons8-female-user:before {
+  content: "\f137";
+}
+
+.icons8-file:before {
+  content: "\f112";
+}
+
+.icons8-filled-bookmark-ribbon:before {
+  content: "\f110";
+}
+
+.icons8-filter:before {
+  content: "\f3d8";
+}
+
+.icons8-filtration:before {
+  content: "\f28d";
+}
+
+.icons8-find-and-replace:before {
+  content: "\f1c2";
+}
+
+.icons8-fingerprint:before {
+  content: "\f2b8";
+}
+
+.icons8-fingerprint-scan:before {
+  content: "\f2b6";
+}
+
+.icons8-firefox:before {
+  content: "\f431";
+}
+
+.icons8-firewall:before {
+  content: "\f2a0";
+}
+
+.icons8-fit-to-width:before {
+  content: "\f46f";
+}
+
+.icons8-flash-light:before {
+  content: "\f446";
+}
+
+.icons8-flash-on:before {
+  content: "\f480";
+}
+
+.icons8-flickr:before {
+  content: "\f3ae";
+}
+
+.icons8-float:before {
+  content: "\f441";
+}
+
+.icons8-flow:before {
+  content: "\f212";
+}
+
+.icons8-flow-chart:before {
+  content: "\f3bf";
+}
+
+.icons8-fog:before {
+  content: "\f424";
+}
+
+.icons8-folder:before {
+  content: "\f113";
+}
+
+.icons8-food:before {
+  content: "\f390";
+}
+
+.icons8-forest:before {
+  content: "\f444";
+}
+
+.icons8-forgot-password:before {
+  content: "\f2a9";
+}
+
+.icons8-form:before {
+  content: "\f1c4";
+}
+
+.icons8-forward:before {
+  content: "\f4d2";
+}
+
+.icons8-forward-arrow:before {
+  content: "\f4cc";
+}
+
+.icons8-forward-message:before {
+  content: "\f15f";
+}
+
+.icons8-foursquare:before {
+  content: "\f3a7";
+}
+
+.icons8-fragile:before {
+  content: "\f381";
+}
+
+.icons8-frame:before {
+  content: "\f486";
+}
+
+.icons8-free-shipping:before {
+  content: "\f37d";
+}
+
+.icons8-front-desk:before {
+  content: "\f44a";
+}
+
+.icons8-full-battery:before {
+  content: "\f3ea";
+}
+
+.icons8-full-image:before {
+  content: "\f312";
+}
+
+.icons8-full-trash:before {
+  content: "\f322";
+}
+
+.icons8-game-controller:before {
+  content: "\f48b";
+}
+
+.icons8-gantt-chart:before {
+  content: "\f22b";
+}
+
+.icons8-genealogy:before {
+  content: "\f3c0";
+}
+
+.icons8-general-ledger:before {
+  content: "\f237";
+}
+
+.icons8-get-cash:before {
+  content: "\f2e8";
+}
+
+.icons8-get-quote:before {
+  content: "\f151";
+}
+
+.icons8-gg:before {
+  content: "\f2f6";
+}
+
+.icons8-gift:before {
+  content: "\f395";
+}
+
+.icons8-gift-card:before {
+  content: "\f397";
+}
+
+.icons8-github:before {
+  content: "\f3b1";
+}
+
+.icons8-globe:before {
+  content: "\f1e7";
+}
+
+.icons8-gmail-login:before {
+  content: "\f157";
+}
+
+.icons8-goal:before {
+  content: "\f221";
+}
+
+.icons8-gold-medal:before {
+  content: "\f469";
+}
+
+.icons8-google:before {
+  content: "\f43a";
+}
+
+.icons8-google-maps:before {
+  content: "\f3a8";
+}
+
+.icons8-google-play:before {
+  content: "\f435";
+}
+
+.icons8-google-plus:before {
+  content: "\f39f";
+}
+
+.icons8-google-wallet:before {
+  content: "\f2f3";
+}
+
+.icons8-gps:before {
+  content: "\f33e";
+}
+
+.icons8-graduation-cap:before {
+  content: "\f286";
+}
+
+.icons8-graph-report:before {
+  content: "\f412";
+}
+
+.icons8-graph-report-script:before {
+  content: "\f26e";
+}
+
+.icons8-grid-view:before {
+  content: "\f3dc";
+}
+
+.icons8-group-message:before {
+  content: "\f15a";
+}
+
+.icons8-guitar:before {
+  content: "\f442";
+}
+
+.icons8-hammer:before {
+  content: "\f403";
+}
+
+.icons8-hand-cursor:before {
+  content: "\f135";
+}
+
+.icons8-hand-with-pen:before {
+  content: "\f40d";
+}
+
+.icons8-handle-with-care:before {
+  content: "\f387";
+}
+
+.icons8-handshake:before {
+  content: "\f35f";
+}
+
+.icons8-happy:before {
+  content: "\f4a1";
+}
+
+.icons8-hashtag:before {
+  content: "\f279";
+}
+
+.icons8-hashtag-large:before {
+  content: "\f14e";
+}
+
+.icons8-haze:before {
+  content: "\f423";
+}
+
+.icons8-headset:before {
+  content: "\f39a";
+}
+
+.icons8-heart:before {
+  content: "\f16a";
+}
+
+.icons8-heavy-rain:before {
+  content: "\f427";
+}
+
+.icons8-heavy-rain-2:before {
+  content: "\f429";
+}
+
+.icons8-help:before {
+  content: "\f4af";
+}
+
+.icons8-hide:before {
+  content: "\f1dd";
+}
+
+.icons8-hierarchy:before {
+  content: "\f213";
+}
+
+.icons8-high-importance:before {
+  content: "\f193";
+}
+
+.icons8-high-priority:before {
+  content: "\f1da";
+}
+
+.icons8-high-priority-message:before {
+  content: "\f1af";
+}
+
+.icons8-home:before {
+  content: "\f123";
+}
+
+.icons8-hongkong-dollar:before {
+  content: "\f2d9";
+}
+
+.icons8-horn:before {
+  content: "\f443";
+}
+
+.icons8-hotel-bed:before {
+  content: "\f44d";
+}
+
+.icons8-hotel-building:before {
+  content: "\f44b";
+}
+
+.icons8-hourglass:before {
+  content: "\f1fc";
+}
+
+.icons8-humidity:before {
+  content: "\f28e";
+}
+
+.icons8-id-not-verified:before {
+  content: "\f2a4";
+}
+
+.icons8-id-verified:before {
+  content: "\f2a3";
+}
+
+.icons8-idea:before {
+  content: "\f132";
+}
+
+.icons8-idea-bank:before {
+  content: "\f207";
+}
+
+.icons8-idea-sharing:before {
+  content: "\f3d2";
+}
+
+.icons8-identification-documents:before {
+  content: "\f461";
+}
+
+.icons8-imac:before {
+  content: "\f350";
+}
+
+.icons8-image-file:before {
+  content: "\f115";
+}
+
+.icons8-import:before {
+  content: "\f3df";
+}
+
+.icons8-in-transit:before {
+  content: "\f385";
+}
+
+.icons8-inbox:before {
+  content: "\f195";
+}
+
+.icons8-inconsistency:before {
+  content: "\f4c2";
+}
+
+.icons8-indeterminate-checkbox:before {
+  content: "\f4ae";
+}
+
+.icons8-index:before {
+  content: "\f316";
+}
+
+.icons8-infinity:before {
+  content: "\f29d";
+}
+
+.icons8-info:before {
+  content: "\f124";
+}
+
+.icons8-information:before {
+  content: "\f1dc";
+}
+
+.icons8-initial-state:before {
+  content: "\f4ba";
+}
+
+.icons8-initiate-money-transfer:before {
+  content: "\f241";
+}
+
+.icons8-innovation:before {
+  content: "\f40f";
+}
+
+.icons8-insert-credit-card:before {
+  content: "\f2c1";
+}
+
+.icons8-insert-money-euro:before {
+  content: "\f2ea";
+}
+
+.icons8-inspection:before {
+  content: "\f208";
+}
+
+.icons8-instagram:before {
+  content: "\f3a2";
+}
+
+.icons8-instagram-old:before {
+  content: "\f3b6";
+}
+
+.icons8-installing-updates:before {
+  content: "\f1b4";
+}
+
+.icons8-internet:before {
+  content: "\f202";
+}
+
+.icons8-internet-explorer:before {
+  content: "\f430";
+}
+
+.icons8-invisible:before {
+  content: "\f172";
+}
+
+.icons8-invite:before {
+  content: "\f15c";
+}
+
+.icons8-invoice:before {
+  content: "\f2c6";
+}
+
+.icons8-ios-logo:before {
+  content: "\f42e";
+}
+
+.icons8-ipad:before {
+  content: "\f3f7";
+}
+
+.icons8-italic:before {
+  content: "\f31f";
+}
+
+.icons8-japanese-yen:before {
+  content: "\f2d7";
+}
+
+.icons8-jcb:before {
+  content: "\f2f1";
+}
+
+.icons8-job:before {
+  content: "\f259";
+}
+
+.icons8-job-seeker:before {
+  content: "\f25b";
+}
+
+.icons8-keep-dry:before {
+  content: "\f388";
+}
+
+.icons8-key:before {
+  content: "\f12f";
+}
+
+.icons8-key-2:before {
+  content: "\f2ad";
+}
+
+.icons8-keyboard:before {
+  content: "\f353";
+}
+
+.icons8-keypad:before {
+  content: "\f1c8";
+}
+
+.icons8-king:before {
+  content: "\f48a";
+}
+
+.icons8-knowledge-sharing:before {
+  content: "\f287";
+}
+
+.icons8-lady:before {
+  content: "\f178";
+}
+
+.icons8-laptop:before {
+  content: "\f34f";
+}
+
+.icons8-last-24-hours:before {
+  content: "\f39c";
+}
+
+.icons8-law:before {
+  content: "\f289";
+}
+
+.icons8-layers:before {
+  content: "\f44f";
+}
+
+.icons8-leaderboard:before {
+  content: "\f464";
+}
+
+.icons8-leave:before {
+  content: "\f21b";
+}
+
+.icons8-length:before {
+  content: "\f291";
+}
+
+.icons8-less-or-equal:before {
+  content: "\f27b";
+}
+
+.icons8-less-than:before {
+  content: "\f27d";
+}
+
+.icons8-letterbox:before {
+  content: "\f19f";
+}
+
+.icons8-library:before {
+  content: "\f285";
+}
+
+.icons8-light-rain:before {
+  content: "\f425";
+}
+
+.icons8-light-snow:before {
+  content: "\f42c";
+}
+
+.icons8-line:before {
+  content: "\f3bd";
+}
+
+.icons8-line-chart:before {
+  content: "\f227";
+}
+
+.icons8-link:before {
+  content: "\f165";
+}
+
+.icons8-linked-mailbox:before {
+  content: "\f19a";
+}
+
+.icons8-linkedin:before {
+  content: "\f3a6";
+}
+
+.icons8-list:before {
+  content: "\f1bf";
+}
+
+.icons8-list-of-thumbnails:before {
+  content: "\f4b8";
+}
+
+.icons8-loader:before {
+  content: "\f1d8";
+}
+
+.icons8-lock:before {
+  content: "\f11d";
+}
+
+.icons8-lock-2:before {
+  content: "\f2ac";
+}
+
+.icons8-lock-orientation:before {
+  content: "\f2f9";
+}
+
+.icons8-login:before {
+  content: "\f1ce";
+}
+
+.icons8-login-rounded-up:before {
+  content: "\f1cd";
+}
+
+.icons8-love:before {
+  content: "\f16f";
+}
+
+.icons8-low-battery:before {
+  content: "\f3ec";
+}
+
+.icons8-low-importance:before {
+  content: "\f194";
+}
+
+.icons8-low-priority:before {
+  content: "\f21d";
+}
+
+.icons8-low-volume:before {
+  content: "\f49d";
+}
+
+.icons8-loyalty-card:before {
+  content: "\f396";
+}
+
+.icons8-luggage-trolley:before {
+  content: "\f454";
+}
+
+.icons8-magnet:before {
+  content: "\f489";
+}
+
+.icons8-magnetic:before {
+  content: "\f384";
+}
+
+.icons8-mailbox:before {
+  content: "\f13a";
+}
+
+.icons8-mailbox-opened-flag-up:before {
+  content: "\f19d";
+}
+
+.icons8-maintenance:before {
+  content: "\f4b0";
+}
+
+.icons8-management:before {
+  content: "\f225";
+}
+
+.icons8-manager:before {
+  content: "\f20c";
+}
+
+.icons8-map:before {
+  content: "\f338";
+}
+
+.icons8-map-editing:before {
+  content: "\f33a";
+}
+
+.icons8-map-marker:before {
+  content: "\f339";
+}
+
+.icons8-marker:before {
+  content: "\f33c";
+}
+
+.icons8-mastercard:before {
+  content: "\f2ee";
+}
+
+.icons8-mastercard-credit-card:before {
+  content: "\f2c2";
+}
+
+.icons8-math:before {
+  content: "\f29c";
+}
+
+.icons8-measurement-tool:before {
+  content: "\f28c";
+}
+
+.icons8-medal-first-place:before {
+  content: "\f462";
+}
+
+.icons8-medal-second-place:before {
+  content: "\f466";
+}
+
+.icons8-medal-third-place:before {
+  content: "\f465";
+}
+
+.icons8-medium:before {
+  content: "\f3a4";
+}
+
+.icons8-medium-icons:before {
+  content: "\f4b9";
+}
+
+.icons8-medium-priority:before {
+  content: "\f21e";
+}
+
+.icons8-megaphone:before {
+  content: "\f179";
+}
+
+.icons8-menu:before {
+  content: "\f1cf";
+}
+
+.icons8-menu-vertical:before {
+  content: "\f1d0";
+}
+
+.icons8-merge-horizontal:before {
+  content: "\f4da";
+}
+
+.icons8-merge-vertical:before {
+  content: "\f4d9";
+}
+
+.icons8-micro-sd:before {
+  content: "\f347";
+}
+
+.icons8-microscope:before {
+  content: "\f29a";
+}
+
+.icons8-microsoft-edge:before {
+  content: "\f42f";
+}
+
+.icons8-mind-map:before {
+  content: "\f22d";
+}
+
+.icons8-missed-call:before {
+  content: "\f3ee";
+}
+
+.icons8-mobile:before {
+  content: "\f3f6";
+}
+
+.icons8-mobile-payment:before {
+  content: "\f24f";
+}
+
+.icons8-mockup:before {
+  content: "\f410";
+}
+
+.icons8-moderator:before {
+  content: "\f186";
+}
+
+.icons8-monarch:before {
+  content: "\f185";
+}
+
+.icons8-money:before {
+  content: "\f2cc";
+}
+
+.icons8-money-bag:before {
+  content: "\f2cd";
+}
+
+.icons8-money-box:before {
+  content: "\f2cb";
+}
+
+.icons8-money-transfer:before {
+  content: "\f23a";
+}
+
+.icons8-money-yours:before {
+  content: "\f252";
+}
+
+.icons8-monitor:before {
+  content: "\f354";
+}
+
+.icons8-monument:before {
+  content: "\f451";
+}
+
+.icons8-more:before {
+  content: "\f14c";
+}
+
+.icons8-more-or-equal:before {
+  content: "\f27e";
+}
+
+.icons8-more-than:before {
+  content: "\f281";
+}
+
+.icons8-motorbike-helmet:before {
+  content: "\f32a";
+}
+
+.icons8-motorcycle:before {
+  content: "\f32b";
+}
+
+.icons8-mouse:before {
+  content: "\f34b";
+}
+
+.icons8-mouse-pointer:before {
+  content: "\f4a5";
+}
+
+.icons8-move:before {
+  content: "\f30f";
+}
+
+.icons8-move-stock:before {
+  content: "\f371";
+}
+
+.icons8-movie-ticket:before {
+  content: "\f334";
+}
+
+.icons8-multichannel:before {
+  content: "\f405";
+}
+
+.icons8-multiply:before {
+  content: "\f275";
+}
+
+.icons8-museum:before {
+  content: "\f450";
+}
+
+.icons8-music:before {
+  content: "\f130";
+}
+
+.icons8-musical:before {
+  content: "\f359";
+}
+
+.icons8-mute:before {
+  content: "\f49a";
+}
+
+.icons8-myspace:before {
+  content: "\f3b5";
+}
+
+.icons8-myspace-app:before {
+  content: "\f43d";
+}
+
+.icons8-name-tag:before {
+  content: "\f20e";
+}
+
+.icons8-navigate:before {
+  content: "\f337";
+}
+
+.icons8-new-document:before {
+  content: "\f1e5";
+}
+
+.icons8-new-job:before {
+  content: "\f25a";
+}
+
+.icons8-new-message:before {
+  content: "\f159";
+}
+
+.icons8-new-post:before {
+  content: "\f156";
+}
+
+.icons8-new-ticket:before {
+  content: "\f331";
+}
+
+.icons8-new-topic:before {
+  content: "\f148";
+}
+
+.icons8-new-window:before {
+  content: "\f1d4";
+}
+
+.icons8-news:before {
+  content: "\f129";
+}
+
+.icons8-news-feed:before {
+  content: "\f3da";
+}
+
+.icons8-next-page:before {
+  content: "\f4d3";
+}
+
+.icons8-night:before {
+  content: "\f418";
+}
+
+.icons8-night-landscape:before {
+  content: "\f482";
+}
+
+.icons8-no-audio:before {
+  content: "\f49e";
+}
+
+.icons8-no-baggage:before {
+  content: "\f459";
+}
+
+.icons8-no-barcode:before {
+  content: "\f378";
+}
+
+.icons8-no-battery:before {
+  content: "\f3eb";
+}
+
+.icons8-no-camera:before {
+  content: "\f477";
+}
+
+.icons8-no-cash:before {
+  content: "\f479";
+}
+
+.icons8-no-chat:before {
+  content: "\f1a7";
+}
+
+.icons8-no-credit-cards:before {
+  content: "\f476";
+}
+
+.icons8-no-idea:before {
+  content: "\f270";
+}
+
+.icons8-no-mobile:before {
+  content: "\f478";
+}
+
+.icons8-no-rain:before {
+  content: "\f422";
+}
+
+.icons8-no-reminders:before {
+  content: "\f198";
+}
+
+.icons8-no-synchronize:before {
+  content: "\f10e";
+}
+
+.icons8-noise:before {
+  content: "\f2a1";
+}
+
+.icons8-normal-distribution-histogram:before {
+  content: "\f3c4";
+}
+
+.icons8-not-applicable:before {
+  content: "\f269";
+}
+
+.icons8-not-equal:before {
+  content: "\f280";
+}
+
+.icons8-note:before {
+  content: "\f14a";
+}
+
+.icons8-nothing-found:before {
+  content: "\f1d5";
+}
+
+.icons8-notification:before {
+  content: "\f1b6";
+}
+
+.icons8-numbered-list:before {
+  content: "\f1c0";
+}
+
+.icons8-numeric:before {
+  content: "\f3e3";
+}
+
+.icons8-octocat:before {
+  content: "\f3b3";
+}
+
+.icons8-office-phone:before {
+  content: "\f265";
+}
+
+.icons8-offline:before {
+  content: "\f184";
+}
+
+.icons8-ok:before {
+  content: "\f12d";
+}
+
+.icons8-one-to-one:before {
+  content: "\f3d4";
+}
+
+.icons8-one-way-transition:before {
+  content: "\f4bb";
+}
+
+.icons8-online:before {
+  content: "\f182";
+}
+
+.icons8-online-money-transfer:before {
+  content: "\f244";
+}
+
+.icons8-online-payment:before {
+  content: "\f251";
+}
+
+.icons8-online-payment-with-a-credit-card:before {
+  content: "\f242";
+}
+
+.icons8-online-store:before {
+  content: "\f38d";
+}
+
+.icons8-online-support:before {
+  content: "\f20d";
+}
+
+.icons8-open-archive:before {
+  content: "\f4dc";
+}
+
+.icons8-open-book:before {
+  content: "\f284";
+}
+
+.icons8-open-envelope:before {
+  content: "\f154";
+}
+
+.icons8-open-in-popup:before {
+  content: "\f4b5";
+}
+
+.icons8-opened-folder:before {
+  content: "\f117";
+}
+
+.icons8-opera:before {
+  content: "\f433";
+}
+
+.icons8-organization:before {
+  content: "\f222";
+}
+
+.icons8-original-size:before {
+  content: "\f310";
+}
+
+.icons8-out-of-stock:before {
+  content: "\f375";
+}
+
+.icons8-outbox:before {
+  content: "\f190";
+}
+
+.icons8-padlock:before {
+  content: "\f11e";
+}
+
+.icons8-page:before {
+  content: "\f311";
+}
+
+.icons8-paid:before {
+  content: "\f36b";
+}
+
+.icons8-paint-brush:before {
+  content: "\f404";
+}
+
+.icons8-paint-roller:before {
+  content: "\f314";
+}
+
+.icons8-palm-tree:before {
+  content: "\f43e";
+}
+
+.icons8-paper:before {
+  content: "\f46c";
+}
+
+.icons8-paper-money:before {
+  content: "\f2d0";
+}
+
+.icons8-paper-plane:before {
+  content: "\f3fd";
+}
+
+.icons8-partly-cloudy-day:before {
+  content: "\f417";
+}
+
+.icons8-party-balloons:before {
+  content: "\f470";
+}
+
+.icons8-password:before {
+  content: "\f1ca";
+}
+
+.icons8-password-1:before {
+  content: "\f2aa";
+}
+
+.icons8-paste:before {
+  content: "\f301";
+}
+
+.icons8-paste-special:before {
+  content: "\f303";
+}
+
+.icons8-pause:before {
+  content: "\f491";
+}
+
+.icons8-paycheque:before {
+  content: "\f243";
+}
+
+.icons8-payment-history:before {
+  content: "\f2c9";
+}
+
+.icons8-paypal:before {
+  content: "\f2ed";
+}
+
+.icons8-payroll:before {
+  content: "\f258";
+}
+
+.icons8-pdf:before {
+  content: "\f4e0";
+}
+
+.icons8-pdf-2:before {
+  content: "\f4e4";
+}
+
+.icons8-percentage:before {
+  content: "\f273";
+}
+
+.icons8-performance-macbook:before {
+  content: "\f355";
+}
+
+.icons8-permanent-job:before {
+  content: "\f257";
+}
+
+.icons8-phone:before {
+  content: "\f3ef";
+}
+
+.icons8-photo-gallery:before {
+  content: "\f481";
+}
+
+.icons8-picture:before {
+  content: "\f114";
+}
+
+.icons8-pie-chart:before {
+  content: "\f3be";
+}
+
+.icons8-pin-code:before {
+  content: "\f14f";
+}
+
+.icons8-pinterest:before {
+  content: "\f3ab";
+}
+
+.icons8-planner:before {
+  content: "\f211";
+}
+
+.icons8-play:before {
+  content: "\f48e";
+}
+
+.icons8-play-button:before {
+  content: "\f3a1";
+}
+
+.icons8-play-record:before {
+  content: "\f4a0";
+}
+
+.icons8-plugin:before {
+  content: "\f4f0";
+}
+
+.icons8-plus:before {
+  content: "\f103";
+}
+
+.icons8-plus-math:before {
+  content: "\f271";
+}
+
+.icons8-plus-minus:before {
+  content: "\f272";
+}
+
+.icons8-point-of-interest:before {
+  content: "\f456";
+}
+
+.icons8-poison:before {
+  content: "\f4ea";
+}
+
+.icons8-poll:before {
+  content: "\f1a2";
+}
+
+.icons8-poo:before {
+  content: "\f187";
+}
+
+.icons8-popular:before {
+  content: "\f147";
+}
+
+.icons8-pos-terminal:before {
+  content: "\f369";
+}
+
+.icons8-post:before {
+  content: "\f162";
+}
+
+.icons8-post-box:before {
+  content: "\f19e";
+}
+
+.icons8-postal:before {
+  content: "\f19c";
+}
+
+.icons8-postcard:before {
+  content: "\f4a2";
+}
+
+.icons8-poster:before {
+  content: "\f47e";
+}
+
+.icons8-ppt:before {
+  content: "\f4e3";
+}
+
+.icons8-presentation-filled:before {
+  content: "\f411";
+}
+
+.icons8-pressure:before {
+  content: "\f296";
+}
+
+.icons8-print:before {
+  content: "\f46d";
+}
+
+.icons8-printer:before {
+  content: "\f46e";
+}
+
+.icons8-prison:before {
+  content: "\f47c";
+}
+
+.icons8-privacy:before {
+  content: "\f199";
+}
+
+.icons8-private:before {
+  content: "\f191";
+}
+
+.icons8-proactivity:before {
+  content: "\f260";
+}
+
+.icons8-process:before {
+  content: "\f217";
+}
+
+.icons8-processor:before {
+  content: "\f34d";
+}
+
+.icons8-product:before {
+  content: "\f363";
+}
+
+.icons8-profile:before {
+  content: "\f256";
+}
+
+.icons8-profit:before {
+  content: "\f24b";
+}
+
+.icons8-protect:before {
+  content: "\f2b3";
+}
+
+.icons8-prototype:before {
+  content: "\f25f";
+}
+
+.icons8-public:before {
+  content: "\f192";
+}
+
+.icons8-public-transportation:before {
+  content: "\f45f";
+}
+
+.icons8-purchase-order:before {
+  content: "\f2c5";
+}
+
+.icons8-purse:before {
+  content: "\f2cf";
+}
+
+.icons8-push-notifications:before {
+  content: "\f18b";
+}
+
+.icons8-push-pin:before {
+  content: "\f4ec";
+}
+
+.icons8-puzzle:before {
+  content: "\f118";
+}
+
+.icons8-qr-code:before {
+  content: "\f37b";
+}
+
+.icons8-query:before {
+  content: "\f2af";
+}
+
+.icons8-quest:before {
+  content: "\f33b";
+}
+
+.icons8-question-mark:before {
+  content: "\f4c6";
+}
+
+.icons8-questionnaire:before {
+  content: "\f206";
+}
+
+.icons8-questions:before {
+  content: "\f204";
+}
+
+.icons8-quote:before {
+  content: "\f1ac";
+}
+
+.icons8-quote-left:before {
+  content: "\f152";
+}
+
+.icons8-rain:before {
+  content: "\f419";
+}
+
+.icons8-rain-cloud:before {
+  content: "\f41f";
+}
+
+.icons8-rain-cloud-2:before {
+  content: "\f42a";
+}
+
+.icons8-rainfall:before {
+  content: "\f420";
+}
+
+.icons8-rainy-night:before {
+  content: "\f428";
+}
+
+.icons8-rainy-weather:before {
+  content: "\f426";
+}
+
+.icons8-rating:before {
+  content: "\f12b";
+}
+
+.icons8-realtime:before {
+  content: "\f29f";
+}
+
+.icons8-receipt:before {
+  content: "\f2c8";
+}
+
+.icons8-receive-cash:before {
+  content: "\f2e5";
+}
+
+.icons8-received:before {
+  content: "\f160";
+}
+
+.icons8-record:before {
+  content: "\f490";
+}
+
+.icons8-recurring-appointment-exception:before {
+  content: "\f21f";
+}
+
+.icons8-reddit:before {
+  content: "\f3bb";
+}
+
+.icons8-redeem:before {
+  content: "\f362";
+}
+
+.icons8-redo:before {
+  content: "\f306";
+}
+
+.icons8-refresh:before {
+  content: "\f104";
+}
+
+.icons8-refund:before {
+  content: "\f2e4";
+}
+
+.icons8-refuse:before {
+  content: "\f1ae";
+}
+
+.icons8-registered-trademark:before {
+  content: "\f409";
+}
+
+.icons8-remove-ads:before {
+  content: "\f264";
+}
+
+.icons8-remove-key:before {
+  content: "\f2a6";
+}
+
+.icons8-renew:before {
+  content: "\f18d";
+}
+
+.icons8-rent:before {
+  content: "\f224";
+}
+
+.icons8-repeat:before {
+  content: "\f496";
+}
+
+.icons8-repeat-one:before {
+  content: "\f497";
+}
+
+.icons8-replace:before {
+  content: "\f1c1";
+}
+
+.icons8-reply:before {
+  content: "\f155";
+}
+
+.icons8-reply-all:before {
+  content: "\f161";
+}
+
+.icons8-reply-all-arrow:before {
+  content: "\f4cd";
+}
+
+.icons8-reply-arrow:before {
+  content: "\f4cb";
+}
+
+.icons8-request-money:before {
+  content: "\f240";
+}
+
+.icons8-reservation:before {
+  content: "\f475";
+}
+
+.icons8-reset:before {
+  content: "\f215";
+}
+
+.icons8-resize-horizontal:before {
+  content: "\f31b";
+}
+
+.icons8-resize-vertical:before {
+  content: "\f318";
+}
+
+.icons8-response:before {
+  content: "\f1ab";
+}
+
+.icons8-restart:before {
+  content: "\f102";
+}
+
+.icons8-restaurant:before {
+  content: "\f474";
+}
+
+.icons8-resume-button:before {
+  content: "\f498";
+}
+
+.icons8-return:before {
+  content: "\f4ce";
+}
+
+.icons8-return-purchase:before {
+  content: "\f36a";
+}
+
+.icons8-retweet:before {
+  content: "\f18f";
+}
+
+.icons8-reversed-numerical-sorting:before {
+  content: "\f3e2";
+}
+
+.icons8-rewind:before {
+  content: "\f493";
+}
+
+.icons8-ringer-volume:before {
+  content: "\f3f3";
+}
+
+.icons8-romance:before {
+  content: "\f358";
+}
+
+.icons8-rotate:before {
+  content: "\f313";
+}
+
+.icons8-rotate-left:before {
+  content: "\f4c9";
+}
+
+.icons8-rotate-right:before {
+  content: "\f4c8";
+}
+
+.icons8-rss:before {
+  content: "\f18e";
+}
+
+.icons8-rubber-stamp:before {
+  content: "\f236";
+}
+
+.icons8-ruble:before {
+  content: "\f2de";
+}
+
+.icons8-rucksack:before {
+  content: "\f447";
+}
+
+.icons8-ruler:before {
+  content: "\f30c";
+}
+
+.icons8-rules:before {
+  content: "\f22f";
+}
+
+.icons8-rupee:before {
+  content: "\f2dd";
+}
+
+.icons8-safari:before {
+  content: "\f432";
+}
+
+.icons8-safe:before {
+  content: "\f2e6";
+}
+
+.icons8-sail-boat:before {
+  content: "\f45c";
+}
+
+.icons8-sales-performance:before {
+  content: "\f23e";
+}
+
+.icons8-satellite-in-orbit:before {
+  content: "\f343";
+}
+
+.icons8-satellites:before {
+  content: "\f344";
+}
+
+.icons8-save:before {
+  content: "\f1b2";
+}
+
+.icons8-save-as:before {
+  content: "\f1b3";
+}
+
+.icons8-save-search:before {
+  content: "\f4a9";
+}
+
+.icons8-scale:before {
+  content: "\f290";
+}
+
+.icons8-scales:before {
+  content: "\f28b";
+}
+
+.icons8-scan-stock:before {
+  content: "\f370";
+}
+
+.icons8-scatter-plot:before {
+  content: "\f22c";
+}
+
+.icons8-schedule:before {
+  content: "\f21c";
+}
+
+.icons8-scoreboard:before {
+  content: "\f46a";
+}
+
+.icons8-screensharing:before {
+  content: "\f1c5";
+}
+
+.icons8-screenshot:before {
+  content: "\f30e";
+}
+
+.icons8-sd:before {
+  content: "\f346";
+}
+
+.icons8-search:before {
+  content: "\f100";
+}
+
+.icons8-search-contacts:before {
+  content: "\f17e";
+}
+
+.icons8-search-more:before {
+  content: "\f1d6";
+}
+
+.icons8-secure:before {
+  content: "\f196";
+}
+
+.icons8-secure-cloud:before {
+  content: "\f3d6";
+}
+
+.icons8-secured-letter:before {
+  content: "\f153";
+}
+
+.icons8-security-ssl:before {
+  content: "\f2b4";
+}
+
+.icons8-sell-stock:before {
+  content: "\f36f";
+}
+
+.icons8-send:before {
+  content: "\f164";
+}
+
+.icons8-send-email:before {
+  content: "\f163";
+}
+
+.icons8-send-file:before {
+  content: "\f14b";
+}
+
+.icons8-sent:before {
+  content: "\f14d";
+}
+
+.icons8-service-bell:before {
+  content: "\f449";
+}
+
+.icons8-services:before {
+  content: "\f11a";
+}
+
+.icons8-settings:before {
+  content: "\f11b";
+}
+
+.icons8-share:before {
+  content: "\f109";
+}
+
+.icons8-share-3:before {
+  content: "\f111";
+}
+
+.icons8-shared-mailbox:before {
+  content: "\f19b";
+}
+
+.icons8-shekel:before {
+  content: "\f2e1";
+}
+
+.icons8-shield:before {
+  content: "\f487";
+}
+
+.icons8-shipped:before {
+  content: "\f386";
+}
+
+.icons8-shipping-container:before {
+  content: "\f38e";
+}
+
+.icons8-shit-hits-fan:before {
+  content: "\f17c";
+}
+
+.icons8-shoes:before {
+  content: "\f448";
+}
+
+.icons8-shop:before {
+  content: "\f262";
+}
+
+.icons8-shopping-bag:before {
+  content: "\f366";
+}
+
+.icons8-shopping-basket:before {
+  content: "\f360";
+}
+
+.icons8-shopping-cart:before {
+  content: "\f367";
+}
+
+.icons8-show-password:before {
+  content: "\f2a7";
+}
+
+.icons8-shuffle:before {
+  content: "\f48d";
+}
+
+.icons8-shutdown:before {
+  content: "\f34c";
+}
+
+.icons8-shuttle:before {
+  content: "\f45d";
+}
+
+.icons8-sidebar-menu:before {
+  content: "\f1d2";
+}
+
+.icons8-sigma:before {
+  content: "\f288";
+}
+
+.icons8-sign-out:before {
+  content: "\f1cb";
+}
+
+.icons8-sign-up:before {
+  content: "\f308";
+}
+
+.icons8-signature:before {
+  content: "\f231";
+}
+
+.icons8-signin:before {
+  content: "\f1cc";
+}
+
+.icons8-signpost:before {
+  content: "\f341";
+}
+
+.icons8-silver-medal:before {
+  content: "\f468";
+}
+
+.icons8-skip-to-start:before {
+  content: "\f495";
+}
+
+.icons8-skype:before {
+  content: "\f436";
+}
+
+.icons8-sleep:before {
+  content: "\f400";
+}
+
+.icons8-sleet:before {
+  content: "\f41e";
+}
+
+.icons8-slide-up:before {
+  content: "\f4d4";
+}
+
+.icons8-slider:before {
+  content: "\f3e6";
+}
+
+.icons8-sling-here:before {
+  content: "\f37e";
+}
+
+.icons8-smart-card:before {
+  content: "\f268";
+}
+
+.icons8-smartphone-chat-female:before {
+  content: "\f181";
+}
+
+.icons8-smartphone-chat-male:before {
+  content: "\f17f";
+}
+
+.icons8-smartphone-chat-male-2:before {
+  content: "\f180";
+}
+
+.icons8-snapchat:before {
+  content: "\f437";
+}
+
+.icons8-snow:before {
+  content: "\f41a";
+}
+
+.icons8-snow-storm:before {
+  content: "\f41b";
+}
+
+.icons8-software-installer:before {
+  content: "\f4f4";
+}
+
+.icons8-sort:before {
+  content: "\f4db";
+}
+
+.icons8-sort-down:before {
+  content: "\f13e";
+}
+
+.icons8-sort-left:before {
+  content: "\f13d";
+}
+
+.icons8-sort-right:before {
+  content: "\f13f";
+}
+
+.icons8-sort-up:before {
+  content: "\f140";
+}
+
+.icons8-sorting:before {
+  content: "\f205";
+}
+
+.icons8-source-code:before {
+  content: "\f4eb";
+}
+
+.icons8-spade:before {
+  content: "\f402";
+}
+
+.icons8-spam:before {
+  content: "\f197";
+}
+
+.icons8-speech-bubble:before {
+  content: "\f131";
+}
+
+.icons8-speed:before {
+  content: "\f293";
+}
+
+.icons8-speedometer:before {
+  content: "\f336";
+}
+
+.icons8-split-transaction:before {
+  content: "\f2e9";
+}
+
+.icons8-split-vertical:before {
+  content: "\f4d8";
+}
+
+.icons8-square-root:before {
+  content: "\f277";
+}
+
+.icons8-ssd:before {
+  content: "\f348";
+}
+
+.icons8-stack-exchange:before {
+  content: "\f3b4";
+}
+
+.icons8-stack-of-money:before {
+  content: "\f2d1";
+}
+
+.icons8-stack-of-tweets:before {
+  content: "\f1a5";
+}
+
+.icons8-stack-overflow:before {
+  content: "\f3b2";
+}
+
+.icons8-stamp:before {
+  content: "\f235";
+}
+
+.icons8-star:before {
+  content: "\f16b";
+}
+
+.icons8-star-filled:before {
+  content: "\f170";
+}
+
+.icons8-star-half:before {
+  content: "\f16d";
+}
+
+.icons8-star-half-empty:before {
+  content: "\f16e";
+}
+
+.icons8-statistics:before {
+  content: "\f25e";
+}
+
+.icons8-stop:before {
+  content: "\f48f";
+}
+
+.icons8-stopwatch:before {
+  content: "\f1f3";
+}
+
+.icons8-storage:before {
+  content: "\f4aa";
+}
+
+.icons8-storm:before {
+  content: "\f41c";
+}
+
+.icons8-stormy-weather:before {
+  content: "\f41d";
+}
+
+.icons8-street-view:before {
+  content: "\f342";
+}
+
+.icons8-stripe:before {
+  content: "\f2f4";
+}
+
+.icons8-study:before {
+  content: "\f234";
+}
+
+.icons8-stumbleupon:before {
+  content: "\f3b9";
+}
+
+.icons8-subtract:before {
+  content: "\f274";
+}
+
+.icons8-suitcase:before {
+  content: "\f455";
+}
+
+.icons8-summer:before {
+  content: "\f43f";
+}
+
+.icons8-sun:before {
+  content: "\f12e";
+}
+
+.icons8-sunlight:before {
+  content: "\f37f";
+}
+
+.icons8-support:before {
+  content: "\f119";
+}
+
+.icons8-survey:before {
+  content: "\f218";
+}
+
+.icons8-swedish-krona:before {
+  content: "\f2dc";
+}
+
+.icons8-swiss-franc:before {
+  content: "\f2d8";
+}
+
+.icons8-sword:before {
+  content: "\f48c";
+}
+
+.icons8-synchronize:before {
+  content: "\f10a";
+}
+
+.icons8-system-information:before {
+  content: "\f4f1";
+}
+
+.icons8-system-report:before {
+  content: "\f4f3";
+}
+
+.icons8-system-task:before {
+  content: "\f4f2";
+}
+
+.icons8-tag-window:before {
+  content: "\f4c0";
+}
+
+.icons8-target:before {
+  content: "\f20f";
+}
+
+.icons8-tasklist:before {
+  content: "\f40e";
+}
+
+.icons8-tasks:before {
+  content: "\f220";
+}
+
+.icons8-tax:before {
+  content: "\f249";
+}
+
+.icons8-taxi:before {
+  content: "\f47a";
+}
+
+.icons8-telegram-app:before {
+  content: "\f438";
+}
+
+.icons8-telephone:before {
+  content: "\f3f1";
+}
+
+.icons8-temperature:before {
+  content: "\f294";
+}
+
+.icons8-temperature-sensitive:before {
+  content: "\f38a";
+}
+
+.icons8-template:before {
+  content: "\f4ef";
+}
+
+.icons8-tent:before {
+  content: "\f452";
+}
+
+.icons8-test-tube:before {
+  content: "\f28f";
+}
+
+.icons8-thermometer:before {
+  content: "\f413";
+}
+
+.icons8-this-way-up:before {
+  content: "\f382";
+}
+
+.icons8-thumbnails:before {
+  content: "\f315";
+}
+
+.icons8-thumbs-down:before {
+  content: "\f3fb";
+}
+
+.icons8-tick-box:before {
+  content: "\f122";
+}
+
+.icons8-ticket:before {
+  content: "\f32f";
+}
+
+.icons8-tiles:before {
+  content: "\f4b6";
+}
+
+.icons8-time:before {
+  content: "\f292";
+}
+
+.icons8-time-card:before {
+  content: "\f25c";
+}
+
+.icons8-time-machine:before {
+  content: "\f1fe";
+}
+
+.icons8-time-search:before {
+  content: "\f1f7";
+}
+
+.icons8-timecode:before {
+  content: "\f325";
+}
+
+.icons8-timeline:before {
+  content: "\f22a";
+}
+
+.icons8-timer:before {
+  content: "\f1f5";
+}
+
+.icons8-timezone:before {
+  content: "\f1fd";
+}
+
+.icons8-today:before {
+  content: "\f1e8";
+}
+
+.icons8-todo-list:before {
+  content: "\f219";
+}
+
+.icons8-toggle-off:before {
+  content: "\f4bd";
+}
+
+.icons8-toggle-on:before {
+  content: "\f4be";
+}
+
+.icons8-toolbox:before {
+  content: "\f136";
+}
+
+.icons8-topic:before {
+  content: "\f146";
+}
+
+.icons8-topic-moved:before {
+  content: "\f1a1";
+}
+
+.icons8-torrential-rain:before {
+  content: "\f42b";
+}
+
+.icons8-touchscreen:before {
+  content: "\f3f4";
+}
+
+.icons8-track-order:before {
+  content: "\f399";
+}
+
+.icons8-tracking:before {
+  content: "\f398";
+}
+
+.icons8-trademark:before {
+  content: "\f40a";
+}
+
+.icons8-train-ticket:before {
+  content: "\f453";
+}
+
+.icons8-transaction:before {
+  content: "\f253";
+}
+
+.icons8-transaction-2:before {
+  content: "\f2e3";
+}
+
+.icons8-transaction-list:before {
+  content: "\f246";
+}
+
+.icons8-transition-both-directions:before {
+  content: "\f4bc";
+}
+
+.icons8-translation:before {
+  content: "\f28a";
+}
+
+.icons8-trash:before {
+  content: "\f105";
+}
+
+.icons8-trash-can:before {
+  content: "\f101";
+}
+
+.icons8-travel-card:before {
+  content: "\f458";
+}
+
+.icons8-tree-structure:before {
+  content: "\f210";
+}
+
+.icons8-trolley:before {
+  content: "\f380";
+}
+
+.icons8-trolley-2:before {
+  content: "\f383";
+}
+
+.icons8-trophy:before {
+  content: "\f463";
+}
+
+.icons8-truck:before {
+  content: "\f32c";
+}
+
+.icons8-trust:before {
+  content: "\f20a";
+}
+
+.icons8-tumblr:before {
+  content: "\f3a5";
+}
+
+.icons8-tune:before {
+  content: "\f1c6";
+}
+
+.icons8-turkish-lira:before {
+  content: "\f2e0";
+}
+
+.icons8-twitter:before {
+  content: "\f39d";
+}
+
+.icons8-two-tickets:before {
+  content: "\f332";
+}
+
+.icons8-type:before {
+  content: "\f321";
+}
+
+.icons8-typography:before {
+  content: "\f320";
+}
+
+.icons8-unavailable:before {
+  content: "\f121";
+}
+
+.icons8-unchecked-checkbox:before {
+  content: "\f4ac";
+}
+
+.icons8-undo:before {
+  content: "\f305";
+}
+
+.icons8-uninstalling-updates:before {
+  content: "\f1c3";
+}
+
+.icons8-unit:before {
+  content: "\f216";
+}
+
+.icons8-unknown-status:before {
+  content: "\f183";
+}
+
+.icons8-unlock:before {
+  content: "\f2ab";
+}
+
+.icons8-unpin:before {
+  content: "\f4ed";
+}
+
+.icons8-unverified-account:before {
+  content: "\f1df";
+}
+
+.icons8-up-down-arrow:before {
+  content: "\f3e7";
+}
+
+.icons8-upload:before {
+  content: "\f1bd";
+}
+
+.icons8-upload-to-the-cloud:before {
+  content: "\f10c";
+}
+
+.icons8-urgent-message:before {
+  content: "\f15b";
+}
+
+.icons8-us-dollar:before {
+  content: "\f2d6";
+}
+
+.icons8-usb-connector:before {
+  content: "\f356";
+}
+
+.icons8-usb-off:before {
+  content: "\f34e";
+}
+
+.icons8-user-male:before {
+  content: "\f138";
+}
+
+.icons8-user-manual:before {
+  content: "\f4b1";
+}
+
+.icons8-user-menu-male:before {
+  content: "\f1d1";
+}
+
+.icons8-user-shield:before {
+  content: "\f2b5";
+}
+
+.icons8-valet-parking:before {
+  content: "\f44e";
+}
+
+.icons8-validation:before {
+  content: "\f2a8";
+}
+
+.icons8-variation:before {
+  content: "\f4a6";
+}
+
+.icons8-verified-account:before {
+  content: "\f1de";
+}
+
+.icons8-versions:before {
+  content: "\f4e6";
+}
+
+.icons8-very-popular-topic:before {
+  content: "\f1a0";
+}
+
+.icons8-video-file:before {
+  content: "\f4dd";
+}
+
+.icons8-video-message:before {
+  content: "\f1a6";
+}
+
+.icons8-video-playlist:before {
+  content: "\f484";
+}
+
+.icons8-view-details:before {
+  content: "\f4b3";
+}
+
+.icons8-vintage-camera:before {
+  content: "\f47f";
+}
+
+.icons8-vip:before {
+  content: "\f1db";
+}
+
+.icons8-virus-free:before {
+  content: "\f2a5";
+}
+
+.icons8-visa:before {
+  content: "\f2ef";
+}
+
+.icons8-visit:before {
+  content: "\f33d";
+}
+
+.icons8-visual-effects:before {
+  content: "\f326";
+}
+
+.icons8-vk-com:before {
+  content: "\f3b7";
+}
+
+.icons8-voice:before {
+  content: "\f49c";
+}
+
+.icons8-voice-recognition:before {
+  content: "\f26f";
+}
+
+.icons8-volume:before {
+  content: "\f295";
+}
+
+.icons8-waiting-room:before {
+  content: "\f44c";
+}
+
+.icons8-wall-mount-camera:before {
+  content: "\f4a4";
+}
+
+.icons8-wallet:before {
+  content: "\f2ce";
+}
+
+.icons8-warning-shield:before {
+  content: "\f2b0";
+}
+
+.icons8-watch:before {
+  content: "\f1f4";
+}
+
+.icons8-watches-front-view:before {
+  content: "\f1f6";
+}
+
+.icons8-water-transportation:before {
+  content: "\f460";
+}
+
+.icons8-weight:before {
+  content: "\f299";
+}
+
+.icons8-whatsapp:before {
+  content: "\f3af";
+}
+
+.icons8-windows-10:before {
+  content: "\f439";
+}
+
+.icons8-windy-weather:before {
+  content: "\f421";
+}
+
+.icons8-withdrawal:before {
+  content: "\f248";
+}
+
+.icons8-withdrawal-limit:before {
+  content: "\f2d3";
+}
+
+.icons8-won:before {
+  content: "\f2df";
+}
+
+.icons8-word:before {
+  content: "\f4e1";
+}
+
+.icons8-wordpress:before {
+  content: "\f3a3";
+}
+
+.icons8-work:before {
+  content: "\f255";
+}
+
+.icons8-worker:before {
+  content: "\f4e9";
+}
+
+.icons8-workflow:before {
+  content: "\f3c1";
+}
+
+.icons8-workstation:before {
+  content: "\f352";
+}
+
+.icons8-wrench:before {
+  content: "\f32e";
+}
+
+.icons8-xls:before {
+  content: "\f4e2";
+}
+
+.icons8-yahoo:before {
+  content: "\f43c";
+}
+
+.icons8-yelp:before {
+  content: "\f3a9";
+}
+
+.icons8-you-and-me:before {
+  content: "\f17d";
+}
+
+.icons8-youtube:before {
+  content: "\f3a0";
+}
+
+.icons8-zip-code:before {
+  content: "\f188";
+}
+
+.icons8-zoom-in:before {
+  content: "\f1e0";
+}
+
+.icons8-zoom-out:before {
+  content: "\f1e1";
+}
+
+.icons8-zoom-to-actual-size:before {
+  content: "\f1e2";
+}
+
+.icons8-zoom-to-extents:before {
+  content: "\f1e3";
+}

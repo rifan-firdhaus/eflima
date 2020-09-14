@@ -298,15 +298,7 @@ class Event extends ActiveRecord
                 continue;
             }
 
-            $model = new EventMember([
-                'scenario' => 'admin/event/add',
-                'event_id' => $this->id,
-                'staff_id' => $memberId,
-            ]);
-
-            $model->loadDefaultValues();
-
-            if (!$model->save()) {
+            if (!$this->invite($memberId)) {
                 return false;
             }
         }
@@ -319,6 +311,28 @@ class Event extends ActiveRecord
             if (!$model->delete()) {
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int|string $staffId
+     *
+     * @return bool
+     */
+    public function invite($staffId)
+    {
+        $model = new EventMember([
+            'scenario' => 'admin/event/add',
+            'event_id' => $this->id,
+            'staff_id' => $staffId,
+        ]);
+
+        $model->loadDefaultValues();
+
+        if (!$model->save()) {
+            return false;
         }
 
         return true;
@@ -347,7 +361,7 @@ class Event extends ActiveRecord
         $history = [
             'params' => $this->getHistoryParams(),
             'model' => self::class,
-            'model_id' => $this->id
+            'model_id' => $this->id,
         ];
 
         if ($this->scenario === 'admin/add' && $insert) {

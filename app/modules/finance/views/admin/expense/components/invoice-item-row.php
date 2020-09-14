@@ -13,6 +13,7 @@ use yii\helpers\Html;
 ?>
 <tr data-id="<?= $model->id ?>">
     <td class="align-middle text-center text-nowrap">
+        <div class="handle"></div>
         <?= Html::a(Icon::show('i8:edit'), ['/finance/admin/expense/update-invoice-item', 'id' => $model->id], [
             'class' => 'text-primary align-middle update-invoice-item-button m-0 h4',
             'data-lazy' => 0,
@@ -35,10 +36,10 @@ use yii\helpers\Html;
             <div class="text-right">
                 <?= Html::a([
                     'label' => Yii::t('app', 'Expense') . Icon::show('i8:external-link', ['class' => 'icon ml-2']),
-                    'url' => [
+                    'url' => isset($model->params['expense_id']) ? [
                         '/finance/admin/expense/view',
                         'id' => $model->params['expense_id'],
-                    ],
+                    ] : '#',
                     'class' => 'badge px-2 py-1 text-uppercase badge-info',
                     'data-lazy-modal' => 'expense-form-modal',
                     'data-lazy-container' => '#main-container',

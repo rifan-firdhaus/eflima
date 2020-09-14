@@ -1,0 +1,11 @@
+{
+	"version": 3,
+	"file": "invoice-view.css",
+	"sources": [
+		"invoice-view.scss",
+		"../../../../../account/assets/admin/source/css/_variables.scss",
+		"../../../../../../vendor/npm-asset/bootstrap/scss/_functions.scss"
+	],
+	"names": [],
+	"mappings": "ACIA,2CAA2C;AA8I3C,+BAA+B;AAQ/B,uCAAuC;AAwxBvC,uCAAuC;ADh7BvC,AACE,mBADiB,CACjB,KAAK,GAAG,EAAE,GAAG,EAAE,AAAA,YAAY,CAAC;EAC1B,QAAQ,EAAE,QAAQ;EAClB,YAAY,EC4HL,QAAe,GD3HvB;;AAJH,AAME,mBANiB,CAMjB,KAAK,GAAG,EAAE,AAAA,gBAAgB,CAAC,EAAE,CAAC;EAC5B,UAAU,EC8IJ,OAAwD,GD7I/D;;AARH,AAUE,mBAViB,CAUjB,OAAO,CAAC;EACN,QAAQ,EAAE,QAAQ;EAClB,GAAG,EAAE,GAAG;EACR,IAAI,EAAE,GAAG;EACT,MAAM,EAAE,GAAG;EACX,KAAK,EAAE,GAAG;EACV,WAAW,EAAE,GAAG,CAAC,MAAM,CCEhB,OAAO;EDDd,YAAY,EAAE,GAAG,CAAC,MAAM,CCCjB,OAAO;EDAd,MAAM,EAAE,IAAI,GACb"
+}

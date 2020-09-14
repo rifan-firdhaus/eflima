@@ -2,10 +2,13 @@
 
 // "Keep the essence of your id, id isn't just a id, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
+use modules\account\models\forms\staff\StaffSearch;
+use modules\account\models\Staff;
 use modules\account\web\admin\Controller;
 use modules\calendar\components\EventRelation;
 use modules\calendar\models\Event;
 use modules\calendar\models\forms\event\EventSearch;
+use modules\task\models\Task;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -270,6 +273,43 @@ class EventController extends Controller
 
 
     /**
+     * @param $id
+     *
+     * @return array|Event|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionStaffInvitableAutoComplete($id)
+    {
+
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $searchModel = new StaffSearch();
+
+        $model = $this->getModel($id);
+
+        if (!$model instanceof Event) {
+            return $model;
+        }
+
+        $invited = $model->getMemberRelationships()
+            ->select('staff_id')
+            ->createCommand()
+            ->queryColumn();
+
+        $searchModel->getQuery()
+            ->andWhere(['NOT IN', 'staff.id', $invited]);
+
+        return $searchModel->autoComplete(Yii::$app->request->queryParams);
+    }
+
+    /**
      * @param $model
      *
      * @return array
@@ -287,4 +327,6 @@ class EventController extends Controller
             'input' => $this->view->renderAjaxContent($relation->pickerInput($event, 'model_id')),
         ];
     }
+
+
 }

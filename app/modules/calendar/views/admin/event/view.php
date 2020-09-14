@@ -1,7 +1,9 @@
 <?php
 
 use modules\account\web\admin\View;
+use modules\account\widgets\inputs\StaffInput;
 use modules\account\widgets\StaffCommentWidget;
+use modules\calendar\assets\admin\EventViewAsset;
 use modules\calendar\models\Event;
 use modules\calendar\models\EventMember;
 use modules\ui\widgets\Card;
@@ -9,14 +11,19 @@ use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\DateColumn;
 use modules\ui\widgets\data_table\DataTable;
 use modules\ui\widgets\Icon;
+use modules\ui\widgets\lazy\Lazy;
 use modules\ui\widgets\table\cells\Cell;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\Url;
 
 /**
  * @var View  $this
  * @var Event $model
  */
+
+EventViewAsset::register($this);
 
 $this->title = $model->name;
 $this->menu->active = 'main/calendar';
@@ -101,14 +108,35 @@ $this->toolbar['update-event'] = Html::a([
 
         </table>
         <?php
-        Card::begin([
-            'title' => Yii::t('app', 'Staff Member'),
+        $memberCard = Card::begin([
+            'title' => Yii::t('app', 'Attendees'),
             'icon' => 'i8:account',
             'headerOptions' => [
-                'class' => 'card-header border-top',
+                'class' => 'card-header border-top px-0',
             ],
             'bodyOptions' => false,
         ]);
+
+        echo $this->block('@member:begin');
+
+
+        $memberButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
+            'class' => 'btn btn-outline-primary btn-sm btn-event-member',
+        ]);
+        $memberInput = StaffInput::widget([
+            'name' => 'assignee',
+            'url' => ['/calendar/admin/event/staff-invitable-auto-complete', 'id' => $model->id],
+            'id' => 'event-member-input',
+            'options' => [
+                'class' => 'event-member-input',
+            ],
+        ]);
+
+        $memberCard->addToHeader(
+            Html::tag('div', $memberInput . $memberButton, [
+                'class' => 'event-member-input-container',
+            ])
+        );
 
         echo DataTable::widget([
             'dataProvider' => new ArrayDataProvider([
@@ -174,7 +202,6 @@ $this->toolbar['update-event'] = Html::a([
                         'update' => false,
                         'delete' => [
                             'value' => [
-
                                 'icon' => 'i8:trash',
                                 'label' => Yii::t('app', 'Delete'),
                                 'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
@@ -189,6 +216,8 @@ $this->toolbar['update-event'] = Html::a([
                 ],
             ],
         ]);
+
+        echo $this->block('@member:end');
 
         Card::end();
         ?>
@@ -221,3 +250,12 @@ $this->toolbar['update-event'] = Html::a([
         ]) ?>
     </div>
 </div>
+
+<?php
+
+$jsOptions = Json::encode([
+    'inviteUrl' => Url::to(['/calendar/admin/event-member/invite', 'id' => $model->id]),
+]);
+
+$this->registerJs("$('#event-view-wrapper-{$this->uniqueId}').eventView({$jsOptions})");
+?>

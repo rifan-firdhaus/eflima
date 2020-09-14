@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"file": "task-view.css",
+	"sources": [
+		"task-view.scss"
+	],
+	"names": [],
+	"mappings": "AAAA,AAAA,8BAA8B,CAAC,QAAQ,CAAC;EACtC,UAAU,EAAE,MAAM;EAClB,KAAK,EAAE,cAAc;EACrB,QAAQ,EAAE,MAAM,GACjB"
+}

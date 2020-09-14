@@ -1,0 +1,22 @@
+/********** BOOTSTRAP VARIABLES **********/
+/*********** MIXINS **********/
+/********** THEME VARIABLES **********/
+/********** THEME VARIABLES **********/
+.invoice-item-table tbody > tr > td:first-child {
+  position: relative;
+  padding-left: 1.725rem; }
+
+.invoice-item-table tbody > tr.sortable-chosen td {
+  background: #fff5e6; }
+
+.invoice-item-table .handle {
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  bottom: 6px;
+  width: 7px;
+  border-left: 2px dotted #adb5bd;
+  border-right: 2px dotted #adb5bd;
+  cursor: move; }
+
+/*# sourceMappingURL=invoice-view.css.map */

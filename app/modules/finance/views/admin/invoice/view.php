@@ -6,6 +6,7 @@ use modules\finance\models\Invoice;
 use modules\ui\widgets\Icon;
 use modules\ui\widgets\lazy\Lazy;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\Url;
 
 /**
@@ -118,7 +119,13 @@ echo $this->block('@begin');
             </div>
         </div>
 
-        <?php $this->registerJs("$('#invoice-view-wrapper').invoiceView()"); ?>
+        <?php
+        $jsOptions = Json::encode([
+            'sortUrl' => Url::to(['/finance/admin/invoice-item/sort', 'invoice_id' => $model->id]),
+        ]);
+
+        $this->registerJs("$('#invoice-view-wrapper').invoiceView({$jsOptions})");
+        ?>
         <?php Lazy::end(); ?>
 
         <div class="border-left bg-really-light content-sidebar invoice-view-sidebar h-100 overflow-auto">

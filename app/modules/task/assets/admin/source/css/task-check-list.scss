@@ -1,0 +1,47 @@
+@import "../../../../../account/assets/admin/source/css/_variables.scss";
+
+.task-check-list-item .text-wrapper {
+  flex-grow: 1;
+  margin-left: map-get($spacers, 3);
+}
+
+.task-check-list-item {
+  display: flex;
+  border-bottom: 1px solid $gray-200;
+  align-items: center;
+  padding-top: 2px;
+  position: relative;
+  padding-left: 15px;
+
+  &.sortable-chosen {
+    background: color-level($warning, -11);
+  }
+}
+
+.task-check-list-item > .handle {
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  bottom: 6px;
+  width: 7px;
+  border-left: 2px dotted $gray-500;
+  border-right: 2px dotted $gray-500;
+  cursor: move;
+}
+
+.task-check-list-item .text-wrapper input {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 5px 0;
+}
+
+.task-check-list-item .text-wrapper input:focus {
+  outline: 0;
+  border-bottom: 2px solid $primary;
+}
+
+.task-check-list-item .checkbox-wrapper {
+  margin-top: -5px;
+}
