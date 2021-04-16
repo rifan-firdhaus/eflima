@@ -2,12 +2,14 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
+use modules\account\components\CommentRelation;
 use modules\account\models\AccountComment;
 use modules\account\models\forms\account_comment\AccountCommentSearch;
 use modules\account\models\StaffAccount;
 use modules\account\web\admin\Controller;
 use modules\account\widgets\lazy\LazyResponse;
 use modules\file_manager\web\UploadedFile;
+use modules\note\components\NoteRelation;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -22,6 +24,90 @@ use yii\web\Response;
  */
 class StaffCommentController extends Controller
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'actions' => ['index'],
+                'matchCallback' => function ($rule) {
+                    $model = Yii::$app->request->get('model');
+                    $modelId = Yii::$app->request->get('model_id');
+
+                    $rule->allow = true;
+
+                    if ($model) {
+                        $noteRelation = CommentRelation::get($model);
+
+                        if (!$noteRelation) {
+                            $rule->allow = false;
+                        }
+
+                        if (!$noteRelation->isActive($modelId)) {
+                            $rule->allow = false;
+                        }
+                    }
+
+                    return true;
+                },
+            ],
+            [
+                'actions' => ['add', 'update'],
+                'matchCallback' => function ($rule) {
+                    $data = Yii::$app->request->post('AccountComment');
+                    $model = $data['model'];
+                    $modelId = $data['model_id'];
+
+                    $rule->allow = true;
+
+                    if ($model) {
+                        $noteRelation = CommentRelation::get($model);
+
+                        if (!$noteRelation) {
+                            $rule->allow = false;
+                        }
+
+                        if (!$noteRelation->isActive($modelId)) {
+                            $rule->allow = false;
+                        }
+                    }
+
+                    return true;
+                },
+            ],
+            [
+                'actions' => ['delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'matchCallback' => function ($rule) {
+                    $id = Yii::$app->request->get('id');
+
+                    $note = $this->getModel($id);
+
+                    $model = $note->model;
+                    $modelId = $note->model_id;
+
+                    $rule->allow = true;
+
+                    if ($model) {
+                        $noteRelation = CommentRelation::get($model);
+
+                        if (!$noteRelation) {
+                            $rule->allow = false;
+                        }
+
+                        if (!$noteRelation->isActive($modelId)) {
+                            $rule->allow = false;
+                        }
+                    }
+
+                    return true;
+                },
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * @return array|string|Response

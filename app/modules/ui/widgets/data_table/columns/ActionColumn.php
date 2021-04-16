@@ -66,7 +66,7 @@ class ActionColumn extends Column
                 'value' => [
                     'icon' => 'i8:trash',
                     'label' => Yii::t('app', 'Delete'),
-                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
                         'object_name' => Yii::t('app', 'this item'),
                     ]),
                     'class' => 'text-danger',
@@ -89,12 +89,12 @@ class ActionColumn extends Column
                 $button = ['value' => $button];
             }
 
-            if (isset($button['visibility'])) {
-                if (is_callable($button['visibility'])) {
-                    $button['visibility'] = call_user_func($button['visibility'], $model, $id, $index);
+            if (isset($button['visible'])) {
+                if (is_callable($button['visible'])) {
+                    $button['visible'] = call_user_func($button['visible'], $model, $id, $index);
                 }
 
-                if (!$button['visibility']) {
+                if (!$button['visible']) {
                     continue;
                 }
             }

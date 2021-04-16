@@ -22,15 +22,17 @@ class M190603030202Note extends Migration
 
         $this->createTable('{{%note}}', [
             'id' => $this->primaryKey()->unsigned(),
-            'creator_id' => $this->integer()->unsigned()->notNull(),
             'model' => $this->text()->null(),
             'model_id' => $this->text()->null(),
             'color' => $this->char(7),
             'title' => $this->text()->null(),
             'content' => $this->text()->null(),
+            'is_pinned' => $this->boolean()->defaultValue(0),
             'is_private' => $this->boolean()->defaultValue(0),
-            'created_at' => $this->integer()->unsigned(),
-            'updated_at' => $this->integer()->unsigned(),
+            'creator_id' => $this->integer()->unsigned()->null(),
+            'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
+            'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
         $this->createTable("{{%note_attachment}}", [
@@ -47,6 +49,20 @@ class M190603030202Note extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        $this->addForeignKey(
+            'creator_of_note',
+            '{{%note}}', 'creator_id',
+            '{{%account}}', 'id',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'updater_of_note',
+            '{{%note}}', 'updater_id',
+            '{{%account}}', 'id',
+            'CASCADE'
+        );
     }
 
     /**
@@ -54,6 +70,9 @@ class M190603030202Note extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('creator_of_note', '{{%note}}');
+        $this->dropForeignKey('updater_of_note', '{{%note}}');
+
         $this->dropForeignKey('attachment_of_note', '{{%note_attachment}}');
 
         $this->dropTable('{{%note}}');

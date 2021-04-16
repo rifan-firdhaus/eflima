@@ -9,6 +9,7 @@ use modules\note\models\queries\NoteAttachmentQuery;
 use modules\note\models\queries\NoteQuery;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception as DbException;
 
@@ -20,14 +21,16 @@ use yii\db\Exception as DbException;
  * @property NoteAttachment[]|array $attachments
  *
  * @property int                    $id         [int(10) unsigned]
- * @property int                    $creator_id [int(11) unsigned]
  * @property string                 $model
  * @property string                 $model_id
  * @property string                 $color      [char(7)]
  * @property string                 $title
  * @property string                 $content
+ * @property bool                   $is_pinned  [tinyint(1)]
  * @property bool                   $is_private [tinyint(1)]
+ * @property int                    $creator_id [int(11) unsigned]
  * @property int                    $created_at [int(11) unsigned]
+ * @property int                    $updater_id [int(11) unsigned]
  * @property int                    $updated_at [int(11) unsigned]
  */
 class Note extends ActiveRecord
@@ -104,6 +107,9 @@ class Note extends ActiveRecord
         ];
     }
 
+    /**
+     * @throws InvalidConfigException
+     */
     public function validateRelatedModel()
     {
         if ($this->hasErrors() || empty($this->model)) {
@@ -124,6 +130,12 @@ class Note extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;
@@ -232,5 +244,29 @@ class Note extends ActiveRecord
         }
 
         return parent::loadDefaultValues($skipIfSet);
+    }
+
+    /**
+     * @param bool $pin
+     *
+     * @return bool
+     */
+    public function pin($pin = true)
+    {
+        if ($this->is_pinned === $pin) {
+            return true;
+        }
+
+        $this->is_pinned = $pin;
+
+        return $this->save(false);
+    }
+
+    /**
+     * @return bool
+     */
+    public function unpin()
+    {
+        return $this->pin(false);
     }
 }

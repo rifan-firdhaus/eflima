@@ -3,4 +3,22 @@
   width: 0px !important;
   overflow: hidden; }
 
+.task-progress-slider.irs--flat {
+  height: auto; }
+  .task-progress-slider.irs--flat .irs-handle {
+    top: -6px;
+    width: 14px;
+    height: 16px; }
+  .task-progress-slider.irs--flat .irs-bar,
+  .task-progress-slider.irs--flat .irs-line,
+  .task-progress-slider.irs--flat .irs-bar {
+    top: 0;
+    height: 4px; }
+  .task-progress-slider.irs--flat .irs-from, .task-progress-slider.irs--flat .irs-to, .task-progress-slider.irs--flat .irs-single {
+    top: -24px;
+    transform: scale(0);
+    transition: 0.2s transform; }
+  .task-progress-slider.irs--flat:hover .irs-from, .task-progress-slider.irs--flat:hover .irs-to, .task-progress-slider.irs--flat:hover .irs-single {
+    transform: scale(1); }
+
 /*# sourceMappingURL=task-view.css.map */

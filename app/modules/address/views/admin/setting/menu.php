@@ -21,14 +21,17 @@ echo Menu::widget([
         'country' => [
             'label' => Yii::t('app', 'Country'),
             'url' => ['/address/admin/country/index'],
+            'visible' => Yii::$app->user->can('admin.setting.country.list')
         ],
         'province' => [
             'label' => Yii::t('app', 'Province'),
             'url' => ['/address/admin/province/index'],
+            'visible' => Yii::$app->user->can('admin.setting.province.list')
         ],
         'city' => [
             'label' => Yii::t('app', 'City'),
             'url' => ['/address/admin/city/index'],
+            'visible' => Yii::$app->user->can('admin.setting.city.list')
         ],
     ],
     'options' => [

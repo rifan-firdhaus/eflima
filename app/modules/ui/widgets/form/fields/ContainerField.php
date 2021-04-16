@@ -2,11 +2,11 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use http\Exception\InvalidArgumentException;
-use yii\helpers\Html;
 use modules\ui\widgets\form\fields\traits\ErrorTrait;
 use modules\ui\widgets\form\fields\traits\HorizontalLayoutTrait;
 use modules\ui\widgets\form\fields\traits\RequiredTrait;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
@@ -82,5 +82,13 @@ class ContainerField extends Field
         $this->normalizeError();
 
         parent::normalize();
+
+        if (isset($this->inputOptions['id'])) {
+            $this->inputOptions['id'] = $this->inputOptions['id'] . '-' . $this->form->getView()->uniqueId;
+        }
+
+        if (isset($this->options['id'])) {
+            $this->options['id'] = $this->options['id'] . '-' . $this->form->getView()->uniqueId;
+        }
     }
 }

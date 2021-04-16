@@ -18,29 +18,45 @@ $this->beginContent('@modules/finance/views/admin/expense/components/view-layout
 
 echo $this->block('@begin');
 
+if (Yii::$app->user->can('admin.expense.delete')) {
+    $this->toolbar['delete-expense'] = Html::a([
+        'url' => ['/finance/admin/expense/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+            'object_name' => Html::tag('strong', $model->name),
+        ]),
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
+        'data-toggle' => 'tooltip',
+        'data-lazy-options' => ['method' => 'DELETE'],
+    ]);
+}
 
-$this->toolbar['delete-expense'] = Html::a([
-    'url' => ['/finance/admin/expense/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->name),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-    'data-toggle' => 'tooltip',
-]);
 
-$this->toolbar['update-expense'] = Html::a([
-    'label' => Html::tag('span', Yii::t('app', 'Update'), ['class' => 'btn-label']),
-    'url' => ['/finance/admin/expense/update', 'id' => $model->id],
-    'class' => 'btn btn-icon-sm btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'expense-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
+if ($model->is_billable && !$model->isBilled && Yii::$app->user->can('admin.expense.bill')) {
+    $this->toolbar['add-expense-to-invoice'] = Html::a(Icon::show('i8:transaction-2') . Yii::t('app', 'Add to Invoice'), ['/finance/admin/expense/add-to-invoice','id' => $model->id], [
+        'title' => Yii::t('app', 'Add to Invoice'),
+        'class' => 'btn btn-outline-primary',
+        'data-lazy-container' => '#main-container',
+        'data-lazy-modal' => 'add-to-invoice-form-modal',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-toggle' => 'tooltip',
+    ]);
+}
 
-if ($model->is_billable && empty($model->invoice_item_id)) {
+if (Yii::$app->user->can('admin.expense.update')) {
+    $this->toolbar['update-expense'] = Html::a([
+        'label' => Html::tag('span', Yii::t('app', 'Update'), ['class' => 'btn-label']),
+        'url' => ['/finance/admin/expense/update', 'id' => $model->id],
+        'class' => 'btn btn-icon-sm btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'expense-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
+
+if ($model->is_billable && empty($model->invoice_item_id) && Yii::$app->user->can('bill')) {
     $this->toolbar['add-expense-to-invoice'] = Html::a([
         'label' => Yii::t('app', 'Add to Invoice'),
         'url' => ['/finance/admin/expense/add-to-invoice', 'id' => $model->id],
@@ -48,7 +64,7 @@ if ($model->is_billable && empty($model->invoice_item_id)) {
         'data-lazy-modal' => 'add-to-invoice-form-modal',
         'data-lazy-modal-size' => 'modal-md',
         'class' => 'btn btn-outline-primary',
-        'icon' => 'i8:transaction-2'
+        'icon' => 'i8:transaction-2',
     ]);
 }
 
@@ -102,7 +118,7 @@ if ($model->is_billable && empty($model->invoice_item_id)) {
                                     <div class="font-size-sm">
                                         <?= Html::a([
                                             'label' => Html::encode($model->customer->primaryContact->name),
-                                            'url' => ['/crm/admin/customer/update', 'id' => $model->customer->primaryContact->id],
+                                            'url' => ['/crm/admin/customer/view', 'id' => $model->customer->primaryContact->id],
                                             'data-lazy-modal' => 'customer-contact-form-modal',
                                             'data-lazy-container' => '#main-container',
                                             'class' => 'd-block text-muted',

@@ -16,6 +16,7 @@ $active = 'timer'; // Set timer tab to active
 $this->subTitle = Yii::t('app', 'Timer');
 
 $this->beginContent('@modules/task/views/admin/task/components/view-layout.php', compact('model', 'active'));
+
 echo $this->render('/admin/task-timer/components/data-view', [
     'searchModel' => $timerSearchModel,
 ]);

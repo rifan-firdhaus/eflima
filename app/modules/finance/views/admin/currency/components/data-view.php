@@ -47,15 +47,17 @@ echo $this->render('data-table', compact('dataProvider'));
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/finance/admin/currency/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'currency-form-modal',
-    'data-lazy-modal-size' => 'modal-md',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.setting.finance.currency.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/finance/admin/currency/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'currency-form-modal',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

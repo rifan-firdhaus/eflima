@@ -6,12 +6,14 @@ use Yii;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
 use yii\data\BaseDataProvider;
+use yii\helpers\ArrayHelper;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  */
 abstract class QuickSearch
 {
+    /** @var QuickSearch[] */
     protected static $searchables = [];
 
     /**
@@ -23,6 +25,14 @@ abstract class QuickSearch
      * @return string
      */
     abstract public function getId();
+
+    /**
+     * @return bool
+     */
+    public function isActive()
+    {
+        return true;
+    }
 
     /**
      * @param $q
@@ -41,33 +51,62 @@ abstract class QuickSearch
 
     /**
      * @param $object
+     *
+     * @throws InvalidConfigException
      */
     public static function register($object)
     {
-        self::$searchables[] = $object;
+        $searchable = Yii::createObject($object);
+
+        if (!($searchable instanceof QuickSearch)) {
+            throw new InvalidArgumentException();
+        }
+
+        self::$searchables[] = $searchable;
+    }
+
+    public static function map()
+    {
+        return ArrayHelper::map(
+            array_filter(
+                self::$searchables,
+                function ($searchable) {
+                    /** @var QuickSearch $searchable */
+
+                    return $searchable->isActive();
+                }
+            ),
+            function ($searchable) {
+                /** @var QuickSearch $searchable */
+
+                return $searchable->getId();
+            },
+            function ($searchable) {
+                /** @var QuickSearch $searchable */
+
+                return $searchable->getLabel();
+            }
+        );
     }
 
     /**
-     * @param string $q
-     * @param View   $view
+     * @param string   $q
+     * @param string[] $models
+     * @param View     $view
      *
      * @return array
-     * @throws InvalidConfigException
      */
-    public static function run($q, $view)
+    public static function run($q, $models = [], $view)
     {
         $result = [
             'page' => 1,
             'more' => false,
-            'result' => []
+            'result' => [],
         ];
 
         foreach (self::$searchables AS $searchable) {
-            /** @var QuickSearch|mixed $searchable */
-            $searchable = Yii::createObject($searchable);
-
-            if (!($searchable instanceof QuickSearch)) {
-                throw new InvalidArgumentException();
+            if (!in_array($searchable->getId(), $models) || !$searchable->isActive()) {
+                continue;
             }
 
             $dataProvider = $searchable->search($q);
@@ -76,7 +115,7 @@ abstract class QuickSearch
                 $dataProvider->pagination->pageParam = 'page';
                 $dataProvider->pagination->pageSize = 8;
 
-                if($dataProvider->pagination->pageCount > 0 && $dataProvider->pagination->page != $dataProvider->pagination->pageCount - 1){
+                if ($dataProvider->pagination->pageCount > 0 && $dataProvider->pagination->page != $dataProvider->pagination->pageCount - 1) {
                     $result['more'] = true;
                 }
             }

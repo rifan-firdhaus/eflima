@@ -23,10 +23,9 @@ use yii\helpers\Json;
 
 TicketViewAsset::register($this);
 
-$this->toolbar['delete-ticket'] = Html::a(
-    '',
-    ['/support/admin/ticket/delete', 'id' => $model->id],
-    [
+if (Yii::$app->user->can('admin.ticket.add')) {
+    $this->toolbar['delete-ticket'] = Html::a([
+        'url' => ['/support/admin/ticket/delete', 'id' => $model->id],
         'class' => 'btn btn-outline-danger btn-icon',
         'icon' => 'i8:trash',
         'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
@@ -34,20 +33,21 @@ $this->toolbar['delete-ticket'] = Html::a(
         ]),
         'data-placement' => 'bottom',
         'title' => Yii::t('app', 'Delete'),
-    ]
-);
+        'data-lazy-options' => ['method' => 'DELETE'],
+    ]);
+}
 
-$this->toolbar['update-ticket'] = Html::a(
-    Yii::t('app', 'Update'),
-    ['/support/admin/ticket/update', 'id' => $model->id],
-    [
+if (Yii::$app->user->can('admin.ticket.add')) {
+    $this->toolbar['update-ticket'] = Html::a([
+        'url' => ['/support/admin/ticket/update', 'id' => $model->id],
+        'label' => Yii::t('app', 'Update'),
         'class' => 'btn btn-outline-secondary',
         'icon' => 'i8:edit',
         'data-lazy-modal' => 'task-form-modal',
         'data-lazy-container' => '#main-container',
         'data-lazy-modal-size' => 'modal-md',
-    ]
-);
+    ]);
+}
 
 $this->beginContent('@modules/support/views/admin/ticket/components/view-layout.php', compact('model'));
 

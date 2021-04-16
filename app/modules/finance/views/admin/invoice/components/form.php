@@ -212,7 +212,7 @@ echo $this->block('@form:end', compact('form'));
 
 $rows = [];
 
-foreach ($model->items AS $item) {
+foreach ($model->getItems()->orderBy('order')->all() AS $item) {
     $scenario = $item->scenario;
 
     $item->scenario = 'admin/temp/update';

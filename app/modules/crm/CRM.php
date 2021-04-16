@@ -6,13 +6,16 @@ use modules\calendar\components\EventRelation;
 use modules\core\base\Module;
 use modules\crm\components\CustomerEventRelation;
 use modules\crm\components\CustomerNoteRelation;
+use modules\crm\components\CustomerQuickSearch;
 use modules\crm\components\CustomerTaskRelation;
 use modules\crm\components\Hook;
 use modules\crm\components\LeadCommentRelation;
 use modules\crm\components\LeadEventRelation;
 use modules\crm\components\LeadNoteRelation;
+use modules\crm\components\LeadQuickSearch;
 use modules\crm\components\LeadTaskRelation;
 use modules\note\components\NoteRelation;
+use modules\quick_access\components\QuickSearch;
 use modules\task\components\TaskRelation;
 use Yii;
 
@@ -43,6 +46,11 @@ class CRM extends Module
         if (Yii::$app->hasModule('calendar')) {
             EventRelation::register('customer', CustomerEventRelation::class);
             EventRelation::register('lead', LeadEventRelation::class);
+        }
+
+        if (Yii::$app->hasModule('quick_access')) {
+            QuickSearch::register(CustomerQuickSearch::class);
+            QuickSearch::register(LeadQuickSearch::class);
         }
     }
 }

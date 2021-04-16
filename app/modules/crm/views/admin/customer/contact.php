@@ -6,7 +6,7 @@ use modules\crm\models\forms\customer_contact\CustomerContactSearch;
 
 /**
  * @var Customer              $model
- * @var CustomerContactSearch $searchModel
+ * @var CustomerContactSearch $contactSearchModel
  * @var View                  $this
  */
 
@@ -16,7 +16,7 @@ $this->subTitle = Yii::t('app', 'Contact');
 $this->beginContent('@modules/crm/views/admin/customer/components/view-layout.php', compact('model', 'active'));
 
 echo $this->block('@begin');
-echo $this->render('../customer-contact/components/data-view', compact('searchModel'));
+echo $this->render('../customer-contact/components/data-view', ['searchModel' => $contactSearchModel]);
 echo $this->block('@end');
 
 $this->endContent();

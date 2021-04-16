@@ -3,6 +3,8 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
 use modules\account\Account;
+use modules\account\models\AccountComment;
+use modules\account\models\queries\AccountCommentQuery;
 use modules\account\models\queries\StaffQuery;
 use modules\account\models\Staff;
 use modules\calendar\components\EventRelation;
@@ -11,32 +13,40 @@ use modules\calendar\models\queries\EventQuery;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\core\validators\DateValidator;
+use modules\note\models\Note;
 use modules\task\components\TaskRelation;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 use yii\db\Exception as DbException;
 use yii\db\StaleObjectException;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property EventMember[]      $memberRelationships
- * @property Staff[]            $members
- * @property bool               $isStarted
- * @property null|mixed         $relatedModel
- * @property null|EventRelation $relatedObject
+ * @property EventMember[]         $memberRelationships
+ * @property Staff[]               $members
+ * @property bool                  $isStarted
+ * @property null|mixed            $relatedModel
+ * @property null|EventRelation    $relatedObject
+ * @property-read array            $historyParams
+ * @property-read AccountComment[] $comments
  *
- * @property int                $id         [int(10) unsigned]
- * @property string             $model
- * @property string             $model_id
- * @property string             $name
- * @property string             $description
- * @property string             $location
- * @property int                $start_date [int(11) unsigned]
- * @property int                $end_date   [int(11) unsigned]
- * @property int                $created_at [int(11) unsigned]
+ * @property int                   $id         [int(10) unsigned]
+ * @property string                $model
+ * @property string                $model_id
+ * @property string                $name
+ * @property string                $description
+ * @property string                $location
+ * @property int                   $start_date [int(11) unsigned]
+ * @property int                   $end_date   [int(11) unsigned]
+ * @property int                   $creator_id [int(11) unsigned]
+ * @property int                   $created_at [int(11) unsigned]
+ * @property int                   $updater_id [int(11) unsigned]
+ * @property int                   $updated_at [int(11) unsigned]
  */
 class Event extends ActiveRecord
 {
@@ -151,12 +161,22 @@ class Event extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
-            'updatedAtAttribute' => false,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;
     }
 
+    /**
+     * @param false|string $color
+     *
+     * @return array|mixed|null
+     */
     public function colors($color = false)
     {
         $colors = [
@@ -269,6 +289,45 @@ class Event extends ActiveRecord
         parent::afterSave($insert, $changedAttributes);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function beforeDelete()
+    {
+        $this->deleteRelations();
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @throws DbException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public function deleteRelations()
+    {
+        foreach ($this->memberRelationships AS $member) {
+            if (!$member->delete()) {
+                throw new DbException('Failed to delete member of event');
+            }
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'event', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new DbException('Failed to delete related note');
+                }
+            }
+        }
+
+        foreach ($this->comments AS $comment) {
+            if (!$comment->delete()) {
+                throw new Exception('Failed to delete related comments');
+            }
+        }
+    }
 
     /**
      * @return bool
@@ -280,6 +339,14 @@ class Event extends ActiveRecord
         }
 
         return $this->start_date <= time() && $this->end_date >= time();
+    }
+
+    /**
+     * @return ActiveQuery|AccountCommentQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(AccountComment::class, ['model_id' => 'id'])->andOnCondition(['model' => 'event']);
     }
 
     /**
@@ -374,5 +441,46 @@ class Event extends ActiveRecord
         $history['tag'] = $this->scenario === 'admin/add' ? 'add' : 'update';
 
         return Account::history()->save($historyEvent, $history);
+    }
+
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = self::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $event) {
+                if (!$event->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
     }
 }

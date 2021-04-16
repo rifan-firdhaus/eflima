@@ -21,21 +21,19 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:ask-question';
 $this->menu->active = 'main/project';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-project-discussion-topic'] = Html::a(
-            '',
-            ['/project/admin/project-discussion-topic/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->subject),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
+if (!$model->isNewRecord && !Lazy::isLazyModalRequest()) {
+    if (Yii::$app->user->can('admin.project.view.discussion.delete')) {
+        $this->toolbar['delete-project-discussion-topic'] = Html::a([
+            'url' => ['/project/admin/project-discussion-topic/delete', 'id' => $model->id],
+            'class' => 'btn btn-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->subject),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE']
+        ]);
     }
 }
 

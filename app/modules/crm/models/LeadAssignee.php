@@ -3,15 +3,19 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
 use modules\account\Account;
+use modules\account\components\notification\DatabaseNotificationChannel;
+use modules\account\components\notification\Notification;
 use modules\account\models\Staff;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\crm\models\queries\LeadAssigneeQuery;
-use modules\task\models\Task;
 use Throwable;
 use Yii;
+use yii\base\Event;
+use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception;
+use yii\helpers\ArrayHelper;
 
 /**
  * @author Rifan Firdhaus Widigdo  <rifanfirdhaus@gmail.com>
@@ -139,6 +143,56 @@ class LeadAssignee extends ActiveRecord
         if ($insert && in_array($this->scenario, ['admin/lead/add', 'admin/add'])) {
             $this->recordAssignedHistory();
         }
+
+        if ($insert && $this->scenario === 'admin/add') {
+            self::sendAssignNotification([$this], $this->task, $this->assignor);
+        }
+    }
+
+    /**
+     * @param LeadAssignee[] $assignees
+     * @param Lead           $lead
+     * @param Staff          $assignor
+     *
+     * @throws InvalidConfigException
+     * @throws Exception
+     */
+    public static function sendAssignNotification($assignees, $lead, $assignor)
+    {
+        if (!$assignor instanceof Staff) {
+            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+
+            if (!$assignor) {
+                throw new Exception('Invalid assignor');
+            }
+        }
+
+        $assignees = array_filter($assignees, function ($assignee) {
+            return $assignee->assignee_id != $assignee->assignor_id;
+        });
+
+        if (empty($assignees)) {
+            return;
+        }
+
+        $accountIds = ArrayHelper::getColumn($assignees, 'assignee.account_id');
+
+        $notification = new Notification([
+            'to' => $accountIds,
+            'title' => '{assignor} assign a lead to you',
+            'titleParams' => [
+                'assignor' => $assignor->name,
+            ],
+            'body' => $lead->name,
+            'channels' => [
+                DatabaseNotificationChannel::class => [
+                    'url' => ['/crm/admin/lead/view', 'id' => $lead->id],
+                    'is_internal_url' => true,
+                ],
+            ],
+        ]);
+
+        $notification->send();
     }
 
     /**
@@ -193,8 +247,35 @@ class LeadAssignee extends ActiveRecord
             'description' => 'Removing assignment of {assignee_name} from lead "{lead_name}"',
             'tag' => 'release_assignment',
             'model' => Lead::class,
-            'model_id' => $this->lead_id
+            'model_id' => $this->lead_id,
         ]);
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public static function deleteAllAssigneeRelatedToDeletedStaff($event)
+    {
+        /** @var Staff $staff */
+        $staff = $event->sender;
+
+        $models = LeadAssignee::find()
+            ->andWhere([
+                'OR',
+                ['assignor_id' => $staff->id],
+                ['assignee_id' => $staff->id],
+            ])
+            ->all();
+
+        foreach ($models AS $model) {
+            if (!$model->delete()) {
+                throw new Exception('Failed to delete related assignee');
+            }
+        }
     }
 
 }

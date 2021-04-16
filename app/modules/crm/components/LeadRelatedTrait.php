@@ -1,6 +1,7 @@
 <?php namespace modules\crm\components;
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
+use modules\core\db\ActiveRecord;
 use modules\crm\models\Lead;
 use Yii;
 use yii\helpers\Html;
@@ -27,7 +28,7 @@ trait LeadRelatedTrait
     {
         $model = Lead::find()->andWhere(['id' => $id])->one();
 
-        
+
         return $model;
     }
 
@@ -42,14 +43,15 @@ trait LeadRelatedTrait
     }
 
     /**
-     * @param Lead $model
+     * @param Lead         $model
+     * @param ActiveRecord $relatedModel
      *
      * @inheritDoc
      */
-    public function validate($model, $lead)
+    public function validate($model, $relatedModel)
     {
         if (!$model) {
-            $lead->addError('model_id', Yii::t('app', '{object} you are looking for doesn\'t exists', [
+            $relatedModel->addError('model_id', Yii::t('app', '{object} you are looking for doesn\'t exists', [
                 'object' => Yii::t('app', 'Lead'),
             ]));
         }

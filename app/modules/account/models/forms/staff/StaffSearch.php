@@ -122,9 +122,13 @@ class StaffSearch extends Staff implements SearchableModel
             'class' => Select2Data::class,
             'dataProvider' => $this->dataProvider,
             'id' => 'id',
-            'label' => 'name',
+            'label' => 'account.username',
             'attributes' => [
                 'email' => 'account.email',
+                'name' => 'name',
+                'avatar' => function($model){
+                    return $model->account->getFileVersionUrl('avatar');
+                }
             ],
         ]);
 

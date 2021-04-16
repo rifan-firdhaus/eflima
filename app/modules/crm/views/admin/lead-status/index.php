@@ -2,12 +2,12 @@
 
 use modules\account\web\admin\View;
 use modules\core\components\SettingRenderer;
-use modules\crm\models\forms\lead_status\LeadStatusSearch;
+use modules\crm\models\forms\lead_status\ProposalStatusSearch;
 
 /**
- * @var View             $this
- * @var LeadStatusSearch $searchModel
- * @var SettingRenderer  $renderer
+ * @var View                 $this
+ * @var ProposalStatusSearch $searchModel
+ * @var SettingRenderer      $renderer
  */
 
 $this->menu->active = "setting/crm";

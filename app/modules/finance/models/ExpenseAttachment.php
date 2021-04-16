@@ -17,6 +17,7 @@ use Yii;
  * @property int     $id         [int(10) unsigned]
  * @property int     $expense_id [int(11) unsigned]
  * @property string  $file
+ * @property int     $uploaded_at [int(11) unsigned]
  */
 class ExpenseAttachment extends ActiveRecord
 {

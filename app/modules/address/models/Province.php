@@ -7,7 +7,10 @@ use modules\core\behaviors\AttributeTypecastBehavior;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\core\models\traits\VisibilityModel;
+use Throwable;
 use Yii;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -117,6 +120,29 @@ class Province extends ActiveRecord
         ];
 
         return $behaviors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        $this->deleteRelations();
+    }
+
+    /**
+     * @throws Exception
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
+    public function deleteRelations(){
+        foreach($this->cities AS $city){
+            if(!$city->delete()){
+                throw new Exception('Failed to delete related city');
+            }
+        }
     }
 
     /**

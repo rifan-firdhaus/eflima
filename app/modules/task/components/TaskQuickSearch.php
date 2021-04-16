@@ -31,6 +31,14 @@ class TaskQuickSearch extends QuickSearch
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.task.list');
+    }
+
+    /**
      * @param $q
      *
      * @return BaseDataProvider

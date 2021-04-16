@@ -1,11 +1,14 @@
 <?php
 
 
+use modules\account\models\StaffAccount;
 use modules\account\web\admin\View;
 use modules\account\widgets\inputs\StaffInput;
+use modules\task\assets\admin\TaskDataViewAsset;
 use modules\task\models\forms\task\TaskSearch;
 use modules\task\widgets\inputs\TaskPriorityInput;
 use modules\task\widgets\inputs\TaskStatusInput;
+use modules\ui\widgets\ButtonDropdown;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
@@ -18,10 +21,12 @@ use yii\helpers\Html;
 
 
 /**
- * @var View       $this
- * @var TaskSearch $searchModel
- * @var array      $dataViewOptions
+ * @var View         $this
+ * @var TaskSearch   $searchModel
+ * @var array        $dataViewOptions
  */
+
+$account = Yii::$app->user->identity;
 
 if (!isset($dataViewOptions)) {
     $dataViewOptions = [];
@@ -60,6 +65,9 @@ $dataView = DataView::begin(ArrayHelper::merge([
         [
             'class' => CardField::class,
             'fields' => [
+                [
+                    'attribute' => 'q',
+                ],
                 [
                     'attribute' => 'status_id',
                     'type' => ActiveField::TYPE_WIDGET,
@@ -225,7 +233,7 @@ $dataView->searchFields[] = [
                 'assigned_to_me' => $searchModel->assigned_to_me ? 0 : 1,
             ],
         ]),
-        'label' => Html::tag('span',Yii::t('app', 'Only Assigned to Me'),['class' => 'btn-label']),
+        'label' => Html::tag('span', Yii::t('app', 'Only Assigned to Me'), ['class' => 'btn-label']),
         'class' => 'btn btn-icon-sm btn-outline-primary mr-2 ' . ($searchModel->assigned_to_me ? 'active' : null),
         'icon' => 'i8:apply',
     ]),
@@ -245,10 +253,10 @@ $dataView->beginHeader();
 
 echo Html::beginTag('div', [
     'id' => 'task-data-view-actions',
-    'class' => ' flex-shrink-0'
+    'class' => ' flex-shrink-0',
 ]);
 
-if ($addUrl !== false) {
+if ($addUrl !== false && Yii::$app->user->can('admin.task.add')) {
     echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
         'class' => 'btn btn-primary',
         'data-lazy-modal' => 'task-form-modal',
@@ -256,9 +264,79 @@ if ($addUrl !== false) {
     ]);
 }
 
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Icon::show('i8:hammer',['class' => 'icon mr-2']).Yii::t('app', 'Set Status'),
+                'encode' => false,
+                'url' => ['/task/admin/task/bulk-set-status'],
+                'linkOptions' => [
+                    'class' => 'bulk-set-status',
+                    'data-lazy-modal' => 'task-bulk-set-status-form-modal',
+                    'data-lazy-modal-size' => 'modal-sm',
+                    'data-lazy-container' => '#main-container',
+                    'data-lazy-options' => ['method' => 'POST'],
+                ],
+            ],
+            [
+                'label' => Icon::show('i8:sorting',['class' => 'icon mr-2']).Yii::t('app', 'Set Priority'),
+                'encode' => false,
+                'url' => ['/task/admin/task/bulk-set-priority'],
+                'linkOptions' => [
+                    'class' => 'bulk-set-priority',
+                    'data-lazy-modal' => 'task-bulk-set-priority-form-modal',
+                    'data-lazy-modal-size' => 'modal-sm',
+                    'data-lazy-container' => '#main-container',
+                    'data-lazy-options' => ['method' => 'POST'],
+                ],
+            ],
+            [
+                'label' => Icon::show('i8:link',['class' => 'icon mr-2']).Yii::t('app', 'Reassign'),
+                'encode' => false,
+                'url' => ['/task/admin/task/bulk-reassign'],
+                'linkOptions' => [
+                    'class' => 'bulk-reassign',
+                    'data-lazy-modal' => 'task-bulk-reassign-form-modal',
+                    'data-lazy-modal-size' => 'modal-md',
+                    'data-lazy-container' => '#main-container',
+                    'data-lazy-options' => ['method' => 'POST'],
+                ],
+            ],
+            '-',
+            [
+                'label' => Icon::show('i8:trash',['class' => 'icon mr-2']).Yii::t('app', 'Delete'),
+                'encode' => false,
+                'url' => ['/task/admin/task/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Task'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
+    ],
+]);
+
 echo Html::endTag('div');
 
 $dataView->endHeader();
+
+TaskDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').taskDataView()");
 
 DataView::end();
 

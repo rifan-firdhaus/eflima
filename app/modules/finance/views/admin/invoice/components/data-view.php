@@ -4,8 +4,10 @@
 use modules\account\web\admin\View;
 use modules\core\validators\DateValidator;
 use modules\crm\widgets\inputs\CustomerInput;
+use modules\finance\assets\admin\InvoiceDataViewAsset;
 use modules\finance\models\forms\invoice\InvoiceSearch;
 use modules\finance\widgets\inputs\CurrencyInput;
+use modules\ui\widgets\ButtonDropdown;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
@@ -318,7 +320,7 @@ echo $this->render('data-table', compact('dataProvider', 'searchModel'));
 
 $dataView->beginHeader();
 
-if ($addUrl !== false) {
+if ($addUrl !== false && Yii::$app->user->can('admin.invoice.add')) {
     echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
         'class' => 'btn btn-primary',
         'data-lazy-modal' => 'invoice-form-modal',
@@ -326,9 +328,53 @@ if ($addUrl !== false) {
     ]);
 }
 
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Icon::show('i8:download', ['class' => 'icon mr-2']) . Yii::t('app', 'Download'),
+                'encode' => false,
+                'url' => ['/finance/admin/invoice/bulk-download'],
+                'linkOptions' => [
+                    'class' => 'bulk-download',
+                    'title' => Yii::t('app', 'Bulk Download'),
+                    'data-lazy' => 0,
+                ],
+            ],
+            '-',
+            [
+                'label' => Icon::show('i8:trash', ['class' => 'icon mr-2']) . Yii::t('app', 'Delete'),
+                'encode' => false,
+                'url' => ['/finance/admin/invoice/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Invoices'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
+    ],
+]);
+
 $dataView->endHeader();
 
 echo $this->block('@data-view:end');
+
+InvoiceDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').invoiceDataView()");
 
 DataView::end();
 

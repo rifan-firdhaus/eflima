@@ -18,6 +18,7 @@ use yii\web\JsExpression;
  */
 class StaffAccount extends Account
 {
+    public $role;
 
     /**
      * @inheritdoc
@@ -40,7 +41,7 @@ class StaffAccount extends Account
 
         return [
             [
-                ['username', 'email'],
+                ['username', 'email', 'role'],
                 'required',
                 'on' => ['admin/add', 'admin/update'],
             ],
@@ -211,6 +212,18 @@ class StaffAccount extends Account
                 'description' => "{$historyAction} staff - {username}",
                 'tag' => $historyEvent,
             ]);
+        }
+
+        $authManager = Yii::$app->authManager;
+
+        if ($this->role) {
+            if ($authManager->getRolesByUser($this->id)) {
+                $authManager->revokeAll($this->id);
+            }
+
+            $role = $authManager->getRole($this->role);
+
+            $authManager->assign($role, $this->id);
         }
     }
 

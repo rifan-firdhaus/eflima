@@ -3,3 +3,32 @@
   width: 0px !important;
   overflow: hidden;
 }
+
+.task-progress-slider.irs--flat {
+  height: auto;
+
+  .irs-handle {
+    top: -6px;
+    width: 14px;
+    height: 16px;
+  }
+
+  .irs-bar,
+  .irs-line,
+  .irs-bar {
+    top: 0;
+    height: 4px;
+  }
+
+  .irs-from, .irs-to, .irs-single {
+    top: -24px;
+    transform: scale(0);
+    transition: 0.2s transform;
+  }
+
+  &:hover {
+    .irs-from, .irs-to, .irs-single {
+      transform: scale(1);
+    }
+  }
+}

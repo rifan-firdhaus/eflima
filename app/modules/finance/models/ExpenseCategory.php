@@ -9,6 +9,7 @@ use modules\core\db\ActiveRecord;
 use modules\core\models\traits\VisibilityModel;
 use modules\finance\models\queries\ExpenseCategoryQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -20,7 +21,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string    $name
  * @property string    $description
  * @property bool      $is_enabled [tinyint(1)]
+ * @property int       $creator_id [int(11) unsigned]
  * @property int       $created_at [int(11) unsigned]
+ * @property int       $updater_id [int(11) unsigned]
  * @property int       $updated_at [int(11) unsigned]
  */
 class ExpenseCategory extends ActiveRecord
@@ -69,6 +72,12 @@ class ExpenseCategory extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;

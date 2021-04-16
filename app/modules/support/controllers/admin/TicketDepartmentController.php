@@ -20,6 +20,48 @@ use yii\web\Response;
 class TicketDepartmentController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.ticket.ticket-department.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.ticket.ticket-department.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.ticket.ticket-department.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.ticket.ticket-department.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.ticket.ticket-department.visibility'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+    /**
      * @return array|string|Response
      *
      * @throws InvalidConfigException

@@ -16,9 +16,10 @@ body.quick-search-open {
 
 .quick-search-overlay {
   z-index: -1;
-  background: rgba(206, 212, 218, 0.8);
+  background: rgba(12, 23, 40, 0.8);
   opacity: 0;
-  transition: 0.3s; }
+  transition: 0.3s;
+  backdrop-filter: blur(4px); }
 
 .quick-search-input {
   font-size: 1.38rem;
@@ -62,7 +63,7 @@ body.quick-search-open {
 .quick-search-result-item {
   background: #FFF;
   padding: 1.15rem;
-  border-radius: 0.35rem;
+  border-radius: 0.575rem;
   margin-bottom: 1.15rem;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   width: 100%;
@@ -103,5 +104,19 @@ body.quick-search-open {
 
 .quick-search-container.quick-search-open .quick-search-close {
   transform: translateY(0); }
+
+.quick-search-model {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%; }
+  .quick-search-model > a {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    width: 50px;
+    justify-content: center; }
+  .quick-search-model > a > .icon {
+    font-size: 2rem; }
 
 /*# sourceMappingURL=quick-search.css.map */

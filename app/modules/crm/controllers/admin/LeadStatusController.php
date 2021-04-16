@@ -3,15 +3,21 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\web\admin\Controller;
+use modules\account\widgets\lazy\LazyResponse;
 use modules\core\components\SettingRenderer;
+use modules\crm\models\forms\lead\LeadSearch;
 use modules\crm\models\forms\lead_status\LeadStatusSearch;
+use modules\crm\models\Lead;
 use modules\crm\models\LeadStatus;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
+use yii\base\DynamicModel;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\db\StaleObjectException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
 
 /**
@@ -19,6 +25,61 @@ use yii\web\Response;
  */
 class LeadStatusController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.crm.lead-status.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.crm.lead-status.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.crm.lead-status.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.crm.lead-status.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.crm.lead-status.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['kanban','lead-list'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.lead.kanban'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['move-lead','sort-lead'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.lead.update'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @return array|string|Response
      *
@@ -49,6 +110,50 @@ class LeadStatusController extends Controller
 
         return $this->render('index', compact('searchModel', 'renderer'));
     }
+
+
+    /**
+     * @return string
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionKanban()
+    {
+        $statuses = LeadStatus::find()->enabled()->orderBy(['order' => SORT_ASC])->all();
+
+        return $this->render('kanban', compact('statuses'));
+    }
+
+    /**
+     * @param $id
+     *
+     * @return string
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionLeadList($id)
+    {
+        $searchModel = new LeadSearch([
+            'params' => [
+                'status_id' => $id,
+            ],
+        ]);
+
+        $searchModel->getQuery()->andWhere(['lead.status_id' => $id])
+            ->orderBy(['lead.order' => SORT_ASC]);
+
+        $searchModel->dataProvider->pagination->validatePage = false;
+
+        $searchModel->apply(Yii::$app->request->queryParams);
+
+        $searchModel->dataProvider->getModels();
+
+        LazyResponse::$lazyData['has_more_page'] = $searchModel->dataProvider->pagination->page + 1 < $searchModel->dataProvider->pagination->pageCount;
+        LazyResponse::$lazyData['page'] = $searchModel->dataProvider->pagination->page + 1;
+
+        return $this->renderPartial('lead-list', compact('searchModel'));
+    }
+
 
     /**
      * @param LeadStatus $model
@@ -216,6 +321,156 @@ class LeadStatusController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
+    public function actionSort()
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (LeadStatus::sort(Yii::$app->request->post('sort'))) {
+            return [
+                'success' => true,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'messages' => [
+                'danger' => [
+                    Yii::t('app', 'Failed to sort {object}', [
+                        'object' => Yii::t('app', 'Status'),
+                    ]),
+                ],
+            ],
+        ];
+    }
+
+
+    /**
+     * @param $id
+     *
+     * @return array|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
+    public function actionSortLead($id)
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        $model = $this->getModel($id);
+
+        if (!$model instanceof LeadStatus) {
+            return $model;
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $validator = new DynamicModel([
+            'sort' => Yii::$app->request->post('sort'),
+        ]);
+
+        $validator->addRule('sort', 'required')->addRule('sort', 'exist', [
+            'allowArray' => true,
+            'targetAttribute' => 'id',
+            'targetClass' => Lead::class,
+        ]);
+
+        if ($validator->validate() && $model->sortTask($validator->sort)) {
+            return [
+                'success' => true,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'messages' => [
+                'danger' => [
+                    Yii::t('app', 'Failed to sort {object}', [
+                        'object' => Yii::t('app', 'Lead'),
+                    ]),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
+    public function actionMoveLead($id)
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        $model = $this->getModel($id);
+
+        if (!$model instanceof LeadStatus) {
+            return $model;
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $validator = new DynamicModel([
+            'sort' => Yii::$app->request->post('sort'),
+            'status_id' => Yii::$app->request->post('status_id'),
+            'lead_id' => Yii::$app->request->post('lead_id'),
+        ]);
+
+        $validator->addRule(['sort', 'status_id', 'lead_id'], 'required')
+            ->addRule('sort', 'exist', [
+                'allowArray' => true,
+                'targetAttribute' => 'id',
+                'targetClass' => Lead::class,
+            ])
+            ->addRule('lead_id', 'exist', [
+                'targetAttribute' => ['lead_id' => 'id'],
+                'targetClass' => Lead::class,
+            ])
+            ->addRule('status_id', 'exist', [
+                'targetAttribute' => ['status_id' => 'id'],
+                'targetClass' => LeadStatus::class,
+            ]);
+
+        if ($validator->validate() && $model->moveTask($validator->lead_id, $validator->status_id, $validator->sort)) {
+            return [
+                'success' => true,
+            ];
+        }
+
+        return [
+            'success' => false,
+            'messages' => [
+                'danger' => [
+                    Yii::t('app', 'Failed to move {object}', [
+                        'object' => Yii::t('app', 'Lead'),
+                    ]),
+                ],
+            ],
+        ];
     }
 
 }

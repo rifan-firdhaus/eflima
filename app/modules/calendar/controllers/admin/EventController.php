@@ -3,12 +3,10 @@
 // "Keep the essence of your id, id isn't just a id, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\models\forms\staff\StaffSearch;
-use modules\account\models\Staff;
 use modules\account\web\admin\Controller;
 use modules\calendar\components\EventRelation;
 use modules\calendar\models\Event;
 use modules\calendar\models\forms\event\EventSearch;
-use modules\task\models\Task;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -24,6 +22,64 @@ use yii\web\Response;
  */
 class EventController extends Controller
 {
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.event.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.event.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.event.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['model-input'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.event.update', 'admin.event.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.event.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['view'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.event.view'],
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'staff-invitable-auto-complete',
+                    'auto-complete',
+                ],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * @param string $view
@@ -55,6 +111,8 @@ class EventController extends Controller
 
             return $searchModel->fullCalendar($params);
         }
+
+        $searchModel->getQuery()->with(['members']);
 
         $searchModel->apply($params);
 
@@ -246,6 +304,36 @@ class EventController extends Controller
         } else {
             Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to delete {object}', [
                 'object' => Yii::t('app', 'Event'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Event::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Event'),
+            ]));
+        }
+
+        if (Event::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Events'),
             ]));
         }
 

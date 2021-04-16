@@ -12,11 +12,52 @@ use function compact;
  */
 class RoleController extends Controller
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.staff.role.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.staff.role.add'],
+                'matchCallback' => function () {
+                    return (bool) (int) Yii::$app->request->post('is_new', true);
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.staff.role.update'],
+                'matchCallback' => function () {
+                    return !((bool) (int) Yii::$app->request->post('is_new', true));
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.staff.role.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     public function actionIndex()
     {
         $tree = Role::tree();
+        $permissionTree = Role::tree();
 
-        return $this->render('index', compact('tree'));
+        return $this->render('index', compact('tree', 'permissionTree'));
     }
 
     public function actionUpdate()

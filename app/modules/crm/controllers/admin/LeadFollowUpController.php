@@ -17,6 +17,36 @@ use yii\web\Response;
  */
 class LeadFollowUpController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.lead.follow-up.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.lead.follow-up.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.lead.follow-up.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * @param int|string $id

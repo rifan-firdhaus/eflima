@@ -20,6 +20,49 @@ use yii\web\Response;
 class TicketStatusController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.ticket.ticket-status.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.ticket.ticket-status.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.ticket.ticket-status.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.ticket.ticket-status.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.ticket.ticket-status.visibility'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
      */
     public function actionIndex()

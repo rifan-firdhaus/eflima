@@ -2,10 +2,13 @@
 
 namespace modules\task\models\query;
 
+use modules\account\models\Staff;
 use modules\core\db\ActiveQuery;
 use modules\task\models\Task;
+use modules\task\models\TaskAssignee;
 use modules\task\models\TaskTimer;
-use function time;
+use yii\base\InvalidConfigException;
+use yii\db\Expression;
 
 /**
  * This is the ActiveQuery class for [[\modules\task\models\Task]].
@@ -65,5 +68,42 @@ class TaskQuery extends ActiveQuery
 
             ],
         ])->andWhere(['IS NOT', "task_timer.started_at", null]);
+    }
+
+    /**
+     * @param Staff $staff
+     *
+     * @return $this
+     *
+     * @throws InvalidConfigException
+     */
+    public function visibleToStaff($staff)
+    {
+        $assigneeQuery = TaskAssignee::find()
+            ->joinWith('assignee')
+            ->select('assignee_id')
+            ->andWhere(new Expression("task_assignee.task_id=task.id"))
+            ->createCommand()
+            ->rawSql;
+
+        $this->andWhere([
+            'OR',
+            ['task.visibility' => Task::VISIBILITY_PUBLIC],
+            [
+                'task.visibility' => Task::VISIBILITY_PRIVATE,
+                'task.creator_id' => $staff->account->id,
+            ],
+            [
+                'AND',
+                ['task.visibility' => [Task::VISIBILITY_INVOLVED]],
+                [
+                    'OR',
+                    ['task.creator_id' => $staff->account->id],
+                    new Expression("'{$staff->id}' IN ($assigneeQuery)"),
+                ],
+            ],
+        ]);
+
+        return $this;
     }
 }

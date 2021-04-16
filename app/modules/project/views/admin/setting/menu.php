@@ -20,10 +20,12 @@ echo Menu::widget([
         'project-setting' => [
             'label' => Yii::t('app', 'General'),
             'url' => ['/core/admin/setting/index', 'section' => 'project'],
+            'visible' => Yii::$app->user->can('admin.setting.project.general')
         ],
         'project-status' => [
             'label' => Yii::t('app', 'Status'),
             'url' => ['/project/admin/project-status/index'],
+            'visible' => Yii::$app->user->can('admin.setting.project.project-status.list')
         ],
     ],
     'options' => [

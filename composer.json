@@ -46,7 +46,9 @@
     "npm-asset/masonry-layout": "^4.2",
     "pusher/pusher-php-server": "^3.4",
     "npm-asset/sortablejs": "^1.9",
-    "mpdf/mpdf": "^8.0"
+    "mpdf/mpdf": "^8.0",
+    "npm-asset/packery": "^2.1",
+    "npm-asset/draggabilly": "^2.3"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "^2.0.0",

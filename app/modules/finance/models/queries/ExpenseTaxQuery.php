@@ -2,6 +2,7 @@
 
 namespace modules\finance\models\queries;
 
+use modules\core\db\ActiveQuery;
 use modules\finance\models\ExpenseTax;
 
 /**
@@ -9,7 +10,7 @@ use modules\finance\models\ExpenseTax;
  *
  * @see \modules\finance\models\ExpenseTax
  */
-class ExpenseTaxQuery extends \modules\core\db\ActiveQuery
+class ExpenseTaxQuery extends ActiveQuery
 {
     /**
      * @inheritdoc

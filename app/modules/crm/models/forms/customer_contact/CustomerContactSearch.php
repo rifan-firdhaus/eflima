@@ -24,9 +24,6 @@ class CustomerContactSearch extends CustomerContact implements SearchableModel
 {
     use SearchableModelTrait;
 
-    /** @var Customer */
-    public $currentCustomer;
-
     public $q;
 
     public function rules()
@@ -102,8 +99,8 @@ class CustomerContactSearch extends CustomerContact implements SearchableModel
 
         $this->_query = CustomerContact::find();
 
-        if (isset($this->currentCustomer)) {
-            $this->_query->andWhere(['customer_contact.customer_id' => $this->currentCustomer->id]);
+        if (isset($this->params['customer_id'])) {
+            $this->_query->andWhere(['customer_contact.customer_id' => $this->params['customer_id']]);
         }
 
         $this->trigger(self::EVENT_QUERY, new SearchableModelEvent([

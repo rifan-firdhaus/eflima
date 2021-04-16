@@ -2,11 +2,17 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use app\modules\account\web\admin\Application as AdminApplication;
+use modules\account\models\Staff;
 use modules\core\components\HookTrait;
 use modules\core\components\SettingRenderer;
+use modules\task\models\TaskAssignee;
+use Throwable;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
+use yii\base\ModelEvent;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
@@ -18,6 +24,8 @@ class Hook
     protected function __construct()
     {
         Event::on(SettingRenderer::class, SettingRenderer::EVENT_INIT, [$this, 'registerSetting']);
+
+        Event::on(Staff::class, Staff::EVENT_BEFORE_DELETE, [TaskAssignee::class, 'deleteAllAssigneeRelatedToDeletedStaff']);
 
         if (Yii::$app instanceof AdminApplication) {
             AdminHook::instance();

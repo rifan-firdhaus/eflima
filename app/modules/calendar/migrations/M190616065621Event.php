@@ -2,6 +2,8 @@
 
 namespace modules\calendar\migrations;
 
+use modules\account\rbac\DbManager;
+use Yii;
 use yii\db\Migration;
 
 /**
@@ -29,7 +31,10 @@ class M190616065621Event extends Migration
             'location' => $this->text()->null(),
             'start_date' => $this->integer()->unsigned()->null(),
             'end_date' => $this->integer()->unsigned()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
+            'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
         $this->createTable('{{%event_member}}', [
@@ -38,6 +43,20 @@ class M190616065621Event extends Migration
             'staff_id' => $this->integer()->unsigned()->notNull(),
             'created_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
+
+        $this->addForeignKey(
+            'creator_of_event',
+            '{{%event}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_event',
+            '{{%event}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
 
         $this->addForeignKey(
             'event_of_member',
@@ -54,6 +73,48 @@ class M190616065621Event extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        $time = time();
+        $this->beginCommand('Register permissions');
+
+        if (!$auth->installPermissions($this->permissions())) {
+            return false;
+        }
+
+        $this->endCommand($time);
+    }
+
+    public function permissions()
+    {
+        return [
+            'admin.event' => [
+                'parent' => 'admin.root',
+                'description' => 'Manage Event'
+            ],
+            'admin.event.list' => [
+                'parent' => 'admin.event',
+                'description' => 'List of Event'
+            ],
+            'admin.event.add' => [
+                'parent' => 'admin.event',
+                'description' => 'Add Event'
+            ],
+            'admin.event.update' => [
+                'parent' => 'admin.event',
+                'description' => 'Update Event'
+            ],
+            'admin.event.view' => [
+                'parent' => 'admin.event',
+                'description' => 'View Event Details'
+            ],
+            'admin.event.delete' => [
+                'parent' => 'admin.event',
+                'description' => 'Delete Event'
+            ],
+        ];
     }
 
     /**
@@ -61,10 +122,20 @@ class M190616065621Event extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('event_of_member','{{%event_member}}');
-        $this->dropForeignKey('staff_of_member','{{%event_member}}');
+        $this->dropForeignKey('updater_of_event', '{{%event}}');
+        $this->dropForeignKey('creator_of_event', '{{%event}}');
+
+        $this->dropForeignKey('event_of_member', '{{%event_member}}');
+        $this->dropForeignKey('staff_of_member', '{{%event_member}}');
 
         $this->dropTable('{{%event}}');
         $this->dropTable('{{%event_member}}');
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        if (!$auth->uninstallPermissions($this->permissions())) {
+            return false;
+        }
     }
 }

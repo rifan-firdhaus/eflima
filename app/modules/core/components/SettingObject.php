@@ -19,6 +19,19 @@ use yii\base\InvalidConfigException;
  */
 class SettingObject extends BaseSettingObject
 {
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        switch ($this->renderer->section) {
+            case 'general':
+                $this->initGeneralSection();
+                break;
+        }
+    }
+
     /**
      * @inheritdoc
      */
@@ -292,18 +305,6 @@ class SettingObject extends BaseSettingObject
             'php:H:i' => Yii::t('app', '24 Hours System'),
             'php:h:i A' => Yii::t('app', '12 Hours System'),
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        switch ($this->renderer->section) {
-            case 'general':
-                $this->initGeneralSection();
-                break;
-        }
     }
 
     /**

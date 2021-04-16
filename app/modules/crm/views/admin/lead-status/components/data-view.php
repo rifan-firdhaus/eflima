@@ -2,7 +2,7 @@
 
 
 use modules\account\web\admin\View;
-use modules\crm\models\forms\lead_status\LeadStatusSearch;
+use modules\crm\models\forms\lead_status\ProposalStatusSearch;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\Icon;
 use yii\helpers\ArrayHelper;
@@ -10,9 +10,9 @@ use yii\helpers\Html;
 
 
 /**
- * @var View             $this
- * @var LeadStatusSearch $searchModel
- * @var array            $dataViewOptions
+ * @var View                 $this
+ * @var ProposalStatusSearch $searchModel
+ * @var array                $dataViewOptions
  */
 
 $dataProvider = $searchModel->dataProvider;
@@ -47,15 +47,17 @@ echo $this->render('data-table', compact('dataProvider'));
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/lead-status/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'lead-status-form-modal',
-    'data-lazy-modal-size' => 'modal-md',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.setting.crm.lead-status.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/lead-status/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'lead-status-form-modal',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

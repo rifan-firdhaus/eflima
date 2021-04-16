@@ -2,7 +2,6 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
-use Faker\Factory;
 use modules\account\models\forms\history\HistorySearch;
 use modules\account\models\forms\staff\StaffSearch;
 use modules\account\models\Staff;
@@ -11,6 +10,9 @@ use modules\account\web\admin\Controller;
 use modules\account\widgets\lazy\LazyResponse;
 use modules\file_manager\web\UploadedFile;
 use modules\task\components\TaskRelation;
+use modules\task\models\forms\task\TaskBulkReassign;
+use modules\task\models\forms\task\TaskBulkSetPriority;
+use modules\task\models\forms\task\TaskBulkSetStatus;
 use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\forms\task_interaction\TaskInteractionSearch;
 use modules\task\models\forms\task_timer\TaskTimerSearch;
@@ -19,13 +21,11 @@ use modules\task\models\Task;
 use modules\task\models\TaskChecklist;
 use modules\task\models\TaskFollower;
 use modules\task\models\TaskInteraction;
-use modules\task\models\TaskPriority;
-use modules\task\models\TaskStatus;
-use modules\task\models\TaskTimer;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
+use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -37,6 +37,130 @@ use yii\web\Response;
  */
 class TaskController extends Controller
 {
+    public $viewMenu = [
+        'detail' => [
+            'route' => ['/task/admin/task/detail'],
+            'role' => 'admin.task.view.detail',
+        ],
+        'timer' => [
+            'route' => ['/task/admin/task/timer'],
+            'role' => 'admin.task.view.timer',
+        ],
+        'history' => [
+            'route' => ['/task/admin/task/history'],
+            'role' => 'admin.task.view.history',
+        ],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.task.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.task.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['all-history'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.task.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['model-input'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.update', 'admin.task.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['detail'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['timer'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.view.timer'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.task.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update-progress'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change-status', 'bulk-set-status'],
+                'verbs' => ['PATCH', 'POST'],
+                'roles' => ['admin.task.status'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change-priority', 'bulk-set-priority'],
+                'verbs' => ['PATCH', 'POST'],
+                'roles' => ['admin.task.priority'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['assign', 'unassign', 'bulk-reassign'],
+                'verbs' => ['PATCH', 'POST'],
+                'roles' => ['admin.task.assignee'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['toggle-timer'],
+                'verbs' => ['PATCH', 'POST'],
+                'roles' => ['admin.task.timer.toggle'],
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'auto-complete',
+                    'staff-assignable-auto-complete',
+                    'active-timers',
+                    'model-input',
+                    'view',
+                ],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @return array|string|Response
      * @throws InvalidConfigException
@@ -45,8 +169,12 @@ class TaskController extends Controller
     {
         $params = Yii::$app->request->queryParams;
 
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+
         $searchModel = new TaskSearch([
             'scenario' => 'admin/search',
+            'currentStaff' => $account->profile,
         ]);
 
         $searchModel->getQuery()->with(['assignees', 'status', 'priority']);
@@ -67,7 +195,7 @@ class TaskController extends Controller
     /**
      * @return string
      */
-    public function actionHistory()
+    public function actionAllHistory()
     {
         $searchModel = new HistorySearch([
             'params' => [
@@ -132,6 +260,8 @@ class TaskController extends Controller
      */
     public function actionUpdate($id)
     {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
         $model = $this->getModel($id, Task::class);
 
         if (!($model instanceof Task)) {
@@ -140,6 +270,7 @@ class TaskController extends Controller
 
         $model->scenario = 'admin/update';
         $model->assignee_ids = $model->getAssigneesRelationship()->select('assignees_of_task.assignee_id')->createCommand()->queryColumn();
+        $model->assignor_id = $account->profile->id;
 
         return $this->modify($model, Yii::$app->request->post());
     }
@@ -162,6 +293,8 @@ class TaskController extends Controller
         $model = new Task([
             'scenario' => 'admin/add',
             'creator_id' => $account->profile->id,
+            'assignor_id' => $account->profile->id,
+            'staff' => $account->profile,
             'model' => $model,
             'model_id' => $model_id,
         ]);
@@ -191,13 +324,20 @@ class TaskController extends Controller
      */
     public function getModel($id, $modelClass = Task::class, $queryFilter = null)
     {
-        $query = $modelClass::find()->andWhere(['id' => $id]);
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+
+        /** @var TaskQuery $query */
+        $query = $modelClass::find();
+
+        $query->andWhere(['id' => $id])->visibleToStaff($account->profile);
 
         if ($queryFilter instanceof Closure) {
             call_user_func($queryFilter, $query, $id, $modelClass);
         }
 
         $model = $query->one();
+        $model->staff = $account->profile;
 
         if (!$model) {
             return $this->notFound(Yii::t('app', '{object} you are looking for doesn\'t exists', [
@@ -245,13 +385,209 @@ class TaskController extends Controller
     }
 
     /**
-     * @param int|string $id
-     * @param string     $action
-     *
      * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Task::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Task'),
+            ]));
+        }
+
+        if (Task::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Tasks'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+    /**
+     * @return array|string|void|Response
+     * @throws Throwable
+     */
+    public function actionBulkSetStatus()
+    {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+        $ids = (array) Yii::$app->request->post('id', []);
+        $model = new TaskBulkSetStatus([
+            'ids' => $ids,
+            'staff' => $account->profile,
+        ]);
+        $data = Yii::$app->request->post();
+
+        if ($model->load($data)) {
+            if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return Form::validate($model);
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully updated', [
+                    'number' => count($model->ids),
+                    'object' => Yii::t('app', 'Tasks'),
+                ]));
+
+                if (Lazy::isLazyModalRequest() || Lazy::isLazyInsideModalRequest()) {
+                    Lazy::close();
+
+                    return;
+                }
+
+                return $this->redirect(['index']);
+            } elseif ($model->hasErrors()) {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Some of the information you entered is invalid'));
+            } else {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to update {object}', [
+                    'object' => Yii::t('app', 'Task'),
+                ]));
+            }
+        }
+
+        return $this->render('bulk-set-status', compact('model'));
+    }
+
+    /**
+     * @return array|string|void|Response
+     * @throws Throwable
+     */
+    public function actionBulkSetPriority()
+    {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+        $ids = (array) Yii::$app->request->post('id', []);
+        $model = new TaskBulkSetPriority([
+            'ids' => $ids,
+            'staff' => $account->profile,
+        ]);
+        $data = Yii::$app->request->post();
+
+        if ($model->load($data)) {
+            if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return Form::validate($model);
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully updated', [
+                    'number' => count($model->ids),
+                    'object' => Yii::t('app', 'Tasks'),
+                ]));
+
+                if (Lazy::isLazyModalRequest() || Lazy::isLazyInsideModalRequest()) {
+                    Lazy::close();
+
+                    return;
+                }
+
+                return $this->redirect(['index']);
+            } elseif ($model->hasErrors()) {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Some of the information you entered is invalid'));
+            } else {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to update {object}', [
+                    'object' => Yii::t('app', 'Task'),
+                ]));
+            }
+        }
+
+        return $this->render('bulk-set-priority', compact('model'));
+    }
+
+    /**
+     * @return array|string|void|Response
+     * @throws Throwable
+     */
+    public function actionBulkReassign()
+    {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+        $ids = (array) Yii::$app->request->post('id', []);
+        $model = new TaskBulkReassign([
+            'ids' => $ids,
+            'staff' => $account->profile,
+        ]);
+        $data = Yii::$app->request->post();
+
+        if ($model->load($data)) {
+            if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return Form::validate($model);
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully updated', [
+                    'number' => count($model->ids),
+                    'object' => Yii::t('app', 'Tasks'),
+                ]));
+
+                if (Lazy::isLazyModalRequest() || Lazy::isLazyInsideModalRequest()) {
+                    Lazy::close();
+
+                    return;
+                }
+
+                return $this->redirect(['index']);
+            } elseif ($model->hasErrors()) {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Some of the information you entered is invalid'));
+            } else {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to update {object}', [
+                    'object' => Yii::t('app', 'Task'),
+                ]));
+            }
+        }
+
+        return $this->render('bulk-reassign', compact('model'));
+    }
+
+    /**
+     * @param int|string $id
+     *
+     * @return Response
+     */
+    public function actionView($id)
+    {
+        foreach ($this->viewMenu AS $item) {
+            if (!Yii::$app->user->can($item['role'])) {
+                continue;
+            }
+
+            $route = $item['route'];
+
+            if (is_callable($route)) {
+                call_user_func($route, $id);
+            } else {
+                $route['id'] = $id;
+            }
+
+
+            return $this->redirect($route);
+        }
+
+        return $this->redirect(['/']);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return Task|string|Response
      * @throws InvalidConfigException
      */
-    public function actionView($id, $action = 'view')
+    public function actionDetail($id)
     {
         $model = $this->getModel($id, Task::class, function ($query) {
             /** @var TaskQuery $query */
@@ -260,13 +596,6 @@ class TaskController extends Controller
 
         if (!($model instanceof Task)) {
             return $model;
-        }
-
-        switch ($action) {
-            case 'history':
-                return $this->history($model);
-            case 'timer':
-                return $this->timer($model);
         }
 
         /** @var StaffAccount $account */
@@ -283,9 +612,9 @@ class TaskController extends Controller
 
         $interactionSearchModel->getQuery()->with([
             'status',
-            'attachments'
+            'attachments',
         ]);
-    
+
         $interactionSearchModel->getQuery()->andWhere(['task_interaction.task_id' => $model->id]);
 
         $interactionSearchModel->apply(Yii::$app->request->queryParams);
@@ -296,12 +625,20 @@ class TaskController extends Controller
     }
 
     /**
-     * @param Task $model
+     * @param string|int $id
      *
-     * @return string
+     * @return string|Response
+     *
+     * @throws InvalidConfigException
      */
-    public function history($model)
+    public function actionHistory($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Task)) {
+            return $model;
+        }
+
         $historySearchModel = new HistorySearch([
             'params' => [
                 'model' => Task::class,
@@ -313,13 +650,20 @@ class TaskController extends Controller
     }
 
     /**
-     * @param Task $model
+     * @param string|int $id
      *
-     * @return string
+     * @return array|string|Response
+     *
      * @throws InvalidConfigException
      */
-    public function timer($model)
+    public function actionTimer($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Task)) {
+            return $model;
+        }
+
         $params = Yii::$app->request->queryParams;
         $timerSearchModel = new TaskTimerSearch([
             'currentTask' => $model,
@@ -451,13 +795,21 @@ class TaskController extends Controller
      * @return array|Task|string|Response
      *
      * @throws InvalidConfigException
+     *
+     * @throws Exception
      */
     public function actionAssign($id, $staff_id)
     {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
         $model = $this->getModel($id);
 
         if (!($model instanceof Task)) {
             return $model;
+        }
+
+        if ($model->visibility === Task::VISIBILITY_PRIVATE) {
+            throw new Exception('You can\'t assign other staff on private task');
         }
 
         $staff = Staff::find()->andWhere(['id' => $staff_id])->one();
@@ -468,7 +820,7 @@ class TaskController extends Controller
             ]));
         }
 
-        if ($model->assign($staff_id)) {
+        if ($model->assign($staff_id, $account->profile)) {
             Yii::$app->session->addFlash('success', Yii::t('app', 'Task assigned to {staff}', [
                 'staff' => $staff->name,
             ]));
@@ -479,12 +831,26 @@ class TaskController extends Controller
         return $this->goBack(['index']);
     }
 
+    /**
+     * @param $id
+     * @param $staff_id
+     *
+     * @return array|Task|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
     public function actionUnassign($id, $staff_id)
     {
         $model = $this->getModel($id);
 
         if (!($model instanceof Task)) {
             return $model;
+        }
+
+        if ($model->visibility === Task::VISIBILITY_PRIVATE) {
+            throw new Exception('You can\'t unassign staff on private task');
         }
 
         $staff = Staff::find()->andWhere(['id' => $staff_id])->one();
@@ -504,6 +870,58 @@ class TaskController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array|Response
+     * @throws InvalidConfigException
+     */
+    public function actionUpdateProgress($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Task)) {
+            return $model;
+        }
+
+        $progress = Yii::$app->request->post('progress');
+
+        $isValid = DynamicModel::validateData([
+            'progress' => $progress,
+        ], [
+            ['progress', 'required'],
+            ['progress', 'integer', 'min' => 0, 'max' => 100],
+        ]);
+
+        if (!$isValid || !$model->updateProgress($progress / 100)) {
+            return [
+                'success' => false,
+                'messages' => [
+                    'danger' => [
+                        Yii::t('app', 'Failed to {action} {object}', [
+                            'action' => Yii::t('app', 'Set'),
+                            'object' => Yii::t('app', 'Task\'s Progress'),
+                        ]),
+                    ],
+                ],
+            ];
+        }
+
+        return [
+            'success' => true,
+            'messages' => [
+                'success' => [
+                    Yii::t('app', 'Task\'s Progress "{object_name}" seccessfully set', [
+                        'action' => Yii::t('app', 'Set'),
+                        'object_name' => Yii::t('app', 'Task\'s Progress'),
+                    ]),
+                ],
+            ],
+        ];
     }
 
     /**
@@ -579,7 +997,8 @@ class TaskController extends Controller
      * @throws InvalidConfigException
      * @throws MethodNotAllowedHttpException
      */
-    public function actionStaffAssignableAutoComplete($id){
+    public function actionStaffAssignableAutoComplete($id)
+    {
 
         if (!Yii::$app->request->isAjax) {
             throw new MethodNotAllowedHttpException('This URL only serve ajax request');
@@ -591,7 +1010,7 @@ class TaskController extends Controller
 
         $model = $this->getModel($id);
 
-        if(!$model instanceof Task){
+        if (!$model instanceof Task) {
             return $model;
         }
 
@@ -601,7 +1020,7 @@ class TaskController extends Controller
             ->queryColumn();
 
         $searchModel->getQuery()
-            ->andWhere(['NOT IN','staff.id',$assigned]);
+            ->andWhere(['NOT IN', 'staff.id', $assigned]);
 
         return $searchModel->autoComplete(Yii::$app->request->queryParams);
     }
@@ -670,112 +1089,5 @@ class TaskController extends Controller
         return [
             'input' => $this->view->renderAjaxContent($relation->pickerInput($task, 'model_id')),
         ];
-    }
-
-    // TODO: Delete for producttion
-    public function actionGenerate($number = 1)
-    {
-        $faker = Factory::create();
-
-        /** @var StaffAccount $account */
-        $account = Yii::$app->user->identity;
-        $transaction = Yii::$app->db->beginTransaction();
-        $now = time();
-        $dateInputFormat = Yii::$app->setting->get('date_input_format') . ' ' . substr(Yii::$app->setting->get('time_input_format'), 4);
-
-        while ($number > 0) {
-            $startDate = $faker->boolean ? $now + rand(-20, 5) * (60 * 60 * 24) : $now + rand(-30, 30) * (60 * 60 * 24);
-            $deadlineDate = $startDate + (rand(1, 60) * (60 * 60 * 24));
-            $model = new Task([
-                'scenario' => 'admin/add',
-                'creator_id' => $account->profile->id,
-            ]);
-            $model->assignee_ids = Staff::find()->orderBy('RAND()')->limit(rand(1, 8))->select('id')->createCommand()->queryColumn();
-            $checklistNum = rand(0, 17);
-            $model->loadDefaultValues();
-            $model->load([
-                'title' => $faker->sentence(rand(2, 8)),
-                'description' => $faker->paragraph(rand(5, 15)),
-                'priority_id' => TaskPriority::find()->orderBy('RAND()')->one()->id,
-                'status_id' => TaskStatus::find()->orderBy('RAND()')->one()->id,
-                'started_date' => Yii::$app->formatter->asDate($startDate, $dateInputFormat),
-                'deadline_date' => Yii::$app->formatter->asDate($deadlineDate, $dateInputFormat),
-                'progress_calculation' => $faker->randomElement([Task::PROGRESS_CALCULATION_CHECKLIST, Task::PROGRESS_CALCULATION_OWN, Task::PROGRESS_CALCULATION_OWN]),
-
-            ], '');
-
-            for ($i = 0; $i <= $checklistNum; $i++) {
-                $model->checklists['__' . rand(1000, 20000)] = [
-                    'label' => $faker->sentence(rand(2, 8)),
-                    'is_checked' => $faker->boolean,
-                ];
-            }
-
-            if (!$model->save()) {
-                $transaction->rollBack();
-
-                return false;
-            }
-
-            if ($model->started_date <= time()) {
-                $rand = rand(0, 5);
-
-                while ($rand > 0) {
-                    $time = $model->started_date + rand(0, ($model->deadline_date < $now ? $model->deadline_date : $now) - $model->started_date);
-                    $timer = new TaskTimer([
-                        'scenario' => 'admin/add',
-                        'started_at' => $time,
-                        'task_id' => $model->id,
-                        'stopped_at' => $time + rand(10 * 60, 43200),
-                        'stopper_id' => Staff::find()->orderBy('RAND()')->select('id')->createCommand()->queryScalar(),
-                        'starter_id' => Staff::find()->orderBy('RAND()')->select('id')->createCommand()->queryScalar(),
-                    ]);
-                    $timer->loadDefaultValues();
-
-                    if (!$timer->save()) {
-                        $transaction->rollBack();
-
-                        return false;
-                    }
-
-                    $rand--;
-                }
-
-                $rand = rand(0, 20);
-
-                $taskInteractionStartDate = $model->started_date > $now ? ($now - rand(0, 432000)) : $model->started_date;
-
-                while ($rand > 0) {
-                    $progress = $faker->boolean && $faker->boolean && $model->progress_calculation == Task::PROGRESS_CALCULATION_OWN ? rand(20, 100) : null;
-                    $taskInteractionStartDate = $taskInteractionStartDate + rand(0, $now - $taskInteractionStartDate);
-
-                    $taskInteraction = new TaskInteraction([
-                        'scenario' => 'admin/add',
-                        'task_id' => $model->id,
-                        'staff_id' => Staff::find()->orderBy('RAND()')->select('id')->createCommand()->queryScalar(),
-                        'comment' => $faker->boolean ? $faker->sentence : $faker->paragraph(rand(1, 4)),
-                        'progress' => $progress,
-                        'status_id' => $faker->boolean ? TaskStatus::find()->orderBy("RAND()")->select('id')->createCommand()->queryScalar() : null,
-                        'at' => $taskInteractionStartDate,
-                    ]);
-
-                    $taskInteraction->comment = "<p>{$taskInteraction->comment}</p>";
-
-                    if (!$taskInteraction->save()) {
-                        $transaction->rollBack();
-
-                        return false;
-                    }
-
-                    $rand--;
-                }
-            }
-
-            $number--;
-        }
-
-        $transaction->commit();
-
-        return true;
     }
 }

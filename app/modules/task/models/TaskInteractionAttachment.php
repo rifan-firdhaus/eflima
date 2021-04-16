@@ -88,6 +88,6 @@ class TaskInteractionAttachment extends ActiveRecord
      */
     public function getInteraction()
     {
-        return $this->hasOne(TaskInteraction::class, ['id' => 'task_id'])->alias('interaction_of_attachment');
+        return $this->hasOne(TaskInteraction::class, ['id' => 'interaction_id'])->alias('interaction_of_attachment');
     }
 }

@@ -31,22 +31,24 @@ echo $this->block('@begin');
         'items' => [
             'detail' => [
                 'label' => Yii::t('app', 'Task'),
-                'url' => ['/task/admin/task/view', 'id' => $model->id],
+                'url' => ['/task/admin/task/detail', 'id' => $model->id],
                 'icon' => 'i8:checked',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.task.view.detail')
             ],
             'timer' => [
                 'label' => Yii::t('app', 'Timesheet'),
-                'url' => ['/task/admin/task/view', 'id' => $model->id, 'action' => 'timer'],
+                'url' => ['/task/admin/task/timer', 'id' => $model->id],
                 'icon' => 'i8:timer',
-                'visible' => $model->is_timer_enabled || $model->getTimers()->exists(),
+                'visible' => ($model->is_timer_enabled || $model->getTimers()->exists()) && Yii::$app->user->can('admin.task.view.timer'),
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
             ],
             'history' => [
                 'label' => Yii::t('app', 'History'),
-                'url' => ['/task/admin/task/view', 'id' => $model->id, 'action' => 'history'],
+                'url' => ['/task/admin/task/history', 'id' => $model->id],
                 'icon' => 'i8:activity-history',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.task.view.history')
             ],
         ],
         'options' => [

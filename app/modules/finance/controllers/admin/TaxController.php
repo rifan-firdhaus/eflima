@@ -20,6 +20,49 @@ use yii\web\Response;
 class TaxController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.finance.tax.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.finance.tax.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.finance.tax.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.finance.tax.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.finance.tax.visibility'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
      *
      * @throws InvalidConfigException

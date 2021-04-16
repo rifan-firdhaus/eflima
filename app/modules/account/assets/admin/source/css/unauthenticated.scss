@@ -40,6 +40,7 @@ html, body {
 
   .card-header-title {
     font-size: $font-size-lg * 1.2;
+    flex-direction: column;
 
     & > small {
       font-size: $font-size-sm;

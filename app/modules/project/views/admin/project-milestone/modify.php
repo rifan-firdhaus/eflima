@@ -21,30 +21,19 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:slider';
 $this->menu->active = 'main/project';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-project-milestone'] = Html::a(
-            '',
-            ['/project/admin/project-milestone/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-
-        $this->toolbar['add-project-milestone'] = Html::a(
-            Yii::t('app', 'Add'),
-            ['/project/admin/project-milestone/add', 'id' => $model->id],
-            [
-                'class' => 'btn btn-secondary',
-                'icon' => 'i8:plus',
-            ]
-        );
+if (!$model->isNewRecord && !Lazy::isLazyModalRequest()) {
+    if (Yii::$app->user->can('admin.project.view.milestone.delete')) {
+        $this->toolbar['delete-project-milestone'] = Html::a([
+            'url' => ['/project/admin/project-milestone/delete', 'id' => $model->id],
+            'class' => 'btn btn-outline-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->name),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE'],
+        ]);
     }
 }
 

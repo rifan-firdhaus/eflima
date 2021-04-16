@@ -14,13 +14,13 @@ echo Menu::widget([
         'class' => 'nav-item',
     ],
     'linkOptions' => [
-        'class' => 'nav-link',
+        'class' => 'nav-link side-panel-close',
     ],
     'subMenuOptions' => [
         'class' => 'nav',
     ],
     'options' => [
-        'class' => 'sidebar-nav nav flex-column menu',
+        'class' => 'sidebar-nav light nav flex-column menu',
     ],
 ]);
 echo $this->block('@end');

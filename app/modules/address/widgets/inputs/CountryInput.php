@@ -4,6 +4,7 @@
 use modules\address\assets\FlagIconAsset;
 use modules\address\models\Country;
 use modules\ui\widgets\inputs\Select2Input;
+use Yii;
 use yii\helpers\Url;
 use yii\web\JsExpression;
 use function array_keys;
@@ -58,7 +59,7 @@ class CountryInput extends Select2Input
                 if ($select2->multiple) {
                     is_array($value) || ($value = explode(',', $value));
 
-                    return Country::find()->andWhere(['code' => $value])->all();
+                    return Country::find()->andWhere(['code' => $value])->map('code','name');
                 }
 
                 $model = Country::find()->andWhere(['code' => $value])->one();

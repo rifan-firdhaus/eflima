@@ -27,6 +27,78 @@ use yii\web\Response;
 class TicketController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.ticket.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.ticket.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.ticket.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['view'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.ticket.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['task'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.ticket.view.task'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.ticket.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.ticket.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change-status'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.ticket.status'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change-priority'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.ticket.status'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+    /**
      * @param string $view
      *
      * @return array|string|Response

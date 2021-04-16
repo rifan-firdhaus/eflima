@@ -20,14 +20,12 @@ class View extends BaseView
     public $icon;
     public $toolbar = [];
     public $fullHeightContent = false;
-    public $uniqueId = null;
 
     /**
      * @inheritdoc
      */
     public function init()
     {
-        $this->uniqueId = rand(100, 1000000000);
         Icon::register('fa', [
             'prefixClass' => 'fa fa-',
             'options' => [
@@ -35,15 +33,6 @@ class View extends BaseView
             ],
             'tag' => 'i',
             'asset' => FontAwesomeAsset::class,
-        ]);
-
-        Icon::register('i8', [
-            'prefixClass' => 'icons8-',
-            'options' => [
-                'class' => 'icon',
-            ],
-            'tag' => 'i',
-            'asset' => Icons8Asset::class,
         ]);
 
         $this->menu = Yii::createObject($this->menu);

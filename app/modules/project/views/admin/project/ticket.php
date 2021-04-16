@@ -12,7 +12,7 @@ use yii\helpers\ReplaceArrayValue;
  * @var TicketSearch       $searchModel
  */
 
-$this->subTitle = Yii::t('app', 'Invoice');
+$this->subTitle = Yii::t('app', 'Ticket');
 
 $this->beginContent('@modules/project/views/admin/project/components/view-layout.php', [
     'model' => $model,

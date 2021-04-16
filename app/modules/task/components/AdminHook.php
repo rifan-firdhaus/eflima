@@ -7,6 +7,8 @@ use modules\account\web\admin\View;
 use modules\account\widgets\history\HistoryWidget;
 use modules\account\widgets\history\HistoryWidgetEvent;
 use modules\core\components\HookTrait;
+use modules\core\controllers\admin\SettingController;
+use modules\note\controllers\admin\NoteController;
 use modules\task\assets\admin\TaskAsset;
 use modules\task\models\Task as TaskModel;
 use modules\task\models\TaskPriority;
@@ -15,6 +17,7 @@ use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
+use yii\filters\AccessControl;
 use yii\helpers\Html;
 
 /**
@@ -29,11 +32,11 @@ class AdminHook
         'task_timer.stop' => 'Stopping timer "{duration}"',
         'task.update' => 'Updating task',
         'task.add' => 'Adding task',
-        'task.status' => 'Changing status to {status_label}',
-        'task.priority' => 'Changing priority to {priority_label}',
+        'task.status' => 'Changing status to "{status_label}"',
+        'task.priority' => 'Changing priority to "{priority_label}"',
         'task.progress' => 'Set progress to {progress}%',
-        'task_assignee.delete' => 'Removing assignment of {assignee_name}',
-        'task_assignee.add' => 'Assigning {assignee_name}',
+        'task_assignee.delete' => 'Removing assignment of "{assignee_name}"',
+        'task_assignee.add' => 'Assigning "{assignee_name}"',
         'task_checklist.add' => 'Adding checklist "{label}"',
         'task_checklist.update' => 'Updating checklist "{label}"',
         'task_checklist.check' => 'Checking checklist "{label}"',
@@ -90,7 +93,46 @@ class AdminHook
 
     protected function __construct()
     {
+        Event::on(NoteController::class, NoteController::EVENT_INIT, [$this, 'noteControllerBeforeAction']);
+        Event::on(SettingController::class, SettingController::EVENT_INIT, [$this, 'registerSettingPermission']);
         Event::on(Controller::class, Controller::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+    }
+
+
+    /**
+     * @param Event $event
+     *
+     * @throws InvalidConfigException
+     */
+    public function registerSettingPermission($event)
+    {
+        /**
+         * @var SettingController $settingController
+         * @var AccessControl     $accessBehaviors
+         */
+        $settingController = $event->sender;
+        $accessBehaviors = $settingController->getBehavior('access');
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.task.general'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'task';
+            },
+        ], $accessBehaviors->ruleConfig));
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function noteControllerBeforeAction($event)
+    {
+        /** @var NoteController $controller */
+        $controller = $event->sender;
+//
+//        $controller->behaviors['access']->
     }
 
     /**
@@ -210,10 +252,8 @@ class AdminHook
             }
         }
 
-        if ($widget->realId == 'task-history') {
-            if (isset($this->historyShortDescription[$model->key])) {
-                $event->description = $this->historyShortDescription[$model->key];
-            }
+        if ($widget->realId == 'task-history' && isset($this->historyShortDescription[$model->key])) {
+            $event->description = $this->historyShortDescription[$model->key];
         }
     }
 
@@ -273,7 +313,7 @@ class AdminHook
             ],
             'setting/task' => [
                 'label' => Yii::t('app', 'Task'),
-                'url' => ['/core/admin/setting/index', 'section' => 'task'],
+                'url' => ['/task/admin/setting/index'],
                 'icon' => 'i8:checked',
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',

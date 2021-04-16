@@ -7,10 +7,9 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\ReplaceArrayValue;
 
 /**
- * @var Customer           $model
- * @var EventSearch        $searchModel
- * @var ActiveDataProvider $dataProvider
- * @var View               $this
+ * @var Customer    $model
+ * @var EventSearch $eventSearchModel
+ * @var View        $this
  */
 
 $active = 'event';
@@ -20,12 +19,10 @@ $this->beginContent('@modules/crm/views/admin/customer/components/view-layout.ph
 echo $this->block('@begin');
 
 echo $this->render('@modules/calendar/views/admin/event/components/data-view', [
-    'dataProvider' => $dataProvider,
-    'searchModel' => $searchModel,
+    'searchModel' => $eventSearchModel,
     'dataViewOptions' => [
-        'searchAction' => new ReplaceArrayValue($searchModel->searchUrl('/crm/admin/customer/view', [
+        'searchAction' => new ReplaceArrayValue($eventSearchModel->searchUrl('/crm/admin/customer/event', [
             'id' => $model->id,
-            'action' => 'event',
         ], false)),
     ],
 ]);

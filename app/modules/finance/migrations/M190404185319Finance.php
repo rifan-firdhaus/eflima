@@ -1,5 +1,6 @@
 <?php namespace modules\finance\migrations;
 
+use modules\account\rbac\DbManager;
 use modules\core\db\MigrationSettingInstaller;
 use Yii;
 use yii\db\Migration;
@@ -45,6 +46,18 @@ class M190404185319Finance extends Migration
 
         $this->registerDefaults();
         $this->registerSettings();
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        $time = time();
+        $this->beginCommand('Register permissions');
+
+        if (!$auth->installPermissions($this->permissions())) {
+            return false;
+        }
+
+        $this->endCommand($time);
     }
 
     public function registerDefaults()
@@ -52,7 +65,7 @@ class M190404185319Finance extends Migration
         $time = time();
         $this->beginCommand('Register currencies');
         $currencies = include Yii::getAlias("@modules/finance/data/currencies.php");
-        Yii::$app->db->createCommand()->batchInsert('{{%currency}}', ['name', 'code', 'symbol','is_enabled'], $currencies)->execute();
+        Yii::$app->db->createCommand()->batchInsert('{{%currency}}', ['name', 'code', 'symbol', 'is_enabled'], $currencies)->execute();
         $this->endCommand($time);
     }
 
@@ -69,6 +82,70 @@ class M190404185319Finance extends Migration
         ];
     }
 
+    public function permissions()
+    {
+        return [
+            'admin.setting.finance' => [
+                'parent' => 'admin.setting',
+                'description' => 'Finance Setting',
+            ],
+            'admin.setting.finance.general' => [
+                'parent' => 'admin.setting.finance',
+                'description' => 'Finance General Setting',
+            ],
+
+            'admin.setting.finance.currency' => [
+                'parent' => 'admin.setting.finance',
+                'description' => 'Currency',
+            ],
+            'admin.setting.finance.currency.list' => [
+                'parent' => 'admin.setting.finance.currency',
+                'description' => 'List of Currency',
+            ],
+            'admin.setting.finance.currency.add' => [
+                'parent' => 'admin.setting.finance.currency',
+                'description' => 'Add Currency',
+            ],
+            'admin.setting.finance.currency.update' => [
+                'parent' => 'admin.setting.finance.currency',
+                'description' => 'Update Currency',
+            ],
+            'admin.setting.finance.currency.delete' => [
+                'parent' => 'admin.setting.finance.currency',
+                'description' => 'Delete Currency',
+            ],
+            'admin.setting.finance.currency.visibility' => [
+                'parent' => 'admin.setting.finance.currency',
+                'description' => 'Enable/Disable Currency',
+            ],
+
+            'admin.setting.finance.tax' => [
+                'parent' => 'admin.setting.finance',
+                'description' => 'Tax',
+            ],
+            'admin.setting.finance.tax.list' => [
+                'parent' => 'admin.setting.finance.tax',
+                'description' => 'List of Tax',
+            ],
+            'admin.setting.finance.tax.add' => [
+                'parent' => 'admin.setting.finance.tax',
+                'description' => 'Add Tax',
+            ],
+            'admin.setting.finance.tax.update' => [
+                'parent' => 'admin.setting.finance.tax',
+                'description' => 'Update Tax',
+            ],
+            'admin.setting.finance.tax.delete' => [
+                'parent' => 'admin.setting.finance.tax',
+                'description' => 'Delete Tax',
+            ],
+            'admin.setting.finance.tax.visibility' => [
+                'parent' => 'admin.setting.finance.tax',
+                'description' => 'Enable/Disable Tax',
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -80,6 +157,13 @@ class M190404185319Finance extends Migration
         $this->dropColumn("{{%customer}}", 'currency_code');
 
         $this->unregisterSettings();
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        if (!$auth->uninstallPermissions($this->permissions())) {
+            return false;
+        }
 
         return true;
     }

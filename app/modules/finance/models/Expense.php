@@ -6,6 +6,8 @@ namespace modules\finance\models;
 
 use Exception;
 use modules\account\Account;
+use modules\account\models\AccountComment;
+use modules\account\models\queries\AccountCommentQuery;
 use modules\core\behaviors\AttributeTypecastBehavior;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
@@ -17,11 +19,13 @@ use modules\finance\models\queries\ExpenseCategoryQuery;
 use modules\finance\models\queries\ExpenseQuery;
 use modules\finance\models\queries\InvoiceItemQuery;
 use modules\finance\models\queries\TaxQuery;
+use modules\note\models\Note;
 use Throwable;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception as DbException;
 use yii\db\StaleObjectException;
@@ -31,36 +35,40 @@ use yii\helpers\Json;
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property ExpenseCategory     $category
- * @property Customer            $customer
- * @property ExpenseTax[]        $taxes
- * @property Currency            $currency
- * @property ExpenseAttachment[] $attachments
- * @property InvoiceItem         $invoiceItem
- * @property bool                $isBilled
- * @property bool                $isInvoiceFieldUpdatable
+ * @property ExpenseCategory       $category
+ * @property Customer              $customer
+ * @property ExpenseTax[]          $taxes
+ * @property Currency              $currency
+ * @property ExpenseAttachment[]   $attachments
+ * @property InvoiceItem           $invoiceItem
+ * @property bool                  $isBilled
+ * @property bool                  $isInvoiceFieldUpdatable
+ * @property-read array            $historyParams
+ * @property-read AccountComment[] $comments
  *
- * @property int                 $id              [int(10) unsigned]
- * @property int                 $category_id     [int(11) unsigned]
- * @property int                 $customer_id     [int(11) unsigned]
- * @property int                 $invoice_item_id [int(11) unsigned]
- * @property string              $currency_code   [char(3)]
- * @property int                 $date            [int(11) unsigned]
- * @property string              $reference
- * @property string              $name
- * @property string              $currency_rate   [decimal(25,10)]
- * @property string              $amount          [decimal(25,10)]
- * @property string              $tax             [decimal(25,10)]
- * @property string              $total           [decimal(25,10)]
- * @property string              $real_total      [decimal(25,10)]
- * @property string              $real_tax        [decimal(25,10)]
- * @property string              $real_amount     [decimal(25,10)]
- * @property string              $description
- * @property bool                $is_tax_included [tinyint(1)]
- * @property bool                $is_billable     [tinyint(1)]
- * @property int                 $created_at      [int(11) unsigned]
- * @property int                 $updated_at      [int(11) unsigned]
- * @property int                 $project_id      [int(11) unsigned]
+ * @property int                   $id              [int(10) unsigned]
+ * @property int                   $category_id     [int(11) unsigned]
+ * @property int                   $customer_id     [int(11) unsigned]
+ * @property int                   $invoice_item_id [int(11) unsigned]
+ * @property string                $currency_code   [char(3)]
+ * @property int                   $date            [int(11) unsigned]
+ * @property string                $reference
+ * @property string                $name
+ * @property string                $currency_rate   [decimal(25,10)]
+ * @property string                $amount          [decimal(25,10)]
+ * @property string                $tax             [decimal(25,10)]
+ * @property string                $total           [decimal(25,10)]
+ * @property string                $real_total      [decimal(25,10)]
+ * @property string                $real_tax        [decimal(25,10)]
+ * @property string                $real_amount     [decimal(25,10)]
+ * @property string                $description
+ * @property bool                  $is_tax_included [tinyint(1)]
+ * @property bool                  $is_billable     [tinyint(1)]
+ * @property int                   $creator_id      [int(11) unsigned]
+ * @property int                   $created_at      [int(11) unsigned]
+ * @property int                   $updater_id      [int(11) unsigned]
+ * @property int                   $updated_at      [int(11) unsigned]
+ * @property int                   $project_id      [int(11) unsigned]
  */
 class Expense extends ActiveRecord
 {
@@ -188,6 +196,12 @@ class Expense extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         $behaviors['attributeTypecast'] = [
@@ -370,6 +384,54 @@ class Expense extends ActiveRecord
         }
 
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function beforeDelete()
+    {
+        foreach ($this->attachments AS $attachment) {
+            if (!$attachment->delete()) {
+                throw new DbException('Failed to delete related attachments');
+            }
+        }
+
+        foreach ($this->taxes AS $tax) {
+            if (!$tax->delete()) {
+                throw new DbException('Failed to delete related taxes');
+            }
+        }
+
+        foreach ($this->comments AS $comment) {
+            if (!$comment->delete()) {
+                throw new DbException('Failed to delete related comments');
+            }
+        }
+
+        if ($this->invoiceItem && !$this->invoiceItem->delete()) {
+            throw new DbException('Failed to delete related invoice item');
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'expense', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new DbException('Failed to delete related note');
+                }
+            }
+        }
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @return ActiveQuery|AccountCommentQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(AccountComment::class, ['model_id' => 'id'])->andOnCondition(['model' => 'invoice']);
     }
 
     /**
@@ -683,7 +745,9 @@ class Expense extends ActiveRecord
     {
         $params = $this->getAttributes(['id', 'name', 'customer_id']);
 
-        $params['customer_name'] = $this->customer->name;
+        if ($this->customer_id) {
+            $params['customer_name'] = $this->customer->name;
+        }
 
         return $params;
     }
@@ -757,5 +821,65 @@ class Expense extends ActiveRecord
         $history['tag'] = $this->scenario === 'admin/add' ? 'add' : 'update';
 
         return Account::history()->save($historyEvent, $history);
+    }
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = self::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $expense) {
+                if (!$expense->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
+    }
+    /**
+     * @param Event $event
+     *
+     * @throws DbException
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public static function deleteAllExpenseRelatedToDeletedCustomer($event)
+    {
+        /** @var Customer $customer */
+        $customer = $event->sender;
+        $invoices = Expense::find()->andWhere(['customer_id' => $customer->id])->all();
+
+        foreach ($invoices AS $invoice) {
+            if (!$invoice->delete()) {
+                throw new DbException('Failed to delete related expenses');
+            }
+        }
     }
 }

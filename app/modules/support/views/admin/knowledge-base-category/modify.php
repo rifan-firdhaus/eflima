@@ -21,30 +21,19 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:category';
 $this->menu->active = 'main/support/knowledge-base';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-knowledge-base-category'] = Html::a(
-            '',
-            ['/task/admin/knowledge-base-category/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-
-        $this->toolbar['add-knowledge-base-category'] = Html::a(
-            Yii::t('app', 'Add'),
-            ['/task/admin/knowledge-base-category/add', 'id' => $model->id],
-            [
-                'class' => 'btn btn-secondary',
-                'icon' => 'i8:plus',
-            ]
-        );
+if (!$model->isNewRecord && !Lazy::isLazyModalRequest()) {
+    if (Yii::$app->user->can('admin.knowledge-base.category.add')) {
+        $this->toolbar['delete-knowledge-base-category'] = Html::a([
+            'url' => ['/task/admin/knowledge-base-category/delete', 'id' => $model->id],
+            'class' => 'btn btn-outline-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->name),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE'],
+        ]);
     }
 }
 

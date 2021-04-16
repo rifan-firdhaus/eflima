@@ -8,7 +8,7 @@
     this.$assigneeInput = this.$assignee.find(".lead-assignee-input");
 
     this.invite = function(staffId){
-      var url = admin.updateQueryParam(options.inviteUrl, "staff_id", staffId);
+      var url = admin.updateQueryParam(options.assignUrl, "staff_id", staffId);
 
       $element.find("[data-rid='lead-assignee-list-lazy']").lazyContainer("load", url, "POST", {}, {
         scroll: false

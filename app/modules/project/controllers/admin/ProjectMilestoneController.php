@@ -3,9 +3,11 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\web\admin\Controller;
-use modules\project\models\forms\project_Milestone\ProjectMilestoneSearch;
+use modules\account\widgets\lazy\LazyResponse;
+use modules\project\models\forms\project_milestone\ProjectMilestoneSearch;
 use modules\project\models\Project;
 use modules\project\models\ProjectMilestone;
+use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\Task;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
@@ -23,6 +25,62 @@ use yii\web\Response;
  */
 class ProjectMilestoneController extends Controller
 {
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index', 'task-list'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.milestone.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.project.view.milestone.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.project.view.milestone.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change-color', 'sort'],
+                'verbs' => ['POST', 'PATCH'],
+                'roles' => ['admin.project.view.milestone.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.project.view.milestone.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['sort-task', 'move-task'],
+                'verbs' => ['PATCH', 'POST'],
+                'roles' => ['admin.project.view.milestone.task'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'verbs' => ['GET'],
+                'roles' => ['@']
+            ]
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param ProjectMilestone $model
      * @param                  $data
@@ -235,6 +293,16 @@ class ProjectMilestoneController extends Controller
         ];
     }
 
+    /**
+     * @param $id
+     *
+     * @return array|ProjectMilestone|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
     public function actionSortTask($id)
     {
         if (!Yii::$app->request->isAjax) {
@@ -277,7 +345,16 @@ class ProjectMilestoneController extends Controller
         ];
     }
 
-
+    /**
+     * @param $id
+     *
+     * @return array|ProjectMilestone|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
     public function actionMoveTask($id)
     {
         if (!Yii::$app->request->isAjax) {
@@ -298,7 +375,7 @@ class ProjectMilestoneController extends Controller
             'task_id' => Yii::$app->request->post('task_id'),
         ]);
 
-        $fakeModel->addRule(['sort','milestone_id','task_id'], 'required')
+        $fakeModel->addRule(['sort', 'milestone_id', 'task_id'], 'required')
             ->addRule('sort', 'exist', [
                 'allowArray' => true,
                 'targetAttribute' => 'id',
@@ -313,7 +390,7 @@ class ProjectMilestoneController extends Controller
                 'targetClass' => ProjectMilestone::class,
             ]);
 
-        if ($fakeModel->validate() && $model->moveTask($fakeModel->task_id,$fakeModel->milestone_id,$fakeModel->sort)) {
+        if ($fakeModel->validate() && $model->moveTask($fakeModel->task_id, $fakeModel->milestone_id, $fakeModel->sort)) {
             return [
                 'success' => true,
             ];
@@ -331,6 +408,32 @@ class ProjectMilestoneController extends Controller
         ];
     }
 
+    /**
+     * @param $id
+     *
+     * @return string
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionTaskList($id)
+    {
+        $taskSearchModel = new TaskSearch();
+
+        $taskSearchModel->getQuery()->andWhere(['task.milestone_id' => $id])
+            ->orderBy(['task.milestone_order' => SORT_ASC]);
+
+        $taskSearchModel->dataProvider->pagination->validatePage = false;
+        $taskSearchModel->dataProvider->pagination->pageSize = 2;
+
+        $taskSearchModel->apply(Yii::$app->request->queryParams);
+
+        $taskSearchModel->dataProvider->getModels();
+
+        LazyResponse::$lazyData['has_more_page'] = $taskSearchModel->dataProvider->pagination->page + 1 < $taskSearchModel->dataProvider->pagination->pageCount;
+        LazyResponse::$lazyData['page'] = $taskSearchModel->dataProvider->pagination->page + 1;
+
+        return $this->renderPartial('task-list', compact('taskSearchModel'));
+    }
 
     /**
      * @return array

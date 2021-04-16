@@ -36,22 +36,23 @@ class CustomerContactAccount extends Account
     {
         $passwordInputId = Html::getInputId($this, 'password');
         $hasAccessInputId = $this->customerContactModel ? Html::getInputId($this->customerContactModel, 'has_customer_area_access') : null;
+        $hasCustomerAccess = function ($model) {
+            /** @var CustomerContactAccount $model */
+
+            if ($model->customerContactModel) {
+                return $model->customerContactModel->has_customer_area_access;
+            }
+
+            return true;
+        };
 
         return [
             [
                 ['password'],
                 'required',
                 'on' => 'admin/add',
-                'when' => function ($model) {
-                    /** @var CustomerContactAccount $model */
-
-                    if ($model->customerContactModel) {
-                        return $model->customerContactModel->has_customer_area_access;
-                    }
-
-                    return true;
-                },
-                'whenClient' => $hasAccessInputId ? new JsExpression("function(){console.log($('#{$hasAccessInputId}[type=checkbox]'));return $('#{$hasAccessInputId}[type=checkbox]').is(':checked')}") : null,
+                'when' => $hasCustomerAccess,
+                'whenClient' => $hasAccessInputId ? new JsExpression("function(){return $('#{$hasAccessInputId}[type=checkbox]').is(':checked')}") : null,
             ],
             [
                 ['password'],
@@ -61,10 +62,8 @@ class CustomerContactAccount extends Account
             [
                 ['password_repeat'],
                 'required',
-                'when' => function ($model) {
-                    return !empty($model->password);
-                },
-                'whenClient' => new JsExpression("function(){return $('#{$passwordInputId}').val() !== ''}"),
+                'when' => $hasCustomerAccess,
+                'whenClient' => new JsExpression("function(){return $('#{$passwordInputId}').val() !== '' && $('#{$hasAccessInputId}[type=checkbox]').is(':checked')}"),
             ],
             [
                 'password_repeat',

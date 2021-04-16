@@ -11,6 +11,7 @@ use modules\calendar\models\forms\event\EventSearch;
 use modules\core\behaviors\AttributeTypecastBehavior;
 use modules\core\components\HookTrait;
 use modules\core\components\SearchableModelEvent;
+use modules\core\controllers\admin\SettingController;
 use modules\core\db\ModelValidatorsEvent;
 use modules\core\web\ViewBlockEvent;
 use modules\crm\models\Customer;
@@ -42,9 +43,12 @@ use modules\ui\widgets\Icon;
 use modules\ui\widgets\Menu;
 use Yii;
 use yii\base\Event;
+use yii\base\InvalidConfigException;
 use yii\base\ModelEvent;
 use yii\bootstrap4\ButtonDropdown;
+use yii\db\Exception;
 use yii\db\Expression;
+use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\validators\Validator;
 
@@ -56,7 +60,9 @@ class AdminHook
     use HookTrait;
 
     protected $historyShortDescription = [
-        'project.status' => 'Changing status to {status_label}',
+        'project.status' => 'Changing status to "{status_label}"',
+        'project_member.add' => 'Inviting "{staff_name}"',
+        'project_member.delete' => 'Removing "{staff_name}" from member',
     ];
 
     protected $historyOptions = [
@@ -68,12 +74,48 @@ class AdminHook
             'icon' => 'i8:hammer',
             'iconOptions' => ['class' => 'icon bg-primary'],
         ],
+        'project_member.add' => [
+            'icon' => 'i8:link',
+            'iconOptions' => ['class' => 'icon bg-info'],
+        ],
+        'project_member.delete' => [
+            'icon' => 'i8:broken-link',
+            'iconOptions' => ['class' => 'icon bg-warning'],
+        ],
     ];
 
     protected function __construct()
     {
         Event::on(Controller::class, Controller::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+        Event::on(SettingController::class, SettingController::EVENT_INIT, [$this, 'registerSettingPermission']);
     }
+
+
+    /**
+     * @param Event $event
+     *
+     * @throws InvalidConfigException
+     */
+    public function registerSettingPermission($event)
+    {
+        /**
+         * @var SettingController $settingController
+         * @var AccessControl     $accessBehaviors
+         */
+        $settingController = $event->sender;
+        $accessBehaviors = $settingController->getBehavior('access');
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.project.general'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'project';
+            },
+        ], $accessBehaviors->ruleConfig));
+    }
+
 
     /**
      * @param Event $event
@@ -595,6 +637,7 @@ class AdminHook
                 'url' => ['/project/admin/project/index', 'customer_id' => $customer->id, 'view' => 'customer'],
                 'icon' => 'i8:idea',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.customer.view.project'),
             ];
         });
     }
@@ -609,6 +652,7 @@ class AdminHook
                 'label' => Yii::t('app', 'Project'),
                 'icon' => 'i8:idea',
                 'url' => ['/project/admin/project/index'],
+                'visible' => Yii::$app->user->can('admin.project.list'),
                 'sort' => 0,
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
@@ -617,7 +661,7 @@ class AdminHook
             ],
             'setting/project' => [
                 'label' => Yii::t('app', 'Project'),
-                'url' => ['/core/admin/setting/index', 'section' => 'project'],
+                'url' => ['/project/admin/setting/index'],
                 'icon' => 'i8:idea',
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
@@ -629,6 +673,9 @@ class AdminHook
 
     /**
      * @param HistoryWidgetEvent $event
+     *
+     * @throws InvalidConfigException
+     * @throws Exception
      */
     public function renderHistoryWidgetItem($event)
     {
@@ -714,6 +761,23 @@ class AdminHook
                     'class' => 'important',
                 ]);
             }
+        }elseif(in_array($model->key,[
+            'project_member.add',
+            'project_member.delete',
+        ])){
+            $event->params['project_name'] = Html::a([
+                'label' => Html::encode($model->params['project_name']),
+                'url' => ['/project/admin/project/view', 'id' => $model->params['project_id']],
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal' => 'project-view-modal',
+                'class' => 'important',
+            ]);
+
+            $event->params['staff_name'] = Html::a([
+                'label' => Html::encode($model->params['staff_name']),
+                'url' => ['/account/admin/staff/profile', 'id' => $model->params['staff_id']],
+                'class' => 'important',
+            ]);
         }
 
         if (isset($this->historyOptions[$model->key])) {
@@ -751,6 +815,7 @@ class AdminHook
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'project-form-modal',
                     ],
+                    'visible' => Yii::$app->user->can('admin.project.add')
                 ];
             }
         });

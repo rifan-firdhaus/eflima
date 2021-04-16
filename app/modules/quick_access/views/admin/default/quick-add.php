@@ -23,7 +23,7 @@ echo Menu::widget([
         'class' => 'nav',
     ],
     'options' => [
-        'class' => 'sidebar-nav nav flex-column menu',
+        'class' => 'sidebar-nav light nav flex-column menu',
     ],
 ]);
 

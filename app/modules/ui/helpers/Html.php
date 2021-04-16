@@ -100,6 +100,16 @@ class Html extends BaseHtml
         return $output;
     }
 
+    public static function colorContrast($hexcolor)
+    {
+        $r = hexdec(substr($hexcolor, 1, 2));
+        $g = hexdec(substr($hexcolor, 3, 2));
+        $b = hexdec(substr($hexcolor, 5, 2));
+        $yiq = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+        return ($yiq >= 128) ? 'black' : 'white';
+    }
+
     public static function getInputId($model, $attribute)
     {
         return self::getRealInputId($model, $attribute) . '-' . Yii::$app->view->uniqueId;

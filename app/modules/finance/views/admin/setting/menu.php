@@ -20,18 +20,27 @@ echo Menu::widget([
         'finance-setting' => [
             'label' => Yii::t('app', 'General'),
             'url' => ['/core/admin/setting/index', 'section' => 'finance'],
+            'visible' => Yii::$app->user->can('admin.setting.finance.general')
         ],
         'currency' => [
             'label' => Yii::t('app', 'Currency'),
             'url' => ['/finance/admin/currency/index'],
+            'visible' => Yii::$app->user->can('admin.setting.finance.currency.list')
         ],
         'tax' => [
             'label' => Yii::t('app', 'Tax'),
             'url' => ['/finance/admin/tax/index'],
+            'visible' => Yii::$app->user->can('admin.setting.finance.tax.list')
         ],
         'expense-category' => [
             'label' => Yii::t('app', 'Expense Category'),
             'url' => ['/finance/admin/expense-category/index'],
+            'visible' => Yii::$app->user->can('admin.setting.finance.expense-category.list')
+        ],
+        'proposal-status' => [
+            'label' => Yii::t('app', 'Proposal Status'),
+            'url' => ['/finance/admin/proposal-status/index'],
+            'visible' => Yii::$app->user->can('admin.setting.finance.proposal-status.list')
         ],
     ],
     'options' => [

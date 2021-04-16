@@ -236,8 +236,14 @@ class TaskTimer extends ActiveRecord
         $notifyTo = $this->task->getAssigneesRelationship()
             ->joinWith(['assignee'])
             ->select('profile_of_assignee.account_id')
+            ->andWhere(['!=','profile_of_assignee.id',$this->starter_id])
             ->createCommand()
             ->queryColumn();
+
+        if(!$notifyTo){
+            return;
+        }
+
         $notification = new Notification([
             'to' => $notifyTo,
             'title' => "Starting timer of task \"{task}\"",
@@ -265,8 +271,14 @@ class TaskTimer extends ActiveRecord
         $notifyTo = $this->task->getAssigneesRelationship()
             ->joinWith(['assignee'])
             ->select('profile_of_assignee.account_id')
+            ->andWhere(['!=','profile_of_assignee.id',$this->stopper_id])
             ->createCommand()
             ->queryColumn();
+
+        if(!$notifyTo){
+            return;
+        }
+
         $notification = new Notification([
             'to' => $notifyTo,
             'title' => "Stopping timer of task \"{task}\"",
@@ -375,5 +387,46 @@ class TaskTimer extends ActiveRecord
 
 
         return Account::history()->save($historyEvent, $history);
+    }
+
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = TaskTimer::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $timer) {
+                if (!$timer->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
     }
 }

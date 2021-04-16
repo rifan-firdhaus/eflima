@@ -81,7 +81,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 $email = '';
                 $phone = '';
 
-                if($model->email){
+                if ($model->email) {
                     $email = Html::a(
                         Icon::show('i8:email', ['class' => 'mr-1 icons8-size']) . Html::encode($model->email),
                         'mailto:' . Html::encode($model->email),
@@ -157,11 +157,25 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'buttons' => [
                 'view' => false,
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.customer.contact.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'name' => Yii::t('app', 'Update'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'customer-contact-form-modal',
+                    ],
+                ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.customer.contact.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                     ],
                 ],
             ],

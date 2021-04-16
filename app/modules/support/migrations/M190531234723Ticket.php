@@ -2,6 +2,7 @@
 
 namespace modules\support\migrations;
 
+use modules\account\rbac\DbManager;
 use modules\core\components\Setting;
 use modules\support\models\TicketDepartment;
 use modules\support\models\TicketPriority;
@@ -32,7 +33,9 @@ class M190531234723Ticket extends Migration
             'order' => $this->integer(3)->unsigned()->defaultValue(100),
             'is_enabled' => $this->boolean()->defaultValue(1),
             'description' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -41,7 +44,9 @@ class M190531234723Ticket extends Migration
             'name' => $this->text()->notNull(),
             'is_enabled' => $this->boolean()->defaultValue(1),
             'description' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -52,7 +57,9 @@ class M190531234723Ticket extends Migration
             'order' => $this->integer(3)->unsigned()->defaultValue(100),
             'is_enabled' => $this->boolean()->defaultValue(1),
             'description' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -68,7 +75,9 @@ class M190531234723Ticket extends Migration
             'name' => $this->text()->notNull(),
             'carbon_copy' => $this->text()->null(),
             'blind_carbon_copy' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -104,9 +113,67 @@ class M190531234723Ticket extends Migration
             'title' => $this->text()->notNull(),
             'content' => $this->text()->notNull(),
             'is_enabled' => $this->boolean()->defaultValue(1),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
+
+        $this->addForeignKey(
+            'creator_of_ticket_department',
+            '{{%ticket_department}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_ticket_department',
+            '{{%ticket_department}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'creator_of_ticket_status',
+            '{{%ticket_status}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_ticket_status',
+            '{{%ticket_status}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'creator_of_ticket_priority',
+            '{{%ticket_priority}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_ticket_priority',
+            '{{%ticket_priority}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'creator_of_ticket_predefined_reply',
+            '{{%ticket_predefined_reply}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_ticket_predefined_reply',
+            '{{%ticket_predefined_reply}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
 
         $this->addForeignKey(
             'status_of_ticket',
@@ -138,6 +205,20 @@ class M190531234723Ticket extends Migration
             '{{%ticket_department}}', 'id',
             'RESTRICT',
             'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'creator_of_ticket',
+            '{{%ticket}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_ticket',
+            '{{%ticket}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
         );
 
         $this->addForeignKey(
@@ -181,8 +262,178 @@ class M190531234723Ticket extends Migration
         );
 
         $this->registerDefaults();
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        $time = time();
+        $this->beginCommand('Register permissions');
+
+        if (!$auth->installPermissions($this->permissions())) {
+            return false;
+        }
+
+        $this->endCommand($time);
     }
 
+    public function permissions()
+    {
+        return [
+            'admin.ticket' => [
+                'parent' => 'admin.root',
+                'description' => 'Manage Ticket',
+            ],
+            'admin.ticket.list' => [
+                'parent' => 'admin.ticket',
+                'description' => 'List of Ticket',
+            ],
+            'admin.ticket.add' => [
+                'parent' => 'admin.ticket',
+                'description' => 'Add Ticket',
+            ],
+            'admin.ticket.update' => [
+                'parent' => 'admin.ticket',
+                'description' => 'Update Ticket',
+            ],
+            'admin.ticket.status' => [
+                'parent' => 'admin.lead',
+                'description' => 'Update Ticket Status',
+            ],
+            'admin.ticket.priority' => [
+                'parent' => 'admin.lead',
+                'description' => 'Update Ticket Priority',
+            ],
+            'admin.ticket.view' => [
+                'parent' => 'admin.ticket',
+                'description' => 'View Ticket',
+            ],
+            'admin.ticket.view.detail' => [
+                'parent' => 'admin.ticket.view',
+                'description' => 'Ticket Details',
+            ],
+            'admin.ticket.view.task' => [
+                'parent' => 'admin.ticket.view',
+                'description' => 'Ticket Task',
+            ],
+            'admin.ticket.view.history' => [
+                'parent' => 'admin.ticket.view',
+                'description' => 'Ticket History',
+            ],
+            'admin.ticket.delete' => [
+                'parent' => 'admin.ticket',
+                'description' => 'Delete Ticket',
+            ],
+
+            'admin.setting.ticket' => [
+                'parent' => 'admin.setting',
+                'description' => 'Ticket Setting',
+            ],
+            'admin.setting.ticket.general' => [
+                'parent' => 'admin.setting.ticket',
+                'description' => 'Ticket General Setting',
+            ],
+
+            'admin.setting.ticket.status' => [
+                'parent' => 'admin.setting.ticket',
+                'description' => 'Ticket Status',
+            ],
+            'admin.setting.ticket.status.list' => [
+                'parent' => 'admin.setting.ticket.status',
+                'description' => 'List of Ticket Status',
+            ],
+            'admin.setting.ticket.status.add' => [
+                'parent' => 'admin.setting.ticket.status',
+                'description' => 'Add Ticket Status',
+            ],
+            'admin.setting.ticket.status.update' => [
+                'parent' => 'admin.setting.ticket.status',
+                'description' => 'Update Ticket Status',
+            ],
+            'admin.setting.ticket.status.delete' => [
+                'parent' => 'admin.setting.ticket.status',
+                'description' => 'Delete Ticket Status',
+            ],
+            'admin.setting.ticket.status.visibility' => [
+                'parent' => 'admin.setting.ticket.status',
+                'description' => 'Enable/Disable Ticket Status',
+            ],
+
+            'admin.setting.ticket.priority' => [
+                'parent' => 'admin.setting.ticket',
+                'description' => 'Ticket Priority',
+            ],
+            'admin.setting.ticket.priority.list' => [
+                'parent' => 'admin.setting.ticket.priority',
+                'description' => 'List of Ticket Priority',
+            ],
+            'admin.setting.ticket.priority.add' => [
+                'parent' => 'admin.setting.ticket.priority',
+                'description' => 'Add Ticket Priority',
+            ],
+            'admin.setting.ticket.priority.update' => [
+                'parent' => 'admin.setting.ticket.priority',
+                'description' => 'Update Ticket Priority',
+            ],
+            'admin.setting.ticket.priority.delete' => [
+                'parent' => 'admin.setting.ticket.priority',
+                'description' => 'Delete Ticket Priority',
+            ],
+            'admin.setting.ticket.priority.visibility' => [
+                'parent' => 'admin.setting.ticket.priority',
+                'description' => 'Enable/Disable Ticket Priority',
+            ],
+
+            'admin.setting.ticket.department' => [
+                'parent' => 'admin.setting.ticket',
+                'description' => 'Ticket Department',
+            ],
+            'admin.setting.ticket.department.list' => [
+                'parent' => 'admin.setting.ticket.department',
+                'description' => 'List of Ticket Department',
+            ],
+            'admin.setting.ticket.department.add' => [
+                'parent' => 'admin.setting.ticket.department',
+                'description' => 'Add Ticket Department',
+            ],
+            'admin.setting.ticket.department.update' => [
+                'parent' => 'admin.setting.ticket.department',
+                'description' => 'Update Ticket Department',
+            ],
+            'admin.setting.ticket.department.delete' => [
+                'parent' => 'admin.setting.ticket.department',
+                'description' => 'Delete Ticket Department',
+            ],
+            'admin.setting.ticket.department.visibility' => [
+                'parent' => 'admin.setting.ticket.department',
+                'description' => 'Enable/Disable Ticket Department',
+            ],
+
+            'admin.setting.ticket.predefined-reply' => [
+                'parent' => 'admin.setting.ticket',
+                'description' => 'Ticket Predefined Reply',
+            ],
+            'admin.setting.ticket.predefined-reply.list' => [
+                'parent' => 'admin.setting.ticket.predefined-reply',
+                'description' => 'List of Ticket Predefined Reply',
+            ],
+            'admin.setting.ticket.predefined-reply.add' => [
+                'parent' => 'admin.setting.ticket.predefined-reply',
+                'description' => 'Add Ticket Predefined Reply',
+            ],
+            'admin.setting.ticket.predefined-reply.update' => [
+                'parent' => 'admin.setting.ticket.predefined-reply',
+                'description' => 'Update Ticket Predefined Reply',
+            ],
+            'admin.setting.ticket.predefined-reply.delete' => [
+                'parent' => 'admin.setting.ticket.predefined-reply',
+                'description' => 'Delete Ticket Predefined Reply',
+            ],
+            'admin.setting.ticket.predefined-reply.visibility' => [
+                'parent' => 'admin.setting.ticket.predefined-reply',
+                'description' => 'Enable/Disable Ticket Predefined Reply',
+            ],
+        ];
+    }
 
     protected function registerDefaults()
     {
@@ -298,10 +549,24 @@ class M190531234723Ticket extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('creator_of_ticket_department', '{{%ticket_department}}');
+        $this->dropForeignKey('updater_of_ticket_department', '{{%ticket_department}}');
+
+        $this->dropForeignKey('creator_of_ticket_priority', '{{%ticket_priority}}');
+        $this->dropForeignKey('updater_of_ticket_priority', '{{%ticket_priority}}');
+
+        $this->dropForeignKey('creator_of_ticket_status', '{{%ticket_status}}');
+        $this->dropForeignKey('updater_of_ticket_status', '{{%ticket_status}}');
+
+        $this->dropForeignKey('creator_of_ticket_predefined_reply', '{{%ticket_predefined_reply}}');
+        $this->dropForeignKey('updater_of_ticket_predefined_reply', '{{%ticket_predefined_reply}}');
+
         $this->dropForeignKey('status_of_ticket', '{{%ticket}}');
         $this->dropForeignKey('priority_of_ticket', '{{%ticket}}');
         $this->dropForeignKey('contact_of_ticket', '{{%ticket}}');
         $this->dropForeignKey('department_of_ticket', '{{%ticket}}');
+        $this->dropForeignKey('creator_of_ticket', '{{%ticket}}');
+        $this->dropForeignKey('updater_of_ticket', '{{%ticket}}');
 
         $this->dropForeignKey('ticket_of_reply', '{{%ticket_reply}}');
         $this->dropForeignKey('staff_of_reply', '{{%ticket_reply}}');
@@ -318,6 +583,13 @@ class M190531234723Ticket extends Migration
         $this->dropTable('{{%ticket_reply}}');
         $this->dropTable('{{%ticket_reply_attachment}}');
         $this->dropTable('{{%ticket_predefined_reply}}');
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        if (!$auth->uninstallPermissions($this->permissions())) {
+            return false;
+        }
 
         return true;
     }

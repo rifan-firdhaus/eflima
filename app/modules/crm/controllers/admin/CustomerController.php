@@ -3,14 +3,17 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\models\forms\history\HistorySearch;
+use modules\account\models\queries\HistoryQuery;
 use modules\account\web\admin\Controller;
 use modules\account\widgets\lazy\LazyResponse;
 use modules\calendar\models\forms\event\EventSearch;
 use modules\crm\models\Customer;
 use modules\crm\models\CustomerContact;
 use modules\crm\models\CustomerContactAccount;
+use modules\crm\models\forms\customer\CustomerBulkSetGroup;
 use modules\crm\models\forms\customer\CustomerSearch;
 use modules\crm\models\forms\customer_contact\CustomerContactSearch;
+use modules\crm\models\Lead;
 use modules\file_manager\web\UploadedFile;
 use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\forms\task_timer\TaskTimerSearch;
@@ -20,6 +23,7 @@ use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\db\Expression;
 use yii\db\StaleObjectException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
@@ -30,6 +34,102 @@ use function compact;
  */
 class CustomerController extends Controller
 {
+    public $viewMenu = [
+        'detail' => [
+            'route' => ['/crm/admin/customer/detail'],
+            'role' => 'admin.customer.view.detail',
+        ],
+        'contact' => [
+            'route' => ['/crm/admin/customer/contact'],
+            'role' => 'admin.customer.view.contact',
+        ],
+        'task' => [
+            'route' => ['/crm/admin/customer/task'],
+            'role' => 'admin.customer.view.contact',
+        ],
+        'event' => [
+            'route' => ['/crm/admin/customer/event'],
+            'role' => 'admin.customer.view.event',
+        ],
+        'history' => [
+            'route' => ['/crm/admin/customer/history'],
+            'role' => 'admin.customer.view.history',
+        ],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.customer.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update', 'bulk-set-group'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.customer.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.customer.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['detail'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['contact'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.contact'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['task'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.task'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['event'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.event'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete', 'view'],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @return array|string|Response
      */
@@ -152,28 +252,45 @@ class CustomerController extends Controller
 
     /**
      * @param string|int $id
-     * @param string     $action
      *
      * @return string|Response
+     *
      * @throws InvalidConfigException
      */
-    public function actionView($id, $action = 'view')
+    public function actionView($id)
+    {
+        foreach ($this->viewMenu AS $item) {
+            if (!Yii::$app->user->can($item['role'])) {
+                continue;
+            }
+
+            $route = $item['route'];
+
+            if (is_callable($route)) {
+                call_user_func($route, $id);
+            } else {
+                $route['id'] = $id;
+            }
+
+
+            return $this->redirect($route);
+        }
+
+        return $this->redirect(['/']);
+    }
+
+    /**
+     * @param $id
+     *
+     * @return Customer|string|Response
+     * @throws InvalidConfigException
+     */
+    public function actionDetail($id)
     {
         $model = $this->getModel($id);
 
         if (!($model instanceof Customer)) {
             return $model;
-        }
-
-        switch ($action) {
-            case 'history':
-                return $this->history(compact('model'));
-            case 'contact':
-                return $this->contact(compact('model'));
-            case 'task':
-                return $this->task(compact('model'));
-            case 'event':
-                return $this->event(compact('model'));
         }
 
         $taskSearchModel = new TaskSearch([
@@ -193,100 +310,131 @@ class CustomerController extends Controller
     }
 
     /**
-     * @param array $params
-     *
-     * @return string
-     */
-    public function history($params)
-    {
-        /** @var Customer $model */
-        $model = $params['model']->id;
-        $params['searchModel'] = new HistorySearch([
-            'params' => [
-                'model' => Customer::class,
-                'model_id' => $model,
-            ],
-        ]);
-        return $this->render('history', $params);
-    }
-
-    /**
-     * @param array $params
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function contact($params)
+    public function actionHistory($id)
     {
-        /** @var Customer $customer */
-        $customer = $params['model'];
-        $searchModel = $params['searchModel'] = new CustomerContactSearch([
-            'currentCustomer' => $customer,
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Customer)) {
+            return $model;
+        }
+
+        $searchModel = new HistorySearch([
             'params' => [
-                'customer_id' => $customer->id,
+                'model' => Customer::class,
+                'model_id' => $model->id,
+                'models' => [
+                    function ($query) use ($model) {
+                        /** @var HistoryQuery $query */
+
+                        $query->leftJoin(CustomerContact::tableName(), [
+                            'customer_contact.id' => new Expression('[[history.model_id]]'),
+                            'history.model' => CustomerContact::class,
+                            'customer_contact.customer_id' => $model->id,
+                        ]);
+
+                        return ['IS NOT', 'customer_contact.id', null];
+                    },
+                ],
+            ],
+        ]);
+        return $this->render('history', compact('model', 'searchModel'));
+    }
+
+    /**
+     * @param string|int $id
+     *
+     * @return string
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionContact($id)
+    {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Customer)) {
+            return $model;
+        }
+
+        $contactSearchModel = new CustomerContactSearch([
+            'params' => [
+                'customer_id' => $model->id,
             ],
         ]);
 
         $searchParams = Yii::$app->request->queryParams;
 
-        $searchModel->getQuery()->andWhere(['customer_contact.customer_id' => $customer->id]);
+        $contactSearchModel->getQuery()->andWhere(['customer_contact.customer_id' => $model->id]);
 
         if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            $searchModel->load($searchParams);
+            $contactSearchModel->load($searchParams);
 
-            return Form::validate($searchModel);
+            return Form::validate($contactSearchModel);
         }
 
-        $searchModel->apply($searchParams);
+        $contactSearchModel->apply($searchParams);
 
-        return $this->render('contact', $params);
+        return $this->render('contact', compact('contactSearchModel', 'model'));
     }
 
     /**
-     * @param array $params
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function task($params)
+    public function actionTask($id)
     {
-        /** @var Customer $model */
-        $model = $params['model'];
-        $searchModel = $params['searchModel'] = new TaskSearch([
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Customer)) {
+            return $model;
+        }
+
+        $taskSearchModel = new TaskSearch([
             'params' => [
                 'model' => 'customer',
                 'model_id' => $model->id,
             ],
         ]);
 
-        $params['dataProvider'] = $searchModel->apply(Yii::$app->request->get());
+        $taskSearchModel->apply(Yii::$app->request->get());
 
-        return $this->render('task', $params);
+        return $this->render('task', compact('taskSearchModel', 'model'));
     }
 
     /**
-     * @param array $params
+     * @param string|int $id
      *
      * @return string|array
      *
      * @throws InvalidConfigException
      */
-    public function event($params)
+    public function actionEvent($id)
     {
-        /** @var Customer $model */
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Customer)) {
+            return $model;
+        }
+
         $view = Yii::$app->request->get('view', 'default');
-        $model = $params['model'];
-        $searchModel = new EventSearch([
+        $eventSearchModel = new EventSearch([
             'params' => [
                 'view' => $view,
                 'model' => 'customer',
                 'model_id' => $model->id,
                 'fetchUrl' => [
-                    '/crm/admin/customer/view',
+                    '/crm/admin/customer/event',
                     'id' => $model->id,
-                    'action' => 'event',
                     'view' => 'calendar',
                     'query' => 1,
                 ],
@@ -297,21 +445,38 @@ class CustomerController extends Controller
         if ($view === 'calendar' && Yii::$app->request->get('query')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            return $searchModel->fullCalendar(Yii::$app->request->queryParams);
+            return $eventSearchModel->fullCalendar(Yii::$app->request->queryParams);
         }
 
-        $dataProvider = $searchModel->apply(Yii::$app->request->queryParams);
+        $eventSearchModel->apply(Yii::$app->request->queryParams);
 
-        return $this->render('event', compact('model', 'searchModel', 'dataProvider'));
+        return $this->render('event', compact('model', 'eventSearchModel'));
     }
 
     /**
+     * @param null|string|int $lead_id
+     *
      * @return array|string|Response
+     *
+     * @throws InvalidConfigException
      */
-    public function actionAdd()
+    public function actionAdd($lead_id = null)
     {
+        $lead = null;
+
+        if ($lead_id) {
+            $lead = Lead::find()->andWhere(['id' => $lead_id])->one();
+
+            if (!$lead) {
+                return $this->notFound(Yii::t('app', '{object} you are looking for doesn\'t exists', [
+                    'object' => Yii::t('app', 'Lead'),
+                ]));
+            }
+        }
+
         $model = new Customer([
             'scenario' => 'admin/add',
+            'fromLead' => $lead,
         ]);
         $model->primaryContactModel = new CustomerContact([
             'is_primary' => true,
@@ -322,7 +487,34 @@ class CustomerController extends Controller
             'customerContactModel' => $model->primaryContactModel,
         ]);
 
+        if ($lead) {
+            $model->type = Customer::TYPE_PERSONAL;
+            $model->primaryContactModel->first_name = $lead->first_name;
+            $model->primaryContactModel->last_name = $lead->last_name;
+            $model->primaryContactModel->phone = $lead->phone;
+            $model->primaryContactModel->email = $lead->email;
+            $model->primaryContactModel->city = $lead->city;
+            $model->primaryContactModel->country_code = $lead->country_code;
+            $model->primaryContactModel->province = $lead->province;
+            $model->primaryContactModel->address = $lead->address;
+            $model->primaryContactModel->postal_code = $lead->postal_code;
+        }
+
         return $this->modify($model, Yii::$app->request->post());
+    }
+
+    /**
+     * @return string
+     */
+    public function actionAllHistory()
+    {
+        $searchModel = new HistorySearch([
+            'params' => [
+                'model' => Customer::class,
+            ],
+        ]);
+
+        return $this->render('all-history', compact('searchModel'));
     }
 
     /**
@@ -386,6 +578,79 @@ class CustomerController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Customer::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Customer'),
+            ]));
+        }
+
+        if (Customer::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Customers'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+    /**
+     * @return array|string|void|Response
+     * @throws Throwable
+     */
+    public function actionBulkSetGroup()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+        $model = new CustomerBulkSetGroup([
+            'id' => $ids,
+        ]);
+        $data = Yii::$app->request->post();
+
+        if ($model->load($data)) {
+            if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return Form::validate($model);
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully updated', [
+                    'number' => count($model->id),
+                    'object' => Yii::t('app', 'Customers'),
+                ]));
+
+                if (Lazy::isLazyModalRequest() || Lazy::isLazyInsideModalRequest()) {
+                    Lazy::close();
+
+                    return;
+                }
+
+                return $this->redirect(['index']);
+            } elseif ($model->hasErrors()) {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Some of the information you entered is invalid'));
+            } else {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to update {object}', [
+                    'object' => Yii::t('app', 'Customer'),
+                ]));
+            }
+        }
+
+        return $this->render('bulk-set-group', compact('model'));
     }
 
     /**

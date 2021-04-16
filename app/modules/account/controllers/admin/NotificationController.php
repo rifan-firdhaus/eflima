@@ -19,6 +19,26 @@ use yii\web\Response;
 class NotificationController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['index','visit'],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string
      * @throws Throwable
      * @throws DbException

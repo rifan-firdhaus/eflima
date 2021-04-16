@@ -32,12 +32,14 @@ echo $this->block('@begin');
                 'url' => ['/support/admin/knowledge-base/index'],
                 'icon' => 'i8:open-book',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.knowledge-base.list')
             ],
             'category' => [
                 'label' => Yii::t('app', 'Category'),
                 'url' => ['/support/admin/knowledge-base-category/index'],
                 'icon' => 'i8:category',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.knowledge-base.category.list')
             ],
         ],
         'options' => [

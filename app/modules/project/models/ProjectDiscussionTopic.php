@@ -10,6 +10,7 @@ use modules\project\models\queries\ProjectDiscussionTopicQuery;
 use modules\project\models\queries\ProjectQuery;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
@@ -24,7 +25,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string                 $content
  * @property bool                   $is_internal [tinyint(1)]
  * @property bool                   $is_closed   [tinyint(1)]
+ * @property int                    $creator_id  [int(11) unsigned]
  * @property int                    $created_at  [int(11) unsigned]
+ * @property int                    $updater_id  [int(11) unsigned]
  * @property int                    $updated_at  [int(11) unsigned]
  */
 class ProjectDiscussionTopic extends ActiveRecord
@@ -85,11 +88,35 @@ class ProjectDiscussionTopic extends ActiveRecord
             'project_id' => Yii::t('app', 'Project ID'),
             'subject' => Yii::t('app', 'Subject'),
             'content' => Yii::t('app', 'Content'),
-            'is_internal' => Yii::t('app', 'Is Internal'),
+            'is_internal' => Yii::t('app', 'Internal Discussion'),
             'is_closed' => Yii::t('app', 'Is Closed'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeHints()
+    {
+        return [
+            'is_internal' => Yii::t('app', 'If you check this, then this discussion topic will not be displayed in customer area'),
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function beforeDelete()
+    {
+        foreach ($this->comments AS $comment) {
+            if (!$comment->delete()) {
+                throw new Exception('Failed to delete related comments');
+            }
+        }
+
+        return parent::beforeDelete();
     }
 
     /**

@@ -3,6 +3,8 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
 use modules\account\Account;
+use modules\account\models\AccountComment;
+use modules\account\models\queries\AccountCommentQuery;
 use modules\account\models\Staff;
 use modules\account\models\StaffAccount;
 use modules\core\behaviors\AttributeTypecastBehavior;
@@ -16,59 +18,72 @@ use modules\finance\models\queries\InvoiceAssigneeQuery;
 use modules\finance\models\queries\InvoiceItemQuery;
 use modules\finance\models\queries\InvoicePaymentQuery;
 use modules\finance\models\queries\InvoiceQuery;
+use modules\note\models\Note;
+use modules\task\models\Task;
+use Mpdf\HTMLParserMode;
+use Mpdf\Mpdf;
+use Mpdf\MpdfException;
 use Throwable;
 use Yii;
+use yii\base\Event;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
-use yii\db\Exception as DbException;
+use yii\db\Exception;
 use yii\db\StaleObjectException;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property Customer                $customer
- * @property Currency                $currency
- * @property bool                    $isPastDue
- * @property InvoiceAssignee[]|array $assigneesRelationship
- * @property Staff[]|array           $assignees
- * @property InvoiceItem[] |array    $items
- * @property InvoicePayment[]|array  $payments
+ * @property-read Customer                $customer
+ * @property-read Currency                $currency
+ * @property-read bool                    $isPastDue
+ * @property-read InvoiceAssignee[]|array $assigneesRelationship
+ * @property-read Staff[]|array           $assignees
+ * @property InvoiceItem[] |array         $items
+ * @property-read InvoicePayment[]|array  $payments
+ * @property-read null|string             $statusText
+ * @property-read AccountComment[]        $comments
+ * @property-read array                   $historyParams
  *
- * @property int                     $id                                  [int(10) unsigned]
- * @property int                     $customer_id                         [int(11) unsigned]
- * @property string                  $currency_code                       [char(3)]
- * @property string                  $number                              [varchar(255)]
- * @property string                  $status                              [char(1)]
- * @property int                     $date                                [int(11) unsigned]
- * @property int                     $due_date                            [int(11) unsigned]
- * @property string                  $currency_rate                       [decimal(25,10)]
- * @property string                  $sub_total                           [decimal(25,10)]
- * @property string                  $discount                            [decimal(25,10)]
- * @property string                  $tax                                 [decimal(25,10)]
- * @property string                  $grand_total                         [decimal(25,10)]
- * @property string                  $total_paid                          [decimal(25,10)]
- * @property string                  $total_due                           [decimal(25,10)]
- * @property string                  $real_sub_total                      [decimal(25,10)]
- * @property string                  $real_discount                       [decimal(25,10)]
- * @property string                  $real_tax                            [decimal(25,10)]
- * @property string                  $real_grand_total                    [decimal(25,10)]
- * @property string                  $real_total_paid                     [decimal(25,10)]
- * @property string                  $real_total_due                      [decimal(25,10)]
- * @property bool                    $is_assignee_allowed_to_add_payment  [tinyint(1)]
- * @property bool                    $is_assignee_allowed_to_add_discount [tinyint(1)]
- * @property bool                    $is_assignee_allowed_to_update_item  [tinyint(1)]
- * @property bool                    $is_assignee_allowed_to_cancel       [tinyint(1)]
- * @property bool                    $is_published                        [tinyint(1)]
- * @property bool                    $is_paid                             [tinyint(1)]
- * @property string                  $allowed_payment_method
- * @property string                  $params
- * @property int                     $created_at                          [int(11) unsigned]
- * @property int                     $updated_at                          [int(11) unsigned]
- * @property int                     $project_id                          [int(11) unsigned]
+ * @property int                          $id                                  [int(10) unsigned]
+ * @property int                          $customer_id                         [int(11) unsigned]
+ * @property string                       $currency_code                       [char(3)]
+ * @property string                       $number                              [varchar(255)]
+ * @property string                       $status                              [char(1)]
+ * @property int                          $date                                [int(11) unsigned]
+ * @property int                          $due_date                            [int(11) unsigned]
+ * @property string                       $currency_rate                       [decimal(25,10)]
+ * @property string                       $sub_total                           [decimal(25,10)]
+ * @property string                       $discount                            [decimal(25,10)]
+ * @property string                       $tax                                 [decimal(25,10)]
+ * @property string                       $grand_total                         [decimal(25,10)]
+ * @property string                       $total_paid                          [decimal(25,10)]
+ * @property string                       $total_due                           [decimal(25,10)]
+ * @property string                       $real_sub_total                      [decimal(25,10)]
+ * @property string                       $real_discount                       [decimal(25,10)]
+ * @property string                       $real_tax                            [decimal(25,10)]
+ * @property string                       $real_grand_total                    [decimal(25,10)]
+ * @property string                       $real_total_paid                     [decimal(25,10)]
+ * @property string                       $real_total_due                      [decimal(25,10)]
+ * @property bool                         $is_assignee_allowed_to_add_payment  [tinyint(1)]
+ * @property bool                         $is_assignee_allowed_to_add_discount [tinyint(1)]
+ * @property bool                         $is_assignee_allowed_to_update_item  [tinyint(1)]
+ * @property bool                         $is_assignee_allowed_to_cancel       [tinyint(1)]
+ * @property bool                         $is_published                        [tinyint(1)]
+ * @property bool                         $is_paid                             [tinyint(1)]
+ * @property string                       $allowed_payment_method
+ * @property string                       $params
+ * @property int                          $creator_id                          [int(11) unsigned]
+ * @property int                          $created_at                          [int(11) unsigned]
+ * @property int                          $updater_id                          [int(11) unsigned]
+ * @property int                          $updated_at                          [int(11) unsigned]
+ * @property int                          $project_id                          [int(11) unsigned]
  */
 class Invoice extends ActiveRecord
 {
     public $assignee_ids = [];
+    public $assignor_id;
 
     /** @var array|InvoiceItem[] */
     public $itemModels = [];
@@ -174,6 +189,12 @@ class Invoice extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+        ];
+
         $behaviors['attributeTypecast'] = [
             'class' => AttributeTypecastBehavior::class,
             'attributeTypes' => [
@@ -219,14 +240,14 @@ class Invoice extends ActiveRecord
         // Save assignee
         if (!empty($this->assignee_ids)) {
             if (!$this->saveAssignees()) {
-                throw new DbException('Failed to assign invoice');
+                throw new Exception('Failed to assign invoice');
             }
         }
 
         // Save items
         if (!empty($this->itemModels)) {
             if (!$this->saveItems()) {
-                throw new DbException('Failed to save items');
+                throw new Exception('Failed to save items');
             }
         }
 
@@ -234,7 +255,7 @@ class Invoice extends ActiveRecord
             $this->_recalculated = true;
 
             if (!$this->save(false)) {
-                throw new DbException('Failed to recalculate invoice');
+                throw new Exception('Failed to recalculate invoice');
             }
 
             if (
@@ -248,6 +269,68 @@ class Invoice extends ActiveRecord
         }
 
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        $this->deleteRelations();
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @throws Exception
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public function deleteRelations()
+    {
+        foreach ($this->items AS $item) {
+            if (!$item->delete()) {
+                throw new Exception('Failed to delete related items');
+            }
+        }
+
+        foreach ($this->assigneesRelationship AS $assignee) {
+            if (!$assignee->delete()) {
+                throw new Exception('Failed to delete invoice assignee');
+            }
+        }
+
+        foreach ($this->payments AS $payment) {
+            if (!$payment->delete()) {
+                throw new Exception('Failed to delete invoice payments');
+            }
+        }
+
+        if (Yii::$app->hasModule('task')) {
+            $tasks = Task::find()->andWhere(['model' => 'invoice', 'model_id' => $this->id])->all();
+
+            foreach ($tasks AS $task) {
+                if (!$task->delete()) {
+                    throw new Exception('Failed to delete related tasks');
+                }
+            }
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'invoice', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new Exception('Failed to delete related note');
+                }
+            }
+        }
+
+        foreach ($this->comments AS $comment) {
+            if (!$comment->delete()) {
+                throw new Exception('Failed to delete related comments');
+            }
+        }
     }
 
     /**
@@ -394,19 +477,19 @@ class Invoice extends ActiveRecord
     }
 
     /**
-     * @return ActiveQuery|InvoicePaymentQuery
-     */
-    public function getPayments()
-    {
-        return $this->hasMany(InvoicePayment::class, ['invoice_id' => 'id'])->alias('payments_of_invoice');
-    }
-
-    /**
      * @param InvoiceItem[] $items
      */
     public function setItems($items)
     {
         $this->_items = $items;
+    }
+
+    /**
+     * @return ActiveQuery|InvoicePaymentQuery
+     */
+    public function getPayments()
+    {
+        return $this->hasMany(InvoicePayment::class, ['invoice_id' => 'id'])->alias('payments_of_invoice');
     }
 
     /**
@@ -423,6 +506,14 @@ class Invoice extends ActiveRecord
     public function getCurrency()
     {
         return $this->hasOne(Currency::class, ['code' => 'currency_code'])->alias('currency_of_invoice');
+    }
+
+    /**
+     * @return ActiveQuery|AccountCommentQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(AccountComment::class, ['model_id' => 'id'])->andOnCondition(['model' => 'invoice']);
     }
 
     /**
@@ -450,64 +541,120 @@ class Invoice extends ActiveRecord
     }
 
     /**
-     * @param null|string|int|Staff $assignor
-     *
      * @return bool
      * @throws InvalidConfigException
      * @throws StaleObjectException
      * @throws Throwable
      */
-    protected function saveAssignees($assignor = null)
+    protected function saveAssignees()
     {
-        if ($assignor === null && !Yii::$app->user->isGuest && Yii::$app->user->identity instanceof StaffAccount) {
-            /** @var StaffAccount $account */
-            $account = Yii::$app->user->identity;
-
-            $assignor = $account->profile;
-        }
-
         /** @var InvoiceAssignee[] $currentModels */
-        $currentModels = $this->getAssigneesRelationship()->indexBy('assignee_id')->all();
-
-        foreach ($currentModels AS $key => $model) {
-            if (in_array($key, $this->assignee_ids)) {
-                continue;
-            }
-
-            if (!$model->delete()) {
-                return false;
-            }
-        }
-
-        $addedAssignees = [];
+        $currentModels = $this->getAssigneesRelationship()
+            ->indexBy('assignee_id')
+            ->select('assignee_id')
+            ->asArray()
+            ->all();
 
         foreach ($this->assignee_ids AS $assigneeId) {
             if (isset($currentModels[$assigneeId])) {
                 continue;
             }
 
-            $model = new InvoiceAssignee([
-                'scenario' => 'admin/invoice/add',
-                'invoice_id' => $this->id,
-                'assignee_id' => $assigneeId,
-                'assignor_id' => $assignor->id,
-            ]);
+            if (!$this->assign($assigneeId, $this->assignor_id, false)) {
+                return false;
+            }
+        }
 
-            $model->loadDefaultValues();
+        $addedModels = $this->getAssigneesRelationship()
+            ->andWhere(['NOT IN', 'assignee_id', array_keys($currentModels)])
+            ->all();
 
-            if (!$model->save()) {
+        InvoiceAssignee::sendAssignNotification($addedModels, $this, $this->assignor_id);
+
+        foreach ($currentModels AS $key => $model) {
+            if (in_array($key, $this->assignee_ids)) {
+                continue;
+            }
+
+            if (!$this->unassign($model['assignee_id'])) {
                 return false;
             }
 
-            $addedAssignees[] = $model;
         }
-
-        InvoiceAssignee::sendAssignNotification($addedAssignees, $this, $assignor);
-
-        $this->assignee_ids = [];
 
         return true;
     }
+
+
+    /**
+     * @param Staff|string|int $assignee
+     * @param Staff|string|int $assignor
+     * @param bool             $notify
+     *
+     * @return bool
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     */
+    public function assign($assignee, $assignor, $notify = true)
+    {
+        if (!$assignor instanceof Staff) {
+            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+
+            if (!$assignor) {
+                throw new Exception('Invalid assignor');
+            }
+        }
+
+        if (!$assignee instanceof Staff) {
+            $assignee = Staff::find()->andWhere(['id' => $assignee])->one();
+
+            if (!$assignor) {
+                throw new Exception('Invalid assignee');
+            }
+        }
+
+        $model = new InvoiceAssignee([
+            'scenario' => 'admin/invoice/add',
+            'invoice_id' => $this->id,
+            'assignee_id' => $assignee->id,
+            'assignor_id' => $assignor->id,
+        ]);
+
+        $model->loadDefaultValues();
+
+        if (!$model->save()) {
+            return false;
+        }
+
+        if ($notify) {
+            InvoiceAssignee::sendAssignNotification([$model], $this, $assignor);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $staff
+     *
+     * @return bool|false|int
+     *
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public function unassign($staff)
+    {
+        $staffId = $staff instanceof Staff ? $staff->id : $staff;
+
+        $model = $this->getAssigneesRelationship()->andWhere(['assignee_id' => $staffId])->one();
+
+        if (!$model) {
+            return false;
+        }
+
+        return $model->delete();
+    }
+
 
     /**
      * @return bool
@@ -551,7 +698,7 @@ class Invoice extends ActiveRecord
      * @param bool $insert
      *
      * @return bool
-     * @throws DbException
+     * @throws Exception
      * @throws Throwable
      */
     public function recordSavedHistory($insert = false)
@@ -559,7 +706,7 @@ class Invoice extends ActiveRecord
         $history = [
             'params' => $this->getHistoryParams(),
             'model' => self::class,
-            'model_id' => $this->id
+            'model_id' => $this->id,
         ];
 
         if ($this->scenario === 'admin/add' && $insert) {
@@ -583,5 +730,83 @@ class Invoice extends ActiveRecord
         $params['customer_name'] = $this->customer->name;
 
         return $params;
+    }
+
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = self::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $invoice) {
+                if (!$invoice->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public static function deleteAllInvoiceRelatedToDeletedCustomer($event)
+    {
+        /** @var Customer $customer */
+        $customer = $event->sender;
+        $invoices = Invoice::find()->andWhere(['customer_id' => $customer->id])->all();
+
+        foreach ($invoices AS $invoice) {
+            if (!$invoice->delete()) {
+                throw new Exception('Failed to delete related invoices');
+            }
+        }
+    }
+
+    /**
+     * @return Mpdf
+     * @throws MpdfException
+     */
+    public function asPDF()
+    {
+        $pdf = new Mpdf();
+
+        $pdf->WriteHTML(file_get_contents(Yii::getAlias('@modules/finance/views/admin/invoice/pdf/plain/plain.css')), HTMLParserMode::HEADER_CSS);
+        $pdf->WriteHTML(Yii::$app->view->renderFile('@modules/finance/views/admin/invoice/pdf/plain/plain.php', [
+            'model' => $this,
+        ]));
+
+        return $pdf;
     }
 }

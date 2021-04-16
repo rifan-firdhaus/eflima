@@ -108,6 +108,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'sort' => 1000000,
             'buttons' => [
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.knowledge-base.view.update'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'label' => Yii::t('app', 'View'),
@@ -117,12 +118,26 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     ],
                 ],
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.knowledge-base.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'label' => Yii::t('app', 'Update'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal-size' => 'modal-lg',
                         'data-lazy-modal' => 'knowledge-base-form-modal',
+                    ],
+                ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.knowledge-base.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                     ],
                 ],
             ],

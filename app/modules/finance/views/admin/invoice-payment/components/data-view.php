@@ -111,7 +111,7 @@ echo $this->render('data-table', compact('dataProvider', 'searchModel'));
 
 $dataView->beginHeader();
 
-if ($addUrl !== false) {
+if ($addUrl !== false && Yii::$app->user->can('admin.invoice.payment.add')) {
     echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
         'class' => 'btn btn-primary',
         'data-lazy-modal' => 'invoice-payment-form',

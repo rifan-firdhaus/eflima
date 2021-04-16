@@ -10,8 +10,19 @@
     this.assign = function(staffId){
       var url = admin.updateQueryParam(options.assignUrl, "staff_id", staffId);
 
-      $element.closest("[data-rid='task-view-wrapper-lazy']").lazyContainer("load", url, "POST", {}, {
+      $element.find("[data-rid='task-assignee-list-lazy']").lazyContainer("load", url, "POST", {}, {
         scroll: false
+      });
+    };
+
+    this.setProgress = function(value){
+      return $.ajax({
+        url: options.setProgressUrl,
+        data: {progress: value},
+        type: "POST",
+        success: function(data){
+          admin.notifies(data.messages);
+        }
       });
     };
 

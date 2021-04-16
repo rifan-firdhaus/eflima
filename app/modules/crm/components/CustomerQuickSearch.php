@@ -30,6 +30,14 @@ class CustomerQuickSearch extends QuickSearch
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.customer.list');
+    }
+
+    /**
      * @param $q
      *
      * @return BaseDataProvider

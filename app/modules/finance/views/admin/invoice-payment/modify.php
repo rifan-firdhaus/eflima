@@ -21,24 +21,6 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:hashtag';
 $this->menu->active = 'transaction/payment';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-invoice-payment'] = Html::a(
-            '',
-            ['/finance/admin/invoice-payment/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->number),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-    }
-}
-
 echo $this->block('@begin');
 echo $this->render('components/form', compact('model'));
 echo $this->block('@end');

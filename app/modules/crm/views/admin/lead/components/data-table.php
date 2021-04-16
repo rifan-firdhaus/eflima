@@ -8,6 +8,7 @@ use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\CheckboxColumn;
 use modules\ui\widgets\data_table\DataTable;
 use modules\ui\widgets\Icon;
+use modules\ui\widgets\table\cells\Cell;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -126,8 +127,45 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     'value' => $model->status_id,
                     'url' => function ($status) use ($model) {
                         return ['/crm/admin/lead/change-status', 'id' => $model->id, 'status' => $status['id']];
-                    }
+                    },
                 ]);
+            },
+        ],
+        [
+            'format' => 'raw',
+            'attribute' => 'assignees',
+            'contentCell' => [
+                'hAlign' => Cell::H_ALIGN_CENTER,
+                'vAlign' => Cell::V_ALIGN_CENTER,
+            ],
+            'headerCell' => [
+                'hAlign' => Cell::H_ALIGN_CENTER,
+            ],
+            'content' => function ($model) {
+                /** @var Lead $model */
+
+                $assignees = $model->assignees;
+                $result = [];
+                $more = count($assignees) - 2;
+
+                foreach ($assignees AS $index => $assignee) {
+                    $result[] = Html::tag('div', Html::img($assignee->account->getFileVersionUrl('avatar', 'thumbnail')), [
+                        'class' => 'avatar-list-item',
+                        'data-toggle' => 'tooltip',
+                        'title' => $assignee->name,
+                    ]);
+
+                    if ($index === 1 && $more > 0) {
+                        $result[] = Html::tag('div', "+{$more}", [
+                            'class' => 'avatar-list-item-more',
+                            'data-toggle' => 'tooltip',
+                        ]);
+
+                        break;
+                    }
+                }
+
+                return implode('', $result);
             },
         ],
         [
@@ -136,23 +174,38 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'controller' => '/crm/admin/lead',
             'buttons' => [
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.lead.view.detail'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'name' => Yii::t('app', 'View'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'lead-view-modal',
-                        'data-toggle' => 'tooltip'
+                        'data-toggle' => 'tooltip',
                     ],
                 ],
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.lead.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'name' => Yii::t('app', 'Update'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'lead-form-modal',
-                        'data-toggle' => 'tooltip'
+                        'data-toggle' => 'tooltip',
                     ],
                 ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.lead.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false,'method' => 'DELETE'],
+                    ],
+                ]
             ],
         ],
     ],

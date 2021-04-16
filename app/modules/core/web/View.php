@@ -3,6 +3,8 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\core\widgets\Block;
+use modules\ui\assets\Icons8Asset;
+use modules\ui\widgets\Icon;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
@@ -18,6 +20,23 @@ class View extends BaseView
     protected $_temp = [];
     protected $_blockQueues = [];
     protected $_current = [];
+    public $uniqueId = null;
+
+    public function init()
+    {
+        $this->uniqueId = rand(100, 1000000000);
+
+        Icon::register('i8', [
+            'prefixClass' => 'icons8-',
+            'options' => [
+                'class' => 'icon',
+            ],
+            'tag' => 'i',
+            'asset' => Icons8Asset::class,
+        ]);
+
+        parent::init();
+    }
 
     /**
      * @param string $id

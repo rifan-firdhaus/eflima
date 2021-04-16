@@ -23,12 +23,14 @@ echo Menu::widget([
             'url' => ['/crm/admin/customer/index'],
             'icon' => 'i8:contacts',
             'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+            'visible' => Yii::$app->user->can('admin.customer.list')
         ],
         'contact' => [
             'label' => Yii::t('app', 'Contact'),
             'url' => ['/crm/admin/customer-contact/index'],
             'icon' => 'i8:address-book',
             'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+            'visible' => Yii::$app->user->can('admin.customer.contact.list')
         ],
         'history' => [
             'label' => Yii::t('app', 'History'),

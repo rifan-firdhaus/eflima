@@ -22,7 +22,58 @@ class CountryController extends Controller
 {
 
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.country.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.country.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.country.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.country.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.country.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
+     *
+     * @throws InvalidConfigException
      */
     public function actionIndex()
     {

@@ -1,4 +1,4 @@
-@import "../../../../../account/assets/admin/source/css/_variables.scss";
+@import "../../../../../account/assets/admin/source/css/backup/variables";
 
 .project-milestone-item {
   max-width: 300px;
@@ -11,7 +11,7 @@
 
 .project-milestone-item-header {
   padding: map-get($spacers, 3);
-  background: color-level($yellow, -3);
+  background: color-level($yellow, 0);
   color: $white;
 
   & .btn-menu {
@@ -66,14 +66,14 @@
 .project-milestone-color {
   width: 20px;
   height: 20px;
-  background: color-level($yellow, -3);
+  background: color-level($yellow, 0);
   border-radius: 50%;
   margin: auto;
   transition: 0.1s;
 }
 
 .project-milestone-color-yellow {
-  background: color-level($yellow, -3);
+  background: color-level($yellow, 0);
 }
 
 .project-milestone-color-red {

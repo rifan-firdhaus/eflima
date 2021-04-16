@@ -8,6 +8,8 @@
     this.$trigger = $("#quick-search-button");
     this.$container = $(".quick-search-container");
     this.$input = this.$container.find(".quick-search-input");
+    this.$modelInput = this.$container.find(".quick-search-model");
+    this.$modelInputDropdownMenu = this.$modelInput.find('.dropdown-menu');
     this.$form = this.$container.find(".quick-search-form");
     this.$result = this.$container.find(".quick-search-result");
     this.url = this.$container.data("url");
@@ -46,6 +48,14 @@
       }
 
       var query = this.$input.val();
+      var $models = this.$modelInputDropdownMenu.find("input[type=checkbox]:checked");
+      var models = [];
+
+      $models.each(function(){
+        models.push($(this).val());
+      });
+
+      console.log(this.$modelInput);
 
       if (query === "") {
         this.$result.empty();
@@ -55,7 +65,7 @@
 
       var promise = $.ajax({
         url: this.$form.attr("action"),
-        data: { q: query },
+        data: { q: query, models: models },
         dataType: "JSON",
         success: function(data){
           _ajax = null;
@@ -125,6 +135,10 @@
         e.stopPropagation();
 
         self.search();
+      });
+
+      self.$modelInputDropdownMenu.find("input[type=checkbox]").on('change',function(){
+        self.$form.trigger('submit');
       });
 
       self.$trigger.on("click", function(e){

@@ -5,7 +5,6 @@ use modules\account\web\admin\View;
 use modules\crm\models\forms\customer_group\CustomerGroupSearch;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\Icon;
-use yii\bootstrap4\ButtonGroup;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
@@ -48,19 +47,17 @@ echo $this->render('data-table', compact('dataProvider'));
 
 $dataView->beginHeader();
 
-echo ButtonGroup::widget([
-    'buttons' => [
-        Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/customer-group/add'], [
-            'class' => 'btn btn-primary',
-            'data-lazy-modal' => 'customer-group-form-modal',
-            'data-lazy-modal-size' => 'modal-md',
-            'data-lazy-container' => '#main-container',
-        ]),
-    ],
-]);
+if (Yii::$app->user->can('admin.setting.crm.customer-group.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/customer-group/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'customer-group-form-modal',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

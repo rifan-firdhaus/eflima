@@ -14,6 +14,7 @@ class LazyAsset extends AssetBundle
     public $js = [
         'historyjs/scripts/bundled/html5/native.history.js',
         'lazy-v2.js',
+        'lazy-v3.js',
     ];
 
     public $depends = [

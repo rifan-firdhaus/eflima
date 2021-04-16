@@ -4,15 +4,20 @@ namespace modules\crm\models;
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
+use modules\account\Account;
 use modules\address\models\Country;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\crm\models\queries\CustomerContactQuery;
 use modules\file_manager\helpers\ImageVersion;
+use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception;
+use yii\db\Exception as DbException;
+use yii\db\StaleObjectException;
 use yii\helpers\Inflector;
 
 /**
@@ -22,6 +27,8 @@ use yii\helpers\Inflector;
  * @property Customer               $customer
  * @property string                 $name
  * @property Country                $country
+ * @property-read string            $fullAddress
+ * @property-read array             $historyParams
  *
  * @property int                    $id                       [int(10) unsigned]
  * @property int                    $customer_id              [int(11) unsigned]
@@ -31,24 +38,16 @@ use yii\helpers\Inflector;
  * @property bool                   $is_primary               [tinyint(1)]
  * @property bool                   $has_customer_area_access [tinyint(1)]
  * @property string                 $phone
+ * @property string                 $email
  * @property string                 $mobile
  * @property string                 $city
- * @property string                 $email
  * @property string                 $province
  * @property string                 $country_code             [char(3)]
  * @property string                 $postal_code
  * @property string                 $address
- * @property string                 $facebook
- * @property string                 $twitter
- * @property string                 $instagram
- * @property string                 $pinterest
- * @property string                 $linkedin
- * @property string                 $whatsapp
- * @property string                 $line
- * @property string                 $wechat
- * @property string                 $telegram
- * @property string                 $github
+ * @property int                    $creator_id               [int(11) unsigned]
  * @property int                    $created_at               [int(11) unsigned]
+ * @property int                    $updater_id               [int(11) unsigned]
  * @property int                    $updated_at               [int(11) unsigned]
  */
 class CustomerContact extends ActiveRecord
@@ -131,6 +130,12 @@ class CustomerContact extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+        ];
+
         return $behaviors;
     }
 
@@ -183,7 +188,7 @@ class CustomerContact extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($insert && empty($this->account->avatar)) {
+        if ($insert && $this->has_customer_area_access && empty($this->account->avatar)) {
             $avatarFile = $this->account->getFilePath('avatar', Inflector::slug($this->name) . '-' . rand(10, 900) . '.jpg');
 
             ImageVersion::instance()->placeholder($this->name)->save($avatarFile);
@@ -200,7 +205,39 @@ class CustomerContact extends ActiveRecord
                 throw new Exception('Failed to delete corresponding account');
             }
         }
+
+
+        $isManualUpdate = in_array($this->scenario, ['admin/add', 'admin/update']);
+
+        if ($isManualUpdate && !empty($changedAttributes)) {
+            $this->recordSavedHistory($insert);
+        }
+
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterDelete()
+    {
+        $this->deleteRelations();
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @throws DbException
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
+    public function deleteRelations()
+    {
+        if (!$this->account->delete()) {
+            throw new Exception('Failed to delete related account');
+        }
+    }
+
+
 
     /**
      * @inheritdoc
@@ -292,5 +329,44 @@ class CustomerContact extends ActiveRecord
         $components = array_filter($components);
 
         return implode(', ', $components);
+    }
+
+    /**
+     * @return array
+     */
+    public function getHistoryParams()
+    {
+        $params = $this->getAttributes(['id', 'customer_id', 'name']);
+
+        return array_merge($params, [
+            'customer_name' => $this->customer->name,
+        ]);
+    }
+
+    /**
+     * @param bool $insert
+     *
+     * @return bool
+     * @throws DbException
+     * @throws Throwable
+     */
+    public function recordSavedHistory($insert = false)
+    {
+        $history = [
+            'params' => $this->getHistoryParams(),
+            'model' => self::class,
+            'model_id' => $this->id,
+        ];
+
+        if ($this->scenario === 'admin/add' && $insert) {
+            $history['description'] = 'Adding contact "{name}" to customer "{customer_name}"';
+        } else {
+            $history['description'] = 'Updating contact "{name}" of customer "{customer_name}"';
+        }
+
+        $historyEvent = $this->scenario === 'admin/add' ? 'customer_contact.add' : 'customer_contact.update';
+        $history['tag'] = $this->scenario === 'admin/add' ? 'add' : 'update';
+
+        return Account::history()->save($historyEvent, $history);
     }
 }

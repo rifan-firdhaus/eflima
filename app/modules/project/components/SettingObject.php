@@ -14,7 +14,7 @@ class SettingObject extends BaseSettingObject
     public function render()
     {
         switch ($this->renderer->section) {
-            case 'finance':
+            case 'project':
                 $this->renderProjectSection();
                 break;
         }

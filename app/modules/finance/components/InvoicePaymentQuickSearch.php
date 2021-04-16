@@ -33,6 +33,14 @@ class InvoicePaymentQuickSearch extends QuickSearch
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.invoice.payment.list');
+    }
+
+    /**
      * @param $q
      *
      * @return BaseDataProvider

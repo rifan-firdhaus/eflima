@@ -1,6 +1,7 @@
 <?php
 
 use modules\account\web\admin\View;
+use modules\core\components\Setting;
 use modules\crm\models\LeadStatus;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
@@ -14,7 +15,13 @@ use yii\helpers\ArrayHelper;
  * @var View       $this
  * @var LeadStatus $model
  * @var array      $formOptions
+ * @var Setting    $setting
  */
+
+$setting = Yii::$app->setting;
+
+$model->is_default_status = $setting->get('lead/default_status') == $model->id;
+$model->is_converted_status = $setting->get('lead/converted_status') == $model->id;
 
 if (!isset($formOptions)) {
     $formOptions = [];
@@ -68,6 +75,25 @@ echo $form->fields([
                 'attribute' => 'description',
                 'class' => ActiveField::class,
                 'type' => ActiveField::TYPE_TEXTAREA,
+            ],
+            [
+                'class' => ActiveField::class,
+                'attribute' => 'is_default_status',
+                'label' => false,
+                'type' => ActiveField::TYPE_CHECKBOX,
+                'inputOptions' => [
+                    'custom' => true,
+                ],
+            ],
+            [
+                'class' => ActiveField::class,
+                'attribute' => 'is_converted_status',
+                'hint' => Yii::t('app', 'Status of the lead will be changed to this status automatically once the lead is converted to customer'),
+                'label' => false,
+                'type' => ActiveField::TYPE_CHECKBOX,
+                'inputOptions' => [
+                    'custom' => true,
+                ],
             ],
             [
                 'class' => ActiveField::class,

@@ -4,9 +4,9 @@
     var count = 1;
 
     this.$currencyCodeInput = $form.find("[data-rid='invoice-currency_code']");
-    this.$customerInput = $form.find("[data-rid='invoice-customer_id']");
     this.$currencyRateInput = $form.find("[data-rid='invoice-currency_rate']");
     this.$currencyRateField = this.$currencyRateInput.closest(".form-group");
+    this.$customerInput = $form.find("[data-rid='invoice-customer_id']");
     this.$addItemButton = $form.find(".add-invoice-item-button");
     this.$table = $form.find(".invoice-item-table");
     this.$tableBody = this.$table.find("tbody");
@@ -123,12 +123,28 @@
       });
     };
 
+    this.sort = function(order){
+      $.each(order, function(order, id){
+        if (self.models[id]) {
+          self.models[id]["order"] = order;
+        }
+      });
+    };
+
     var init = function(){
         if (options.rows) {
           $.each(options.rows, function(index, row){
             self.add(row["model"], row["row"]);
           });
         }
+
+        new Sortable(self.$tableBody.get(0), {
+          animation: 300,
+          handle: ".handle",
+          onEnd: function(){
+            self.sort(this.toArray());
+          }
+        });
 
         self.$currencyCodeInput.on("change", checkCurrencyRateVisibility);
 
@@ -137,7 +153,7 @@
 
           var url = $(this).attr("href");
 
-          self.open(url,count);
+          self.open(url, count);
         });
 
         $form.parent().on("lazy.beforeSend", function(e, request, settings){
@@ -167,9 +183,7 @@
         $row.find(".delete-invoice-item-button").on("click", function(e){
           e.preventDefault();
 
-          if (confirm("You are about to delete this item, are you sure?")) {
-            self.remove(count);
-          }
+          self.remove(count);
         });
       },
 

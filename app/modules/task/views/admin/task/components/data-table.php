@@ -253,14 +253,14 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
 
                 foreach ($assignees AS $index => $assignee) {
                     $result[] = Html::tag('div', Html::img($assignee->account->getFileVersionUrl('avatar', 'thumbnail')), [
-                        'class' => 'task-avatar',
+                        'class' => 'avatar-list-item',
                         'data-toggle' => 'tooltip',
                         'title' => $assignee->name,
                     ]);
 
                     if ($index === 1 && $more > 0) {
                         $result[] = Html::tag('div', "+{$more}", [
-                            'class' => 'task-avatar-more',
+                            'class' => 'avatar-list-item-more',
                             'data-toggle' => 'tooltip',
                         ]);
 
@@ -277,6 +277,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'controller' => '/task/admin/task',
             'buttons' => [
                 'start-timer' => [
+                    'visible' => Yii::$app->user->can('admin.task.timer.toggle'),
                     'value' => function ($url, $model) use ($account) {
                         /** @var Task $model */
 
@@ -295,6 +296,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                                 'data-toggle' => 'tooltip',
                                 'data-lazy-options' => [
                                     'scroll' => false,
+                                    'method' => 'POST'
                                 ],
                             ];
                         }
@@ -307,11 +309,13 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                             'data-toggle' => 'tooltip',
                             'data-lazy-options' => [
                                 'scroll' => false,
+                                'method' => 'POST'
                             ],
                         ];
                     },
                 ],
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.task.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'label' => Yii::t('app', 'Update'),
@@ -321,6 +325,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     ],
                 ],
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.task.view.detail'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'label' => Yii::t('app', 'Update'),
@@ -329,6 +334,19 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'data-toggle' => 'tooltip',
                     ],
                 ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.task.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false,'method' => 'DELETE'],
+                    ],
+                ]
             ],
         ],
     ],

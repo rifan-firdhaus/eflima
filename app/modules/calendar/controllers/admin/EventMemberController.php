@@ -6,7 +6,6 @@ use modules\account\models\Staff;
 use modules\account\web\admin\Controller;
 use modules\calendar\models\Event;
 use modules\calendar\models\EventMember;
-use modules\ui\widgets\lazy\Lazy;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -18,6 +17,30 @@ use yii\web\Response;
  */
 class EventMemberController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['invite'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.event.update', 'admin.event.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.event.update', 'admin.event.add'],
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * @param string             $id
@@ -65,7 +88,7 @@ class EventMemberController extends Controller
         if ($model->delete()) {
             Yii::$app->session->addFlash('success', Yii::t('app', '{object} ({object_name}) successfully removed from {target_object}', [
                 'object' => Yii::t('app', 'Staff'),
-                'target_object' => Yii::t('app','Event'),
+                'target_object' => Yii::t('app', 'Event'),
                 'object_name' => $model->staff->name,
             ]));
         } else {
@@ -75,10 +98,18 @@ class EventMemberController extends Controller
             ]));
         }
 
-        return $this->redirect(['/calendar/admin/event/view','id' => $model->event_id]);
+        return $this->redirect(['/calendar/admin/event/view', 'id' => $model->event_id]);
     }
 
-    public function actionInvite($id,$staff_id){
+    /**
+     * @param $id
+     * @param $staff_id
+     *
+     * @return array|string|Response
+     * @throws InvalidConfigException
+     */
+    public function actionInvite($id, $staff_id)
+    {
         $model = Event::find()->andWhere(['id' => $id])->one();
 
         if (!($model instanceof Event)) {
@@ -103,6 +134,6 @@ class EventMemberController extends Controller
             Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to invite to event'));
         }
 
-        return $this->redirect(['/calendar/admin/event/view','id' => $model->id]);
+        return $this->redirect(['/calendar/admin/event/view', 'id' => $model->id]);
     }
 }

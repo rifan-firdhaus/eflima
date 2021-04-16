@@ -34,6 +34,9 @@ class TaskSearch extends Task implements SearchableModel
 {
     use SearchableModelTrait;
 
+    /** @var Staff */
+    public $currentStaff;
+
     public $q;
     public $started_date_from;
     public $started_date_to;
@@ -43,6 +46,24 @@ class TaskSearch extends Task implements SearchableModel
     public $created_at_to;
     public $assigned_to_me;
     public $overdue;
+
+    public function init()
+    {
+
+
+        $this->setAssociateSort([
+            'task' => [
+                'model' => Task::instance(),
+                'alias' => 'task',
+                'except' => [
+                    'creator_id',
+                    'updater_id'
+                ]
+            ]
+        ]);
+
+        parent::init();
+    }
 
     public function rules()
     {
@@ -112,11 +133,24 @@ class TaskSearch extends Task implements SearchableModel
     }
 
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        unset($behaviors['attributeTypecast']);
+
+        return $behaviors;
+    }
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
     {
         return array_merge(parent::attributeLabels(), [
+            'q' => Yii::t('app', 'Keyword'),
             'assigned_to_me' => Yii::t('app', 'Show only task assigned to me'),
             'overdue' => Yii::t('app', 'Show only overdue task'),
         ]);
@@ -249,26 +283,6 @@ class TaskSearch extends Task implements SearchableModel
 
     /**
      * @inheritDoc
-     */
-    public function getDataProvider()
-    {
-        if (isset($this->_dataProvider)) {
-            return $this->_dataProvider;
-        }
-
-        $this->_dataProvider = Yii::createObject([
-            'class' => ActiveDataProvider::class,
-            'query' => $this->getQuery(),
-            'sort' => [
-                'defaultOrder' => ['created_at' => SORT_DESC],
-            ],
-        ]);
-
-        return $this->_dataProvider;
-    }
-
-    /**
-     * @inheritDoc
      *
      * @param TaskQuery|ActiveQuery
      *
@@ -308,15 +322,16 @@ class TaskSearch extends Task implements SearchableModel
             $query->overdue();
         }
 
-        // Show only task assigned to current staff
-        if ($this->scenario === 'admin/search' && isset($this->assigned_to_me) && $this->assigned_to_me) {
+        // Show only task assigned to the current staff
+        if (isset($this->assigned_to_me) && $this->assigned_to_me) {
             $query->leftJoin(['current_task_assignee' => TaskAssignee::tableName()], [
                 'AND',
                 "[[current_task_assignee.task_id]] = [[task.id]]",
-                ['current_task_assignee.assignee_id' => $this->assigned_to_me],
+                ['current_task_assignee.assignee_id' => $this->currentStaff->id],
             ])->andWhere(['IS NOT', 'current_task_assignee.id', null]);
         }
 
+        // Filter by assignee
         if (!Common::isEmpty($this->assignee_ids)) {
             $query->leftJoin(['task_assignee' => TaskAssignee::tableName()], [
                 'AND',
@@ -325,6 +340,7 @@ class TaskSearch extends Task implements SearchableModel
             ])->andWhere(['IS NOT', 'task_assignee.id', null]);
         }
 
+        // Filter by query string
         $query->andFilterWhere([
             'OR',
             ['LIKE', 'task.title', $this->q],
@@ -351,6 +367,10 @@ class TaskSearch extends Task implements SearchableModel
 
         $this->_query = Task::find();
 
+        if ($this->currentStaff) {
+            $this->_query->visibleToStaff($this->currentStaff);
+        }
+
         $this->trigger(self::EVENT_QUERY, new SearchableModelEvent([
             'query' => $this->_query,
         ]));
@@ -359,13 +379,13 @@ class TaskSearch extends Task implements SearchableModel
 
         if (!empty($this->params['models'])) {
             foreach ($this->params['models'] AS $relation) {
-                if($relation instanceof Closure){
-                    $relatedModelCondition = call_user_func($relation,$this->_query);
+                if ($relation instanceof Closure) {
+                    $relatedModelCondition = call_user_func($relation, $this->_query);
 
-                    if($relatedModelCondition){
+                    if ($relatedModelCondition) {
                         $relatedModelConditions[] = $relatedModelCondition;
                     }
-                }else {
+                } else {
                     $relatedModelCondition = ['task.model' => $relation['model']];
 
                     if (isset($relation['model_id'])) {

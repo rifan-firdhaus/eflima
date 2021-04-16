@@ -29,32 +29,36 @@ echo $this->block('@begin');
     <?php
     echo Menu::widget([
         'active' => $active,
-        'id' => 'customer-view-menu',
+        'id' => 'lead-view-menu',
         'items' => [
             'profile' => [
                 'label' => Yii::t('app', 'Detail'),
-                'url' => ['/crm/admin/lead/view', 'id' => $model->id],
+                'url' => ['/crm/admin/lead/detail', 'id' => $model->id],
                 'icon' => 'i8:connect',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.lead.view.detail')
             ],
             'task' => [
                 'label' => Yii::t('app', 'Task'),
-                'url' => ['/crm/admin/lead/view', 'id' => $model->id, 'action' => 'task'],
+                'url' => ['/crm/admin/lead/task', 'id' => $model->id],
                 'icon' => 'i8:checked',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.lead.view.task')
             ],
             'event' => [
                 'label' => Yii::t('app', 'Event'),
-                'url' => ['/crm/admin/lead/view', 'id' => $model->id, 'action' => 'event'],
+                'url' => ['/crm/admin/lead/event', 'id' => $model->id],
                 'icon' => 'i8:event',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.lead.view.event')
             ],
             'history' => [
                 'label' => Yii::t('app', 'History'),
-                'url' => ['/crm/admin/lead/view', 'id' => $model->id, 'action' => 'history'],
+                'url' => ['/crm/admin/lead/history', 'id' => $model->id],
                 'icon' => 'i8:activity-history',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
                 'order' => 99,
+                'visible' => Yii::$app->user->can('admin.lead.view.history')
             ],
         ],
         'options' => [

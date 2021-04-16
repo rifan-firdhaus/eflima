@@ -1,6 +1,7 @@
 <?php
 
 
+use modules\account\assets\admin\StaffDataViewAsset;
 use modules\account\models\forms\staff\StaffSearch;
 use modules\account\web\admin\View;
 use modules\ui\widgets\DataView;
@@ -115,44 +116,89 @@ $dataView = DataView::begin(ArrayHelper::merge([
 
 echo $this->render('data-table', compact('dataProvider'));
 
+
 $dataView->beginHeader();
 
-echo ButtonGroup::widget([
-    'buttons' => [
-        Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/account/admin/staff/add'], [
-            'class' => 'btn btn-primary',
-            'data-lazy-modal' => 'staff-form-modal',
-            'data-lazy-container' => '#main-container',
-        ]),
-        ButtonDropdown::widget([
-            'label' => Icon::show('i8:cursor') . Yii::t('app', 'Bulk Action'),
-            'encodeLabel' => false,
-            'buttonOptions' => [
-                'class' => 'btn btn-secondary',
-            ],
-            'dropdown' => [
-                'encodeLabels' => false,
-                'items' => [
-                    [
-                        'label' => Icon::show('i8:shield', ['class' => 'mr-2 icon']) . Yii::t('app', 'Unblock'),
-                        'url' => ['/'],
-                    ],
-                    [
-                        'label' => Icon::show('i8:delete-shield', ['class' => 'mr-2 icon']) . Yii::t('app', 'Block'),
-                        'url' => ['/'],
-                    ],
-                    [
-                        'label' => Icon::show('i8:trash', ['class' => 'mr-2 icon']) . Yii::t('app', 'Delete'),
-                        'url' => ['/'],
-                    ],
+if(Yii::$app->user->can('admin.staff.add')){
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/account/admin/staff/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'staff-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
+
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Icon::show('i8:multiply',['class' => 'icon mr-2']).Yii::t('app', 'Block'),
+                'encode' => false,
+                'url' => ['/account/admin/staff/bulk-block','block' => 1],
+                'linkOptions' => [
+                    'class' => 'bulk-block',
+                    'title' => Yii::t('app', '{action} Selected {object}',[
+                        'action' => Yii::t('app', 'Block'),
+                        'object' => Yii::t('app', 'Staff')
+                    ]),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Staff'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
                 ],
             ],
-        ]),
+            [
+                'label' => Icon::show('i8:checkmark',['class' => 'icon mr-2']).Yii::t('app', 'Unblock'),
+                'encode' => false,
+                'url' => ['/account/admin/staff/bulk-block','block' => 0],
+                'linkOptions' => [
+                    'class' => 'bulk-unblock',
+                    'title' => Yii::t('app', '{action} Selected {object}',[
+                        'action' => Yii::t('app', 'Unblock'),
+                        'object' => Yii::t('app', 'Staff')
+                    ]),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Staff'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+            '-',
+            [
+                'label' => Icon::show('i8:trash',['class' => 'icon mr-2']).Yii::t('app', 'Delete'),
+                'encode' => false,
+                'url' => ['/account/admin/staff/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Staff'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
     ],
 ]);
 
 $dataView->endHeader();
 
+StaffDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').staffDataView()");
+
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

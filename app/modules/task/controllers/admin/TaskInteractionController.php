@@ -21,6 +21,22 @@ use function compact;
  */
 class TaskInteractionController extends Controller
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.view.detail']
+            ]
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param TaskInteraction $model
      * @param                 $data

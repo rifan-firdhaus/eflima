@@ -47,12 +47,14 @@ echo $this->render('data-table', compact('dataProvider'));
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/lead-follow-up-type/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'lead-follow-up-type-form-modal',
-    'data-lazy-modal-size' => 'modal-md',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.setting.crm.lead-follow-up-type.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/lead-follow-up-type/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'lead-follow-up-type-form-modal',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 

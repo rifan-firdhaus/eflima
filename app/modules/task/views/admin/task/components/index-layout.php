@@ -27,24 +27,21 @@ $this->fullHeightContent = true;
                     'url' => ['/task/admin/task/index'],
                     'icon' => 'i8:checked',
                     'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                    'visible' => Yii::$app->user->can('admin.task.list')
                 ],
                 'timer' => [
                     'label' => Yii::t('app', 'Timesheet'),
                     'url' => ['/task/admin/task-timer/index'],
                     'icon' => 'i8:timer',
                     'iconOptions' => ['class' => 'icon icons8-size mr-1'],
-                ],
-                'statistic' => [
-                    'label' => Yii::t('app', 'Statistic'),
-                    'url' => ['/task/admin/task/statistic'],
-                    'icon' => 'i8:statistics',
-                    'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                    'visible' => Yii::$app->user->can('admin.task.timer.list')
                 ],
                 'history' => [
                     'label' => Yii::t('app', 'History'),
-                    'url' => ['/task/admin/task/history'],
+                    'url' => ['/task/admin/task/all-history'],
                     'icon' => 'i8:activity-history',
                     'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                    'visible' => Yii::$app->user->can('admin.task.history')
                 ],
             ],
             'options' => [

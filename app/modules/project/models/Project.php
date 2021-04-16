@@ -5,58 +5,73 @@
 use modules\account\Account;
 use modules\account\models\queries\StaffQuery;
 use modules\account\models\Staff;
+use modules\account\models\StaffAccount;
+use modules\calendar\models\Event as CalendarEvent;
+use modules\core\behaviors\AttributeTypecastBehavior;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\core\validators\DateValidator;
 use modules\crm\models\Customer;
 use modules\crm\models\queries\CustomerQuery;
 use modules\finance\models\Currency;
+use modules\finance\models\Expense;
 use modules\finance\models\Invoice;
 use modules\finance\models\queries\CurrencyQuery;
+use modules\finance\models\queries\ExpenseQuery;
 use modules\finance\models\queries\InvoiceQuery;
+use modules\note\models\Note;
+use modules\project\models\queries\ProjectDiscussionTopicQuery;
 use modules\project\models\queries\ProjectMemberQuery;
 use modules\project\models\queries\ProjectMilestoneQuery;
 use modules\project\models\queries\ProjectQuery;
 use modules\project\models\queries\ProjectStatusQuery;
+use modules\task\models\Task;
 use Throwable;
 use Yii;
+use yii\base\Event;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 use yii\db\Exception as DbException;
 use yii\db\StaleObjectException;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property Customer                  $customer
- * @property Currency                  $currency
- * @property ProjectStatus             $status
- * @property null|string               $visibilityText
- * @property Invoice[]|array           $invoices
- * @property ProjectAttachment[]|array $attachments
- * @property ProjectMilestone[]|array  $milestones
- * @property Staff[]                   $members
- * @property ProjectMember[]           $membersRelationship
- * @property bool                      $isStarted
- * @property bool                      $isOverdue
- * @property array                     $historyParams
- * @property string|float|int          $totalDue
+ * @property Customer                      $customer
+ * @property Currency                      $currency
+ * @property ProjectStatus                 $status
+ * @property null|string                   $visibilityText
+ * @property Invoice[]|array               $invoices
+ * @property Expense[]|array               $expenses
+ * @property ProjectAttachment[]|array     $attachments
+ * @property ProjectMilestone[]|array      $milestones
+ * @property-read ProjectDiscussionTopic[] $discussionTopics
+ * @property Staff[]                       $members
+ * @property ProjectMember[]               $membersRelationship
+ * @property bool                          $isStarted
+ * @property bool                          $isOverdue
+ * @property array                         $historyParams
+ * @property string|float|int              $totalDue
  *
- * @property int                       $id                                [int(10) unsigned]
- * @property int                       $customer_id                       [int(11) unsigned]
- * @property int                       $status_id                         [int(11) unsigned]
- * @property string                    $currency_code                     [char(3)]
- * @property string                    $name
- * @property string                    $description
- * @property string                    $progress                          [decimal(5,4)]
- * @property bool                      $is_progress_calcuted_through_task [tinyint(1)]
- * @property string                    $budget                            [decimal(10)]
- * @property int                       $started_date                      [int(11) unsigned]
- * @property int                       $deadline_date                     [int(11) unsigned]
- * @property string                    $visibility                        [char(1)]
- * @property bool                      $is_visible_to_customer            [tinyint(1)]
- * @property int                       $created_at                        [int(11) unsigned]
- * @property int                       $updated_at                        [int(11) unsigned]
+ * @property int                           $id                                [int(10) unsigned]
+ * @property int                           $customer_id                       [int(11) unsigned]
+ * @property int                           $status_id                         [int(11) unsigned]
+ * @property string                        $currency_code                     [char(3)]
+ * @property string                        $name
+ * @property string                        $description
+ * @property string                        $progress                          [decimal(5,4)]
+ * @property bool                          $is_progress_calcuted_through_task [tinyint(1)]
+ * @property string                        $budget                            [decimal(10)]
+ * @property int                           $started_date                      [int(11) unsigned]
+ * @property int                           $deadline_date                     [int(11) unsigned]
+ * @property string                        $visibility                        [char(1)]
+ * @property bool                          $is_visible_to_customer            [tinyint(1)]
+ * @property int                           $creator_id                        [int(11) unsigned]
+ * @property int                           $created_at                        [int(11) unsigned]
+ * @property int                           $updater_id                        [int(11) unsigned]
+ * @property int                           $updated_at                        [int(11) unsigned]
  */
 class Project extends ActiveRecord
 {
@@ -186,6 +201,25 @@ class Project extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+        ];
+
+        $behaviors['attributeTypecast'] = [
+            'class' => AttributeTypecastBehavior::class,
+            'attributeTypes' => [
+                'status_id' => AttributeTypecastBehavior::TYPE_INTEGER,
+                'customer_id' => AttributeTypecastBehavior::TYPE_INTEGER,
+                'budget' => AttributeTypecastBehavior::TYPE_FLOAT,
+                'started_date' => AttributeTypecastBehavior::TYPE_INTEGER,
+                'deadline_date' => AttributeTypecastBehavior::TYPE_INTEGER,
+                'updated_at' => AttributeTypecastBehavior::TYPE_INTEGER,
+                'created_at' => AttributeTypecastBehavior::TYPE_INTEGER,
+            ],
+        ];
+
         return $behaviors;
     }
 
@@ -194,7 +228,6 @@ class Project extends ActiveRecord
      */
     public function afterSave($insert, $changedAttributes)
     {
-
         $isManualUpdate = in_array($this->scenario, ['admin/add', 'admin/update']);
 
         // Save attachments
@@ -228,6 +261,80 @@ class Project extends ActiveRecord
         }
 
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function beforeDelete()
+    {
+        foreach ($this->membersRelationship AS $member) {
+            if (!$member->delete()) {
+                throw new DbException('Failed to delete related member');
+            }
+        }
+
+        foreach ($this->attachments AS $attachment) {
+            if (!$attachment->delete()) {
+                throw new DbException('Failed to delete related attachment');
+            }
+        }
+
+        foreach ($this->invoices AS $invoice) {
+            if (!$invoice->delete()) {
+                throw new DbException('Failed to delete related invoice');
+            }
+        }
+
+        foreach ($this->expenses AS $expense) {
+            if (!$expense->delete()) {
+                throw new DbException('Failed to delete related expense');
+            }
+        }
+
+        foreach ($this->milestones AS $milestone) {
+            if (!$milestone->delete()) {
+                throw new DbException('Failed to delete related milestone');
+            }
+        }
+
+        foreach ($this->discussionTopics AS $discussionTopic) {
+            if (!$discussionTopic->delete()) {
+                throw new DbException('Failed to delete related discussion');
+            }
+        }
+
+        if (Yii::$app->hasModule('task')) {
+            $tasks = Task::find()->andWhere(['model' => 'project', 'model_id' => $this->id])->all();
+
+            foreach ($tasks AS $task) {
+                if (!$task->delete()) {
+                    throw new DbException('Failed to delete related tasks');
+                }
+            }
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'project', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new DbException('Failed to delete related notes');
+                }
+            }
+        }
+
+        if (Yii::$app->hasModule('calendar')) {
+            $events = CalendarEvent::find()->andWhere(['model' => 'project', 'model_id' => $this->id])->all();
+
+            foreach ($events AS $event) {
+                if (!$event->delete()) {
+                    throw new DbException('Failed to delete related event');
+                }
+            }
+        }
+
+        return parent::beforeDelete();
     }
 
     /**
@@ -357,7 +464,15 @@ class Project extends ActiveRecord
      */
     public function getInvoices()
     {
-        return $this->hasMany(Invoice::class, ['id' => 'invoice_id'])->alias('invoices_of_project');
+        return $this->hasMany(Invoice::class, ['project_id' => 'id'])->alias('invoices_of_project');
+    }
+
+    /**
+     * @return ActiveQuery|ExpenseQuery
+     */
+    public function getExpenses()
+    {
+        return $this->hasMany(Expense::class, ['project_id' => 'id'])->alias('expenses_of_project');
     }
 
     /**
@@ -393,6 +508,14 @@ class Project extends ActiveRecord
     }
 
     /**
+     * @return ActiveQuery|ProjectDiscussionTopicQuery
+     */
+    public function getDiscussionTopics()
+    {
+        return $this->hasMany(ProjectDiscussionTopic::class, ['project_id' => 'id']);
+    }
+
+    /**
      * @param integer $statusId
      *
      * @return bool
@@ -415,6 +538,32 @@ class Project extends ActiveRecord
         $this->status_id = $statusId;
 
         if (!$this->save(false)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int|string $staffId
+     *
+     * @return bool
+     */
+    public function invite($staffId)
+    {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+
+        $model = new ProjectMember([
+            'project_id' => $this->id,
+            'staff_id' => $staffId,
+            'inviter_id' => $account->profile->id,
+            'scenario' => 'admin/project/add',
+        ]);
+
+        $model->loadDefaultValues();
+
+        if (!$model->save()) {
             return false;
         }
 
@@ -447,7 +596,7 @@ class Project extends ActiveRecord
         $history = [
             'params' => $this->getHistoryParams(),
             'model' => self::class,
-            'model_id' => $this->id
+            'model_id' => $this->id,
         ];
 
         if ($this->scenario === 'admin/add' && $insert) {
@@ -489,26 +638,14 @@ class Project extends ActiveRecord
         /** @var ProjectMember[] $currentModels */
         $currentModels = $this->getMembersRelationship()->indexBy('staff_id')->all();
 
-        $addedMembers = [];
-
         foreach ($this->member_ids AS $assigneeId) {
             if (isset($currentModels[$assigneeId])) {
                 continue;
             }
 
-            $model = new ProjectMember([
-                'scenario' => 'admin/project/add',
-                'project_id' => $this->id,
-                'staff_id' => $assigneeId,
-            ]);
-
-            $model->loadDefaultValues();
-
-            if (!$model->save()) {
+            if (!$this->invite($assigneeId)) {
                 return false;
             }
-
-            $addedMembers[] = $model;
         }
 
         foreach ($currentModels AS $key => $model) {
@@ -537,4 +674,67 @@ class Project extends ActiveRecord
 
         return parent::loadDefaultValues($skipIfSet);
     }
+
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = self::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $project) {
+                if (!$project->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws DbException
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public static function deleteAllProjectRelatedToDeletedCustomer($event)
+    {
+        /** @var Customer $customer */
+        $customer = $event->sender;
+        $projects = Project::find()->andWhere(['customer_id' => $customer->id])->all();
+
+        foreach ($projects AS $project) {
+            if (!$project->delete()) {
+                throw new Exception('Failed to delete related projects');
+            }
+        }
+    }
+
 }

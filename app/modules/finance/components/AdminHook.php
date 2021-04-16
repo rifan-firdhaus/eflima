@@ -7,16 +7,22 @@ use modules\account\web\admin\Controller;
 use modules\account\web\admin\View;
 use modules\account\widgets\history\HistoryWidget;
 use modules\account\widgets\history\HistoryWidgetEvent;
+use modules\calendar\models\Event as CalendarEvent;
 use modules\core\components\HookTrait;
+use modules\core\controllers\admin\SettingController;
 use modules\core\web\ViewBlockEvent;
+use modules\crm\controllers\admin\CustomerController;
 use modules\crm\models\Customer;
+use modules\crm\models\Lead;
 use modules\finance\models\Currency;
 use modules\finance\models\Expense;
 use modules\finance\models\forms\expense\ExpenseSearch;
 use modules\finance\models\forms\invoice\InvoiceSearch;
 use modules\finance\models\Invoice;
 use modules\finance\models\InvoiceItem;
+use modules\finance\models\Proposal;
 use modules\finance\widgets\inputs\CurrencyInput;
+use modules\note\models\Note;
 use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\query\TaskQuery;
 use modules\task\models\Task;
@@ -26,6 +32,7 @@ use modules\ui\widgets\form\fields\CardField;
 use modules\ui\widgets\Icon;
 use modules\ui\widgets\Menu;
 use modules\ui\widgets\table\cells\Cell;
+use Throwable;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -33,6 +40,9 @@ use yii\base\ModelEvent;
 use yii\bootstrap4\ButtonDropdown;
 use yii\db\Exception;
 use yii\db\Expression;
+use yii\db\StaleObjectException;
+use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\validators\Validator;
 
@@ -44,18 +54,37 @@ class AdminHook
     use HookTrait;
 
     protected $historyShortDescription = [
-        'invoice.add' => 'Adding Invoice',
-        'invoice.update' => 'Updating Invoice',
-        'invoice.pay' => 'Record payment {amount}',
-        'invoice_item.add' => 'Adding item "{name}"',
-        'invoice_item.update' => 'Updating item "{name}"',
-        'invoice_item.delete' => 'Deleting item "{name}"',
-
-        'expense.add' => 'Adding Expense',
-        'expense.update' => 'Updating Expense',
+        'invoice' => [
+            'invoice.add' => 'Adding Invoice',
+            'invoice.update' => 'Updating Invoice',
+            'invoice.pay' => 'Record payment {amount}',
+            'invoice_item.add' => 'Adding item "{name}"',
+            'invoice_item.update' => 'Updating item "{name}"',
+            'invoice_item.delete' => 'Deleting item "{name}"',
+        ],
+        'proposal' => [
+            'proposal.add' => 'Adding Proposal',
+            'proposal.update' => 'Updating Proposal',
+            'proposal.pay' => 'Record payment {amount}',
+            'proposal_item.add' => 'Adding item "{name}"',
+            'proposal_item.update' => 'Updating item "{name}"',
+            'proposal_item.delete' => 'Deleting item "{name}"',
+        ],
+        'expense' => [
+            'expense.add' => 'Adding Expense',
+            'expense.update' => 'Updating Expense',
+        ],
     ];
 
     protected $historyOptions = [
+        'invoice_assignee.add' => [
+            'icon' => 'i8:link',
+            'iconOptions' => ['class' => 'icon bg-info'],
+        ],
+        'invoice_assignee.delete' => [
+            'icon' => 'i8:broken-link',
+            'iconOptions' => ['class' => 'icon bg-warning'],
+        ],
         'invoice_item.add' => [
             'icon' => 'i8:add-shopping-cart',
             'iconOptions' => ['class' => 'icon bg-info'],
@@ -72,6 +101,27 @@ class AdminHook
             'iconOptions' => ['class' => 'icon bg-success'],
         ],
 
+
+        'proposal_assignee.add' => [
+            'icon' => 'i8:link',
+            'iconOptions' => ['class' => 'icon bg-info'],
+        ],
+        'proposal_assignee.delete' => [
+            'icon' => 'i8:broken-link',
+            'iconOptions' => ['class' => 'icon bg-warning'],
+        ],
+        'proposal_item.add' => [
+            'icon' => 'i8:add-shopping-cart',
+            'iconOptions' => ['class' => 'icon bg-info'],
+        ],
+        'proposal_item.update' => [
+            'icon' => 'i8:shopping-cart',
+        ],
+        'proposal_item.delete' => [
+            'icon' => 'i8:clear-shopping-cart',
+            'iconOptions' => ['class' => 'icon bg-warning'],
+        ],
+
         'expense.billed' => [
             'icon' => 'i8:add-shopping-cart',
             'iconOptions' => ['class' => 'icon bg-success'],
@@ -85,6 +135,33 @@ class AdminHook
     protected function __construct()
     {
         Event::on(Controller::class, Controller::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+        Event::on(SettingController::class, SettingController::EVENT_INIT, [$this, 'registerSettingPermission']);
+        Event::on(CustomerController::class, CustomerController::EVENT_INIT, [$this, 'registerControllerCustomerViewMenu']);
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws InvalidConfigException
+     */
+    public function registerSettingPermission($event)
+    {
+        /**
+         * @var SettingController $settingController
+         * @var AccessControl     $accessBehaviors
+         */
+        $settingController = $event->sender;
+        $accessBehaviors = $settingController->getBehavior('access');
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.finance.general'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'finance';
+            },
+        ], $accessBehaviors->ruleConfig));
     }
 
     /**
@@ -115,6 +192,11 @@ class AdminHook
             );
 
             $controller->view->on(
+                'block:crm/admin/lead/components/view-layout:begin',
+                [$this, 'registerLeadViewMenu']
+            );
+
+            $controller->view->on(
                 'block:crm/admin/customer/view:begin',
                 [$this, 'registerCustomerMoreActionMenu']
             );
@@ -126,6 +208,42 @@ class AdminHook
 
             $controller->view->on('block:crm/admin/customer/components/data-table:begin', [$this, 'customizeCustomerDataTable']);
         }
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function registerControllerCustomerViewMenu($event)
+    {
+        /** @var CustomerController $controller */
+        $controller = $event->sender;
+
+        ArrayHelper::insertAfter($controller->viewMenu, 'task', [
+            'invoice' => [
+                'role' => 'admin.customer.view.invoice',
+                'route' => function ($id) {
+                    return ['/finance/admin/invoice/index', 'view' => 'customer', 'customer_id' => $id];
+                },
+            ],
+            'payment' => [
+                'role' => 'admin.customer.view.payment',
+                'route' => function ($id) {
+                    return ['/finance/admin/invoice-payment/index', 'view' => 'customer', 'customer_id' => $id];
+                },
+            ],
+            'expense' => [
+                'role' => 'admin.customer.view.expense',
+                'route' => function ($id) {
+                    return ['/finance/admin/expense/index', 'view' => 'customer', 'customer_id' => $id];
+                },
+            ],
+            'proposal' => [
+                'role' => 'admin.customer.view.proposal',
+                'route' => function ($id) {
+                    return ['/finance/admin/proposal/index', 'view' => 'customer', 'customer_id' => $id];
+                },
+            ],
+        ]);
     }
 
     /**
@@ -317,6 +435,44 @@ class AdminHook
                     'class' => 'important',
                 ]);
             }
+        } elseif (in_array($model->key, [
+            'proposal_item.add',
+            'proposal_item.update',
+            'proposal_item.delete',
+        ])) {
+            $event->params['proposal_number'] = Html::a([
+                'url' => ['/finance/admin/proposal/view', 'id' => $model->params['id']],
+                'label' => Html::encode($model->params['proposal_number']),
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal' => 'invoice-view-modal',
+                'class' => 'important',
+            ]);
+
+            $event->params['name'] = $model->key === 'proposal_item.delete' ? $model->params['name'] : Html::a([
+                'url' => ['/finance/admin/proposal-item/update', 'id' => $model->params['id']],
+                'label' => Html::encode($model->params['name']),
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal-size' => 'modal-md',
+                'class' => 'important',
+                'data-lazy-modal' => 'proposal-item-view-modal',
+            ]);
+        } elseif (in_array($model->key, [
+            'proposal.add',
+            'proposal.update',
+            'proposal.delete',
+        ])) {
+            $proposalModel = Proposal::find()->andWhere(['id' => $model->model_id])->one();
+
+            if ($proposalModel) {
+                $event->params['number'] = Html::a([
+                    'url' => ['/finance/admin/proposal/view', 'id' => $model->params['id']],
+                    'label' => Html::encode($model->params['number']),
+                    'data-lazy-container' => '#main-container',
+                    'data-lazy-modal' => 'proposal-view-modal',
+                    'class' => 'important',
+                ]);
+                $event->params['model'] = $proposalModel->getRelatedObject()->getLink($proposalModel->getRelatedModel());
+            }
         }
 
         if (isset($this->historyOptions[$model->key])) {
@@ -325,10 +481,12 @@ class AdminHook
             }
         }
 
-        if (in_array($widget->realId, ['invoice-history', 'expense-history'])) {
-            if (isset($this->historyShortDescription[$model->key])) {
-                $event->description = $this->historyShortDescription[$model->key];
-            }
+        if ($widget->realId === 'invoice-history' && isset($this->historyShortDescription['invoice'][$model->key])) {
+            $event->description = $this->historyShortDescription['invoice'][$model->key];
+        } elseif ($widget->realId === 'expense-history' && isset($this->historyShortDescription['expense'][$model->key])) {
+            $event->description = $this->historyShortDescription['expense'][$model->key];
+        } elseif ($widget->realId === 'proposal-history' && isset($this->historyShortDescription['proposal'][$model->key])) {
+            $event->description = $this->historyShortDescription['proposal'][$model->key];
         }
     }
 
@@ -398,6 +556,34 @@ class AdminHook
     /**
      * @param ViewBlockEvent $event
      */
+    public function registerLeadViewMenu($event)
+    {
+        /** @var Lead $lead */
+        $lead = $event->viewParams['model'];
+
+        Event::on(Menu::class, Menu::EVENT_INIT, function ($menuEvent) use ($lead) {
+            /** @var Menu $menu */
+
+            $menu = $menuEvent->sender;
+
+            if ($menu->realId !== 'lead-view-menu') {
+                return;
+            }
+
+            $menu->items['proposal'] = [
+                'label' => Yii::t('app', 'Proposal'),
+                'icon' => 'i8:handshake',
+                'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'url' => ['/finance/admin/proposal/index', 'view' => 'lead', 'lead_id' => $lead->id],
+                'visible' => Yii::$app->user->can('admin.lead.view.proposal'),
+            ];
+
+        });
+    }
+
+    /**
+     * @param ViewBlockEvent $event
+     */
     public function registerCustomerViewMenu($event)
     {
         /** @var Customer $customer */
@@ -422,21 +608,50 @@ class AdminHook
                         'icon' => 'i8:cash',
                         'iconOptions' => ['class' => 'icon icons8-size mr-1'],
                         'url' => ['/finance/admin/invoice/index', 'view' => 'customer', 'customer_id' => $customer->id],
+                        'visible' => Yii::$app->user->can('admin.customer.view.invoice'),
                     ],
                     [
                         'label' => Yii::t('app', 'Payment'),
                         'icon' => 'i8:receive-cash',
                         'iconOptions' => ['class' => 'icon icons8-size mr-1'],
                         'url' => ['/finance/admin/invoice-payment/index', 'view' => 'customer', 'customer_id' => $customer->id],
+                        'visible' => Yii::$app->user->can('admin.customer.view.payment'),
                     ],
                     [
                         'label' => Yii::t('app', 'Expense'),
                         'icon' => 'i8:money-transfer',
                         'iconOptions' => ['class' => 'icon icons8-size mr-1'],
                         'url' => ['/finance/admin/expense/index', 'view' => 'customer', 'customer_id' => $customer->id],
+                        'visible' => Yii::$app->user->can('admin.customer.view.expense'),
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Proposal'),
+                        'icon' => 'i8:handshake',
+                        'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                        'url' => ['/finance/admin/proposal/index', 'view' => 'customer', 'customer_id' => $customer->id],
+                        'visible' => Yii::$app->user->can('admin.customer.view.proposal'),
                     ],
                 ],
             ];
+        });
+
+        // Hide "Transaction" menu item if there are no children
+        Event::on(Menu::class, Menu::EVENT_BEFORE_RUN, function ($menuEvent) {
+            /** @var Menu $menu */
+
+            $menu = $menuEvent->sender;
+
+            if ($menu->realId !== 'customer-view-menu') {
+                return;
+            }
+
+            $hasChild = array_filter(ArrayHelper::getColumn($menu->items['transaction']['items'], 'visible'), function ($value) {
+                return $value !== false;
+            });
+
+            if (!$hasChild) {
+                unset($menu->items['transaction']);
+            }
         });
     }
 
@@ -516,11 +731,23 @@ class AdminHook
                     'class' => 'heading',
                 ],
             ],
+            'main/transaction/proposal' => [
+                'label' => Yii::t('app', 'Proposals'),
+                'icon' => 'i8:handshake',
+                'url' => ['/finance/admin/proposal/index'],
+                'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.proposal.list'),
+                'linkOptions' => [
+                    'data-lazy-link' => true,
+                    'data-lazy-container' => '#main-container',
+                ],
+            ],
             'main/transaction/invoice' => [
                 'label' => Yii::t('app', 'Invoice'),
                 'icon' => 'i8:cash',
                 'url' => ['/finance/admin/invoice/index'],
                 'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.invoice.list'),
                 'linkOptions' => [
                     'data-lazy-link' => true,
                     'data-lazy-container' => '#main-container',
@@ -531,6 +758,7 @@ class AdminHook
                 'icon' => 'i8:money-transfer',
                 'url' => ['/finance/admin/expense/index'],
                 'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.expense.list'),
                 'linkOptions' => [
                     'data-lazy-link' => true,
                     'data-lazy-container' => '#main-container',
@@ -541,6 +769,7 @@ class AdminHook
                 'icon' => 'i8:receive-cash',
                 'url' => ['/finance/admin/invoice-payment/index'],
                 'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.invoice.payment.list'),
                 'linkOptions' => [
                     'data-lazy-link' => true,
                     'data-lazy-container' => '#main-container',
@@ -558,7 +787,7 @@ class AdminHook
             ],
             'setting/finance' => [
                 'label' => Yii::t('app', 'Finance'),
-                'url' => ['/core/admin/setting/index', 'section' => 'finance'],
+                'url' => ['/finance/admin/setting/index'],
                 'icon' => 'i8:money-yours',
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
@@ -638,6 +867,17 @@ class AdminHook
                     'linkOptions' => [
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'expense-form-modal',
+                    ],
+                ];
+
+                $buttonDropdown->dropdown['items'][] = [
+                    'label' => Icon::show('i8:handshake', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
+                            'object' => Yii::t('app', 'Proposal'),
+                        ]),
+                    'url' => ['/finance/admin/proposal/add', 'customer_id' => $model->id],
+                    'linkOptions' => [
+                        'data-lazy-container' => '#main-container',
+                        'data-lazy-modal' => 'proposal-form-modal',
                     ],
                 ];
             }

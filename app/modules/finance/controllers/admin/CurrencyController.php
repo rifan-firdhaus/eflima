@@ -21,7 +21,57 @@ use yii\web\Response;
 class CurrencyController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.finance.currency.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.finance.currency.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.finance.currency.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.finance.currency.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.finance.currency.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'roles' => ['@']
+            ]
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
+     *
+     * @throws InvalidConfigException
      */
     public function actionIndex()
     {

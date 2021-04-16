@@ -24,19 +24,17 @@ $this->menu->active = 'main/support/ticket';
 
 if (!$model->isNewRecord) {
     if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-ticket'] = Html::a(
-            '',
-            ['/task/admin/ticket/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
+        $this->toolbar['delete-ticket'] = Html::a([
+            'url' => ['/task/admin/ticket/delete', 'id' => $model->id],
+            'class' => 'btn btn-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->name),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE'],
+        ]);
     }
 }
 

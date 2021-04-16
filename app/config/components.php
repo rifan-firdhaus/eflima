@@ -1,17 +1,19 @@
 <?php
 
 use modules\core\components\Setting;
-use yii\bootstrap\BootstrapAsset;
+use modules\core\web\View;
+use modules\crm\models\CustomerContactAccount;
 use yii\caching\FileCache;
 use yii\i18n\PhpMessageSource;
 use yii\log\FileTarget;
 use yii\swiftmailer\Mailer;
 use yii\web\JqueryAsset;
+use yii\web\User;
 use yii\web\YiiAsset;
 
 return [
     'request' => [
-        'cookieValidationKey' => 'gSKY@nT9xXo1f4g31>G&Y"49z34S1p_new_',
+        'cookieValidationKey' => 'gSKY@nT9xXo1f4g31>G&Y"49z34S1p_client',
         'enableCsrfValidation' => true,
         'enableCookieValidation' => true,
         'enableCsrfCookie' => false,
@@ -54,10 +56,18 @@ return [
             ],
         ],
     ],
+    'view' => [
+        'class' => View::class
+    ],
     'db' => require(__DIR__ . '/db.php'),
     'session' => [
         'timeout' => 43200,
-        'name' => 'eflima-v3.1',
+        'name' => 'eflima-v3-1-client',
+    ],
+    'user' => [
+        'class' => User::class,
+        'identityClass' => CustomerContactAccount::class,
+        'loginUrl' => ['/crm/customer/customer/login'],
     ],
     'setting' => [
         'class' => Setting::class,

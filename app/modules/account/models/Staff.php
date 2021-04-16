@@ -10,25 +10,30 @@ use modules\account\models\queries\StaffQuery;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\file_manager\helpers\ImageVersion;
+use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
  * @property StaffAccount $account
- * @property string               $name
- * @property array                $historyParams
- * @property bool                 $isRoot
+ * @property string       $name
+ * @property array        $historyParams
+ * @property bool         $isRoot
  *
- * @property int                  $id         [int(10) unsigned]
- * @property int                  $account_id [int(11) unsigned]
- * @property string               $first_name
- * @property string               $last_name
- * @property int                  $created_at [int(11) unsigned]
- * @property int                  $updated_at [int(11) unsigned]
+ * @property int          $id         [int(10) unsigned]
+ * @property int          $account_id [int(11) unsigned]
+ * @property string       $first_name
+ * @property string       $last_name
+ * @property int          $creator_id [int(11) unsigned]
+ * @property int          $created_at [int(11) unsigned]
+ * @property int          $updater_id [int(11) unsigned]
+ * @property int          $updated_at [int(11) unsigned]
  */
 class Staff extends ActiveRecord
 {
@@ -55,7 +60,7 @@ class Staff extends ActiveRecord
             [
                 ['first_name', 'last_name'],
                 'string',
-                'on'  => ['admin/add','admin/update']
+                'on' => ['admin/add', 'admin/update'],
             ],
         ];
     }
@@ -93,6 +98,12 @@ class Staff extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;
@@ -189,6 +200,26 @@ class Staff extends ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        $this->deleteRelations();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteRelations()
+    {
+        if (!$this->account->delete()) {
+            throw new Exception('Failed to delete related account');
+        }
+    }
+
+    /**
      * @return array
      */
     public function getHistoryParams()
@@ -244,6 +275,46 @@ class Staff extends ActiveRecord
 
         if (!parent::beforeValidate() || $isAccountModelValid) {
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = self::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $staff) {
+                if (!$staff->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
         }
 
         return true;

@@ -3,7 +3,9 @@
 
 use modules\account\web\admin\View;
 use modules\calendar\assets\admin\EventCalendarAsset;
+use modules\calendar\assets\admin\EventDataViewAsset;
 use modules\calendar\models\forms\event\EventSearch;
+use modules\crm\assets\admin\LeadDataViewAsset;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\Icon;
 use yii\bootstrap4\ButtonDropdown;
@@ -113,6 +115,35 @@ if ($addUrl !== false) {
     ]);
 }
 
+
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Yii::t('app', 'Delete'),
+                'url' => ['/calendar/admin/event/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}',[
+                            'object' => Yii::t('app', 'Event')
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE']
+                ],
+            ],
+        ],
+    ],
+]);
+
 echo Html::tag('div', Yii::t('app', 'View as:'), ['class' => 'ml-3']);
 
 echo ButtonGroup::widget([
@@ -216,6 +247,11 @@ $dataView->beginHeader();
 echo Html::tag('div', '', ['class' => 'flex-shrink-1 w-100 text-center calendar-header font-size-lg font-weight-bold align-self-center']);
 $dataView->endHeader();
 
+
+EventDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').eventDataView()");
+
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

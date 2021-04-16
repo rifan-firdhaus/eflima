@@ -10,6 +10,7 @@ use modules\core\helpers\Common;
 use modules\core\models\traits\VisibilityModel;
 use modules\crm\models\queries\CustomerGroupQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -19,10 +20,12 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property int        $id         [int(10) unsigned]
  * @property string     $name
- * @property string     $description
  * @property string     $color_label
+ * @property string     $description
  * @property bool       $is_enabled [tinyint(1)]
+ * @property int        $creator_id [int(11) unsigned]
  * @property int        $created_at [int(11) unsigned]
+ * @property int        $updater_id [int(11) unsigned]
  * @property int        $updated_at [int(11) unsigned]
  */
 class CustomerGroup extends ActiveRecord
@@ -73,9 +76,18 @@ class CustomerGroup extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+        ];
+
         return $behaviors;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function beforeSave($insert)
     {
         if (!parent::beforeSave($insert)) {

@@ -2,6 +2,7 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use modules\ui\widgets\Card;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -25,6 +26,11 @@ class CardField extends MultiField
         $class = ArrayHelper::remove($this->card, 'class', Card::class);
 
         $this->card['autoRender'] = false;
+
+        if(isset($this->options['id'])){
+            $this->card['id'] = $this->options['id'];
+            unset($this->options['id']);
+        }
 
         $this->card = $class::begin($this->card);
         $class::end();

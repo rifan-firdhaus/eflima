@@ -19,11 +19,51 @@ use function compact;
  */
 class TaskTimerController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.task.timer.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.task.timer.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.task.timer.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.task.timer.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
+     * @return array|string
+     */
     public function actionIndex()
     {
         $params = Yii::$app->request->queryParams;
 
-        $searchModel  = new TaskTimerSearch();
+        $searchModel = new TaskTimerSearch();
 
         if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -160,15 +200,37 @@ class TaskTimerController extends Controller
             Yii::$app->session->addFlash('success', Yii::t('app', '{object} successfully deleted', [
                 'object' => Yii::t('app', 'Timer'),
             ]));
-
-            if (Lazy::isLazyModalRequest()) {
-                Lazy::close();
-
-                return '';
-            }
         } else {
             Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to delete {object}', [
                 'object' => Yii::t('app', 'Timer'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = TaskTimer::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Timer'),
+            ]));
+        }
+
+        if (TaskTimer::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Timers'),
             ]));
         }
 

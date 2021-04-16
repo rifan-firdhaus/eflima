@@ -1,6 +1,7 @@
 <?php namespace modules\calendar\assets\admin;
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
+use modules\account\assets\admin\MainAsset;
 use modules\core\web\AssetBundle;
 use yii\web\JqueryAsset;
 
@@ -20,6 +21,6 @@ class EventViewAsset extends AssetBundle
     ];
 
     public $depends = [
-        JqueryAsset::class,
+        MainAsset::class,
     ];
 }

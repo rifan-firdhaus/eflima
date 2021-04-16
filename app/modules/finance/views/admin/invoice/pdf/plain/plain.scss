@@ -1,0 +1,85 @@
+@import "../../../../../../account/assets/admin/source/css/backup/variables";
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.header-logo-image {
+  max-width: 130px;
+}
+
+.main-header {
+  overflow: hidden;
+  margin-bottom: 1.3rem;
+}
+
+.company-name {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.header {
+  width: 100%;
+  margin-bottom: 1.5rem;
+
+  .header-left {
+    float: left;
+    width: 50%;
+  }
+
+  .header-right {
+    float: right;
+    width: 50%;
+    text-align: right;
+  }
+
+  .header-title {
+    text-transform: uppercase;
+    font-size: 2rem;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid $primary;
+
+  thead th {
+    background-color: $primary;
+    color: $white;
+    text-align: left;
+  }
+
+  th, td {
+    padding: 0.6rem 0.8rem;
+  }
+
+  th.fit, td.fit {
+    width: 1rem;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: $gray-100;
+  }
+}
+
+.table-footer tr td,
+.table-footer tr th {
+  border-top: 1px solid $gray-200;
+  padding: 0.8rem 0.8rem
+}
+
+.table thead th.text-center,
+.text-center {
+  text-align: center;
+}
+
+.table thead th.text-right,
+.text-right {
+  text-align: right;
+}
+
+.amount {
+  width: 150px
+}

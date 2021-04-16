@@ -36,6 +36,14 @@ class ExpenseQuery extends ActiveQuery
     }
 
     /**
+     * @return $this
+     */
+    public function nonBillable()
+    {
+        return $this->billable(false);
+    }
+
+    /**
      * @param bool $isBillable
      *
      * @return $this
@@ -48,9 +56,9 @@ class ExpenseQuery extends ActiveQuery
     /**
      * @return $this
      */
-    public function nonBillable()
+    public function notBilled()
     {
-        return $this->billable(false);
+        return $this->billed(false);
     }
 
     /**
@@ -65,14 +73,6 @@ class ExpenseQuery extends ActiveQuery
         }
 
         return $this->billable()->andWhere(['IS NOT', "{$this->getAlias()}.invoice_item_id", null]);
-    }
-
-    /**
-     * @return $this
-     */
-    public function notBilled()
-    {
-        return $this->billed(false);
     }
 
     /**

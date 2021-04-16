@@ -1,34 +1,4 @@
-@import "../../../../../account/assets/admin/source/css/_variables.scss";
-
-.task-avatar-more,
-.task-avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: inline-block;
-  margin-right: -15px;
-  border: 4px solid $white;
-  transition: 0.3s;
-}
-
-.task-avatar-more {
-  background-color: $primary;
-  font-size: 1rem;
-  font-weight: bold;
-  text-align: center;
-  line-height: 27px;
-  color: #FFF;
-}
-
-.task-avatar img {
-  max-width: 100%;
-}
-
-.task-avatar:hover {
-  z-index: 999999999999999999;
-  transform: scale(1);
-}
+@import "../../../../../account/assets/admin/source/css/backup/variables";
 
 /***** LIST *****/
 .column-detail {
@@ -260,7 +230,14 @@
       border: 0;
       border-top: 1px solid $gray-200;
       padding: 0;
-      background: transparent;
+      bottom: map-get($spacers,3) * -1;
+      border-radius: 0 0 8px 8px;
+      flex-wrap: wrap;
+      z-index: 1039;
+
+      .tox.tox-tinymce.tox-tinymce-inline {
+        max-width: 100%;
+      }
     }
 
     [data-rid=taskinteraction-comment] {

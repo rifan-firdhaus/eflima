@@ -172,6 +172,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'controller' => '/finance/admin/invoice-payment',
             'buttons' => [
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.invoice.payment.view'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'name' => Yii::t('app', 'View'),

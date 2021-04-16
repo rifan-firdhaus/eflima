@@ -2,7 +2,6 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use modules\crm\models\Customer;
-use modules\project\models\Project;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -40,7 +39,8 @@ trait CustomerRelatedTrait
     }
 
     /**
-     * @param Customer $model
+     * @param mixed    $model
+     * @param Customer $customer
      *
      * @inheritDoc
      */

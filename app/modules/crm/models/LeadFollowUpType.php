@@ -6,6 +6,7 @@ use modules\core\db\ActiveRecord;
 use modules\core\models\traits\VisibilityModel;
 use modules\crm\models\queries\LeadFollowUpTypeQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -15,7 +16,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $label
  * @property string $description
  * @property bool   $is_enabled [tinyint(1)]
+ * @property int    $creator_id [int(11) unsigned]
  * @property int    $created_at [int(11) unsigned]
+ * @property int    $updater_id [int(11) unsigned]
  * @property int    $updated_at [int(11) unsigned]
  */
 class LeadFollowUpType extends ActiveRecord
@@ -87,6 +90,12 @@ class LeadFollowUpType extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;

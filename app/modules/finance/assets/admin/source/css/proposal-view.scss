@@ -1,0 +1,18 @@
+@import "../../../../../account/assets/admin/source/css/backup/variables";
+
+[data-rid="proposal-view-wrapper"] {
+  position: relative;
+
+  .content-tinymce-panel {
+    position: sticky;
+    top: map-get($spacers,3) * -1;
+    z-index: 99999;
+  }
+  .tox.tox-tinymce.tox-tinymce-inline {
+    max-width: 100%;
+  }
+
+  [data-rid="proposal-content"] {
+    min-height: 200px;
+  }
+}

@@ -2,6 +2,7 @@
 
 use modules\account\models\Staff;
 use modules\account\web\admin\View;
+use modules\account\widgets\inputs\RoleInput;
 use modules\file_manager\widgets\inputs\FileUploaderInput;
 use modules\ui\widgets\Card;
 use modules\ui\widgets\form\fields\ActiveField;
@@ -84,6 +85,14 @@ echo $form->fields([
                             'attribute' => 'username',
                             'class' => ActiveField::class,
                             'model' => $model->accountModel,
+                        ],
+                        [
+                            'attribute' => 'role',
+                            'type' => ActiveField::TYPE_WIDGET,
+                            'model' => $model->accountModel,
+                            'widget' => [
+                                'class' => RoleInput::class,
+                            ],
                         ],
                         [
                             'attribute' => 'uploaded_avatar',

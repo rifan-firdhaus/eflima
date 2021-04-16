@@ -48,13 +48,17 @@ $form = Form::begin(ArrayHelper::merge([
     'enableTimestamp' => false,
     'model' => $model,
     'formActionsSections' => [
+        'tinymce' => [
+            'sort' => -1,
+            'class' => 'tinymce-toolbar',
+        ],
         'secondary' => [
             'sort' => -1,
             'class' => 'align-self-center align-items-center d-flex ',
         ],
     ],
 ], $formOptions));
-
+$form->addAction('','tinymce-toolbar','tinymce');
 $form->addAction(Html::submitButton(Icon::show('i8:paper-plane') . Yii::t('app', 'Send'), ['class' => 'btn btn-link']), 'save');
 $form->addAction(FileUploaderInput::widget([
     'attribute' => 'uploaded_attachments[]',
@@ -128,6 +132,10 @@ echo $form->fields([
                                 'class' => TinyMceInput::class,
                                 'inline' => true,
                                 'type' => TinyMceInput::TYPE_BASIC,
+                                'jsOptions' => [
+                                    'fixed_toolbar_container' => "#task-interaction-form-{$this->uniqueId} .tinymce-toolbar",
+                                    'toolbar_drawer' => 'floating',
+                                ],
                             ],
                         ],
                         [

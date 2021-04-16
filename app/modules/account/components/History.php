@@ -3,6 +3,7 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Exception;
 use modules\account\models\History as HistoryModel;
+use modules\account\models\Staff;
 use modules\core\components\Setting;
 use Throwable;
 use Yii;
@@ -36,7 +37,7 @@ class History extends BaseObject
         $model = new HistoryModel([
             'key' => $event,
             'at' => microtime(true),
-            'executor_id' => Yii::$app->getUser()->getId(),
+            'executor_id' => Yii::$app->has('user') ? Yii::$app->getUser()->getId() : Staff::root()->account_id,
             'model' => isset($attributes['model']) ? $attributes['model'] : null,
             'model_id' => isset($attributes['model_id']) ? $attributes['model_id'] : null,
         ]);

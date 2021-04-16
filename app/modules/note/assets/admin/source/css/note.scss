@@ -1,7 +1,15 @@
-@import "../../../../../account/assets/admin/source/css/_variables.scss";
+@import "../../../../../account/assets/admin/source/css/variables";
 
 .note-container-overlay {
   background-color: $modal-backdrop-bg;
+}
+
+.packery-drop-placeholder {
+  outline: 3px dashed #444;
+  outline-offset: -6px;
+  /* transition position changing */
+  -webkit-transition: -webkit-transform 0.2s;
+  transition: transform 0.2s;
 }
 
 .note-container-overlay,
@@ -17,6 +25,7 @@
   z-index: -1;
   opacity: 0;
   transition: 0.3s;
+  backdrop-filter: blur(4px);
 }
 
 .note-container {
@@ -29,6 +38,23 @@
 .note-container.note-container-inline {
   position: static;
   padding: 0;
+}
+
+.note-container-close {
+  font-size: 4rem;
+  position: fixed;
+  right: 0;
+  top: 0;
+  line-height: 1;
+  padding: 1.15rem;
+  z-index: 9999999;
+  cursor: pointer;
+  transition: 0.3s;
+  transform: translateY(-100%);
+}
+
+.note-container.note-open .note-container-close {
+  transform: translateY(0);
 }
 
 .note-toolbar {
@@ -63,7 +89,7 @@
 }
 
 .note-container.note-open .note-container-overlay {
-  opacity: 0.88;
+  opacity: 1;
 }
 
 /**** NOTE ITEM ****/
@@ -80,10 +106,13 @@
   transform: translateY(40%);
   min-height: 0;
 
-  .note-item-container {
+  .note-item-container,
+  .note-item-container-sizer {
     width: 25%;
     padding: map-get($spacers, 2);
+  }
 
+  .note-item-container {
     .note-item {
       background: color-level($yellow, -10);
       border: 1px solid color-level($yellow, -3);
@@ -168,4 +197,12 @@
 .note-container.note-open .note-items {
   transform: translateY(0);
   opacity: 1;
+}
+
+[data-pin="1"] .icon-pin {
+  display: none;
+}
+
+[data-pin="0"] .icon-unpin {
+  display: none;
 }

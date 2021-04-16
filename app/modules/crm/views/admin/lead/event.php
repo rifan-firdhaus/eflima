@@ -20,9 +20,8 @@ echo $this->block('@begin');
 echo $this->render('@modules/calendar/views/admin/event/components/data-view', [
     'searchModel' => $eventSearchModel,
     'dataViewOptions' => [
-        'searchAction' => new ReplaceArrayValue($eventSearchModel->searchUrl('/crm/admin/lead/view', [
+        'searchAction' => new ReplaceArrayValue($eventSearchModel->searchUrl('/crm/admin/lead/event', [
             'id' => $model->id,
-            'action' => 'event',
         ], false)),
     ],
 ]);

@@ -121,12 +121,26 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'buttons' => [
                 'view' => false,
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.task.timer.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'label' => Yii::t('app', 'Update'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal-size' => 'modal-md',
                         'data-lazy-modal' => 'task-timer-form-modal',
+                    ],
+                ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.task.timer.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'POST'],
                     ],
                 ],
             ],

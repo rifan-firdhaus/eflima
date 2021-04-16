@@ -2,8 +2,8 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use modules\ui\assets\TinyMceAsset;
-use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 use yii\widgets\InputWidget;
@@ -44,20 +44,19 @@ class TinyMceInput extends InputWidget
         $types = [
             self::TYPE_BASIC => [
                 'auto_focus' => false,
-                'plugins' => [
-                    'autoresize quickbars lists link image code imagetools paste codesample textpattern'
-                ],
+                'plugins' => 'autoresize table quickbars lists link image code imagetools paste searchreplace  codesample textpattern',
+                'contextmenu' => "image media inserttable | paste pastetext searchreplace | pagebreak charmap | code",
                 'menubar' => false,
                 'statusbar' => false,
                 'quickbars_insert_toolbar' => false,
                 'toolbar_drawer' => 'floating',
                 'quickbars_selection_toolbar' => 'bold underline italic strikethrough subscript superscript | h1 h2 h3 h4 | forecolor | quicklink',
-                'toolbar1' => 'bold underline italic strikethrough subscript superscript | forecolor backcolor | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | image link codesample'
+                'toolbar' => 'bold underline italic strikethrough subscript superscript | forecolor backcolor | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | image table link codesample',
             ],
             self::TYPE_FLOATING => [
                 'auto_focus' => false,
                 'plugins' => [
-                    'autoresize quickbars lists link image code imagetools paste codesample textpattern'
+                    'autoresize quickbars lists link image code imagetools paste codesample textpattern',
                 ],
                 'menubar' => false,
                 'statusbar' => false,
@@ -98,7 +97,7 @@ class TinyMceInput extends InputWidget
         //        $this->jsOptions['file_picker_callback'] = new JsExpression('tinymceFilePickerCallback');
         //        $this->view->registerJs($this->renderFile('@modules/core/form/tinymce/assets/file_manager.js'), View::POS_HEAD);
         //
-        if ($this->options['placeholder']) {
+        if (!empty($this->options['placeholder'])) {
             $this->jsOptions['setup'] = new JsExpression(
             /** @lang JavaScript */
                 "function(editor) {
@@ -125,8 +124,9 @@ class TinyMceInput extends InputWidget
             $editableOptions = $this->options;
             $editableOptions['id'] = $this->options['id'] . '-editable';
 
-            $editable = Html::tag('div', Html::getAttributeValue($this->model, $this->attribute), $editableOptions);
-            $input = Html::activeHiddenInput($this->model, $this->attribute, $this->options);
+            $value = $this->hasModel() ? Html::getAttributeValue($this->model, $this->attribute) : $this->value;
+            $editable = Html::tag('div', $value, $editableOptions);
+            $input = $this->hasModel() ? Html::activeHiddenInput($this->model, $this->attribute, $this->options) : Html::hiddenInput($this->name,$this->value,$this->options);
 
             $this->jsOptions['selector'] = '#' . $editableOptions['id'];
             $this->jsOptions['inline'] = true;
@@ -138,6 +138,10 @@ class TinyMceInput extends InputWidget
         }
 
         $this->view->registerJs("$( '#{$this->options['id']}').tinymce(" . Json::encode($this->jsOptions) . ");");
+
+        if (!$this->hasModel()) {
+            return Html::textarea($this->name, $this->value, $this->options);
+        }
 
         return Html::activeTextarea($this->model, $this->attribute, $this->options);
     }

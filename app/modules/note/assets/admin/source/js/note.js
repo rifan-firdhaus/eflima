@@ -9,6 +9,7 @@
     this.$trigger = $("#note-button");
     this.$searchQueryInput = self.$container.find(".note-search-query-input");
     this.$searchForm = self.$container.find(".note-search-form");
+    this.$closeButton = this.$container.find(".note-container-close");
 
     this.open = function(){
       this.$container.show();
@@ -45,11 +46,22 @@
 
     var init = function(){
         self.$trigger.on("click", onTriggerClicked);
+
         self.$searchForm.on("submit", function(e){
           e.preventDefault();
 
           self.$container.noteContainer("clear");
           self.$container.noteContainer("load", self.$searchForm.serialize());
+        });
+
+        $body.on("keyup", function(e){
+          if (self.isOpen() && e.keyCode === 27) {
+            self.close();
+          }
+        });
+
+        self.$closeButton.on("click", function(){
+          self.close();
         });
       },
 
@@ -76,11 +88,15 @@
         var $container = $(this);
 
         setTimeout(function(){
-          self.$items.masonry("remove", $container);
+          self.$items.packery("remove", $container);
         }, time);
 
         time += 30;
       });
+    };
+
+    this.togglePin = function(){
+
     };
 
     this.loadItem = function(result, $container){
@@ -95,6 +111,16 @@
       lazy.render(result, $noteItem).done(function(){
         var $updateButton = $container.find(".btn-update-note");
         var $deleteButton = $container.find(".btn-remove-note");
+        var $pinButton = $container.find(".btn-pin-note");
+
+        $pinButton.on("click", function(e){
+          e.preventDefault();
+
+          var isPinned = $pinButton.attr("data-pin");
+
+          self.togglePin($pinButton.attr("href"), $container);
+          $pinButton.attr("data-pin", isPinned == "1" ? "0" : "1");
+        });
 
         $updateButton.on("click", function(e){
           e.preventDefault();
@@ -123,7 +149,7 @@
             var $container = self.loadItem(html);
 
             setTimeout(function(){
-              self.$items.append($container).masonry("appended", $container).masonry();
+              self.$items.append($container).packery("appended", $container).packery();
             }, time);
 
             time += 30;
@@ -139,8 +165,19 @@
         dataType: "JSON",
         success: function(data){
           if (data.success) {
-            self.$items.masonry("remove", $container).masonry();
+            self.$items.packery("remove", $container).packery();
           }
+        }
+      });
+    };
+
+    this.togglePin = function(url, $container){
+      return $.ajax({
+        url: url,
+        type: "POST",
+        dataType: "JSON",
+        success: function(data){
+          self.$items.packery("remove", $container).packery();
         }
       });
     };
@@ -180,8 +217,10 @@
     var init = function(){
         self.$addButton.on("click", onAddButtonClicked);
 
-        self.$items.masonry({
-          itemSelector: ".note-item-container"
+        self.$items.packery({
+          itemSelector: ".note-item-container",
+          columnWidth: '.note-item-container-sizer',
+          percentPosition: true,
         });
 
         if (options.autoLoad) {
@@ -223,7 +262,7 @@
         if (typeof $container === "undefined") {
           $container = createContainer();
 
-          self.$items.prepend($container).masonry("prepended", $container).masonry();
+          self.$items.prepend($container).packery("prepended", $container).packery();
         }
 
         var $noteItem = $container.children(".note-item");
@@ -246,18 +285,18 @@
             if (data.item) {
               contentTinyMCE.destroy(false);
               self.loadItem(data.item, $container);
-              self.$items.masonry();
+              self.$items.packery();
             }
           });
 
           $attachmentInput.on("fileUploader.change", function(){
-            self.$items.masonry();
+            self.$items.packery();
           });
 
           form.$titleInput.on({
             "keydown": function(){
               setTimeout(function(){
-                self.$items.masonry();
+                self.$items.packery();
               }, 0);
             },
             "focus": function(){
@@ -270,7 +309,7 @@
 
           contentTinyMCE.on("init", function(e){
             this.focus();
-            self.$items.masonry();
+            self.$items.packery();
           });
 
           contentTinyMCE.on("focus", function(){
@@ -282,7 +321,7 @@
           });
 
           contentTinyMCE.on("NodeChange SetContent keyup FullscreenStateChanged ResizeContent", function(){
-            self.$items.masonry();
+            self.$items.packery();
           });
         });
       };

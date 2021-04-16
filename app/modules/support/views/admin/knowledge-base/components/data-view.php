@@ -47,15 +47,17 @@ echo $this->render('data-table', compact('dataProvider'));
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/support/admin/knowledge-base/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'knowledge-base-form',
-    'data-lazy-modal-size' => 'modal-lg',
-    'data-lazy-container' => '#main-container',
-]);
+if(Yii::$app->user->can('admin.knowledge-base.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/support/admin/knowledge-base/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'knowledge-base-form',
+        'data-lazy-modal-size' => 'modal-lg',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

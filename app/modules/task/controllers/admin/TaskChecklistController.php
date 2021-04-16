@@ -4,8 +4,8 @@
 use modules\account\web\admin\Controller;
 use modules\core\helpers\Common;
 use modules\task\models\query\TaskChecklistQuery;
-use modules\task\models\TaskChecklist;
 use modules\task\models\Task;
+use modules\task\models\TaskChecklist;
 use Yii;
 use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
@@ -18,6 +18,79 @@ use function strpos;
  */
 class TaskChecklistController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['change'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.checklist.add'],
+                'matchCallback' => function () {
+                    $id = Yii::$app->request->post('id');
+
+                    return strpos($id, '__') === 0;
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.task.checklist.delete'],
+                'matchCallback' => function () {
+                    return empty(Yii::$app->request->post('label'));
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.checklist.update'],
+                'matchCallback' => function () {
+                    return $this->isUpdateRequest();
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['change'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.checklist.toggle'],
+                'matchCallback' => function () {
+                    return !$this->isUpdateRequest();
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['sort'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.task.checklist.update'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    protected function isUpdateRequest()
+    {
+        $id = Yii::$app->request->post('id');
+        $taskId = Yii::$app->request->get('task_id');
+        $label = Yii::$app->request->post('label');
+
+        if (strpos($id, '__') === 0 || empty($label)) {
+            return false;
+        }
+
+        $model = TaskChecklist::find()->andWhere(['id' => $id, 'task_id' => $taskId])->one();
+        $model->load(Yii::$app->request->post(), '');
+
+        return !$model->isAttributeChanged('is_checked');
+    }
+
     public function actionChange($task_id)
     {
         if (!Yii::$app->request->isAjax) {

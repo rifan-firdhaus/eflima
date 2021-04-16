@@ -1,0 +1,48 @@
+@import "../../../../../account/assets/admin/source/css/backup/variables";
+
+.lead-status-kanban-item {
+  max-width: 300px;
+  min-width: 300px;
+  width: 100%;
+  margin-right: map-get($spacers, 3);
+  border-radius: $border-radius;
+  overflow: hidden;
+}
+
+.lead-status-kanban-item-header {
+  padding: map-get($spacers, 3);
+
+  & .btn-menu {
+    color: inherit;
+  }
+
+  & > .handle {
+    margin-top: map-get($spacers,3) * -1;
+    margin-bottom: map-get($spacers,3) * -1;
+    margin-left: map-get($spacers,3) * -1;
+    padding: map-get($spacers, 3);
+    cursor: move;
+    transition: 0.3s;
+    font-size: $font-size-lg;
+  }
+}
+.lead-status-kanban-item-title {
+  font-weight: $font-weight-semi-bold;
+  color: inherit;
+
+  &:hover {
+    color: inherit;
+  }
+}
+
+.lead-status-kanban-item-content {
+  border-color: $border-color;
+  border-style: solid;
+  flex-shrink: 1;
+  flex-basis: 100vh;
+  border-width: 0 1px 1px;
+}
+
+.lead-status-kanban-item-lead-container.sortable-chosen  .lead-status-kanban-item-lead {
+  background: color-level($warning, -11);
+}

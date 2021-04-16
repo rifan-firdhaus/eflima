@@ -18,6 +18,7 @@ use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\DateColumn;
 use modules\ui\widgets\data_table\DataTable;
 use modules\ui\widgets\Icon;
+use modules\ui\widgets\inputs\RangeInput;
 use modules\ui\widgets\lazy\Lazy;
 use modules\ui\widgets\table\cells\Cell;
 use yii\bootstrap4\Progress;
@@ -25,6 +26,7 @@ use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
+use yii\web\JsExpression;
 
 /**
  * @var View                  $this
@@ -47,52 +49,62 @@ $this->beginContent('@modules/task/views/admin/task/components/view-layout.php',
 
 echo $this->block('@begin');
 
-$this->toolbar['delete-task'] = Html::a([
-    'url' => ['/task/admin/task/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->title),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-    'data-toggle' => 'tooltip',
-]);
-
-if ($model->is_timer_enabled) {
-    $this->toolbar['toggle-timer'] = Html::a([
-        'url' => ['/task/admin/task/toggle-timer', 'id' => $model->id, 'start' => !$isTimerStarted],
-        'icon' => !$isTimerStarted ? 'i8:play' : 'i8:stop',
-        'title' => !$isTimerStarted ? Yii::t('app', 'Start Timer') : Yii::t('app', 'Stop Timer'),
-        'class' => 'btn btn-outline-primary btn-icon',
+if (Yii::$app->user->can('admin.task.delete')) {
+    $this->toolbar['delete-task'] = Html::a([
+        'url' => ['/task/admin/task/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+            'object_name' => Html::tag('strong', $model->title),
+        ]),
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
         'data-toggle' => 'tooltip',
+        'data-lazy-options' => ['method' => 'DELETE'],
     ]);
 }
 
-$this->toolbar['update-task'] = Html::a([
-    'label' => Html::tag('span', Yii::t('app', 'Update'), ['class' => 'btn-label']),
-    'url' => ['/task/admin/task/update', 'id' => $model->id],
-    'class' => 'btn btn-icon-sm btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'task-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
+if ($model->is_timer_enabled) {
+    if (Yii::$app->user->can('admin.task.timer.toggle')) {
+        $this->toolbar['toggle-timer'] = Html::a([
+            'url' => ['/task/admin/task/toggle-timer', 'id' => $model->id, 'start' => !$isTimerStarted],
+            'icon' => !$isTimerStarted ? 'i8:play' : 'i8:stop',
+            'title' => !$isTimerStarted ? Yii::t('app', 'Start Timer') : Yii::t('app', 'Stop Timer'),
+            'class' => 'btn btn-outline-primary btn-icon',
+            'data-toggle' => 'tooltip',
+            'data-lazy-options' => ['method' => 'POST'],
+        ]);
+    }
+}
 
-$this->toolbar['duplicate-task'] = Html::a([
-    'label' => Html::tag('span', Yii::t('app', 'Duplicate'), ['class' => 'btn-label']),
-    'url' => ['/task/admin/task/add', 'duplicate_id' => $model->id],
-    'class' => 'btn btn-icon-sm btn-outline-secondary',
-    'icon' => 'i8:copy',
-    'data-lazy-modal' => 'task-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.task.update')) {
+    $this->toolbar['update-task'] = Html::a([
+        'label' => Html::tag('span', Yii::t('app', 'Update'), ['class' => 'btn-label']),
+        'url' => ['/task/admin/task/update', 'id' => $model->id],
+        'class' => 'btn btn-icon-sm btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'task-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
+
+if (Yii::$app->user->can('admin.task.add')) {
+    $this->toolbar['duplicate-task'] = Html::a([
+        'label' => Html::tag('span', Yii::t('app', 'Duplicate'), ['class' => 'btn-label']),
+        'url' => ['/task/admin/task/add', 'duplicate_id' => $model->id],
+        'class' => 'btn btn-icon-sm btn-outline-secondary',
+        'icon' => 'i8:copy',
+        'data-lazy-modal' => 'task-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 ?>
 <div class="d-flex h-100">
 
     <?php Lazy::begin([
         'id' => 'task-view-wrapper-lazy',
         'options' => [
-            'class' => 'h-100 py-3 w-100 overflow-auto container-fluid',
+            'class' => 'h-100 py-3 w-100 overflow-auto container-fluid task-view-wrapper-overflow',
         ],
     ]); ?>
 
@@ -166,16 +178,16 @@ $this->toolbar['duplicate-task'] = Html::a([
                                 'url' => function ($priority) use ($model) {
                                     return ['/task/admin/task/change-priority', 'priority' => $priority['id'], 'id' => $model->id];
                                 },
-                            ]) ?>
+                            ]); ?>
                         </td>
                     </tr>
 
                     <tr>
                         <th><?= Yii::t('app', 'Created by') ?></th>
                         <td>
-                            <?= Html::a(Html::encode($model->creator->name), ['/account/admin/staff/view', 'id' => $model->creator_id]); ?>
+                            <?= Html::a(Html::encode($model->creator->profile->name), ['/account/admin/staff/view', 'id' => $model->creator_id]); ?>
                             <div class="font-size-sm">
-                                <?= Html::encode($model->creator->account->username) ?>
+                                <?= Html::encode($model->creator->username) ?>
                             </div>
                         </td>
                     </tr>
@@ -212,23 +224,48 @@ $this->toolbar['duplicate-task'] = Html::a([
 
                     <tr>
                         <th><?= Yii::t('app', 'Progress') ?></th>
-                        <td>
+                        <td class="align-middle">
                             <?php
                             $progressInPercent = $model->progress * 100;
                             $progressLabel = Html::tag('div', $progressInPercent . "%", [
-                                'class' => 'mr-2 text-primary data-table-primary-text',
+                                'class' => 'mr-2 text-primary task-progress-label data-table-primary-text',
                             ]);
-                            $progressBar = Progress::widget([
-                                'percent' => $progressInPercent,
-                                'options' => [
-                                    'class' => 'flex-grow-1',
-                                    'style' => 'height: 4px',
-                                ],
-                            ]);
-                            echo Html::tag('div', $progressLabel . $progressBar, [
-                                'class' => 'd-flex task-progress align-items-center',
-                                'style' => 'max-width: 10rem',
-                            ]);
+
+                            if ($model->progress_calculation === Task::PROGRESS_CALCULATION_OWN) {
+                                $slider = RangeInput::widget([
+                                    'id' => 'task-progress-input',
+                                    'name' => 'progress',
+                                    'max' => 100,
+                                    'value' => $model->progress ? $model->progress * 100 : 0,
+                                    'jsOptions' => [
+                                        'prefix' => Yii::t('app', 'Set progress to:'),
+                                        'extra_classes' => 'task-progress-slider flex-grow-1',
+                                        'postfix' => '%',
+                                        'hide_min_max' => true,
+                                        'hide_from_to' => false,
+                                        'force_edges' => true,
+                                        'grid_margin' => false,
+                                        'onFinish' => new JsExpression("function(data,a){\$('#task-view-wrapper-{$this->uniqueId}').taskView('setProgress',data.from)}")
+                                    ],
+                                ]);
+
+                                echo Html::tag('div', $progressLabel . $slider, [
+                                    'class' => 'd-flex task-progress align-items-center',
+                                    'style' => 'max-width: 10rem',
+                                ]);
+                            } else {
+                                $progressBar = Progress::widget([
+                                    'percent' => $progressInPercent,
+                                    'options' => [
+                                        'class' => 'flex-grow-1',
+                                        'style' => 'height: 4px',
+                                    ],
+                                ]);
+                                echo Html::tag('div', $progressLabel . $progressBar, [
+                                    'class' => 'd-flex task-progress align-items-center',
+                                    'style' => 'max-width: 10rem',
+                                ]);
+                            }
                             ?>
                             <div class="font-size-sm">
                                 <?php if ($model->progress_calculation === Task::PROGRESS_CALCULATION_CHECKLIST): ?>
@@ -238,21 +275,23 @@ $this->toolbar['duplicate-task'] = Html::a([
                         </td>
                     </tr>
 
-                    <tr>
-                        <th><?= Yii::t('app', 'Logged Time') ?></th>
-                        <td>
+                    <?php if ($model->is_timer_enabled): ?>
+                        <tr>
+                            <th><?= Yii::t('app', 'Logged Time') ?></th>
+                            <td>
                                 <span data-toggle="tooltip" title="<?= Yii::$app->formatter->asDuration($totalRecordedTime) ?>">
                                   <?= Yii::$app->formatter->asShortDuration($totalRecordedTime) ?>
                                 </span>
-                            <?php if ($model->estimation && $totalRecordedTime > $model->estimationSecond): ?>
-                                <div class="font-size-sm text-danger">
-                                    <?= Yii::t('app', '{time} late from estimation', [
-                                        'time' => Yii::$app->formatter->asShortDuration($model->estimationSecond),
-                                    ]) ?>
-                                </div>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                                <?php if ($model->estimation && $totalRecordedTime > $model->estimationSecond): ?>
+                                    <div class="font-size-sm text-danger">
+                                        <?= Yii::t('app', '{time} late from estimation', [
+                                            'time' => Yii::$app->formatter->asShortDuration($model->estimationSecond),
+                                        ]) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
 
                     <?= $this->block('@detail:end') ?>
                 </table>
@@ -377,27 +416,25 @@ $this->toolbar['duplicate-task'] = Html::a([
 
                     echo $this->block('@assignee:begin');
 
-                    $addAssigneeButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
-                        'class' => 'btn btn-outline-primary btn-sm btn-task-assignee',
-                    ]);
-                    $addAssigneeInput = StaffInput::widget([
-                        'name' => 'assignee',
-                        'url' => ['/task/admin/task/staff-assignable-auto-complete', 'id' => $model->id],
-                        'id' => 'task-assignee-input',
-                        'options' => [
-                            'class' => 'task-assignee-input',
-                        ],
-                    ]);
+                    if ($model->visibility !== Task::VISIBILITY_PRIVATE && Yii::$app->user->can('admin.task.assignee')) {
+                        $addAssigneeButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
+                            'class' => 'btn btn-outline-primary btn-sm btn-task-assignee',
+                        ]);
+                        $addAssigneeInput = StaffInput::widget([
+                            'name' => 'assignee',
+                            'url' => ['/task/admin/task/staff-assignable-auto-complete', 'id' => $model->id],
+                            'id' => 'task-assignee-input',
+                            'options' => [
+                                'class' => 'task-assignee-input',
+                            ],
+                        ]);
 
-                    $assigneeCard->addToHeader(
-                        Html::tag('div', $addAssigneeInput . $addAssigneeButton, [
-                            'class' => 'task-assignee-input-container',
-                        ])
-                    );
-
-                    Lazy::begin([
-                        'id' => 'task-view-assignee',
-                    ]);
+                        $assigneeCard->addToHeader(
+                            Html::tag('div', $addAssigneeInput . $addAssigneeButton, [
+                                'class' => 'task-assignee-input-container',
+                            ])
+                        );
+                    }
 
                     echo DataTable::widget([
                         'dataProvider' => new ArrayDataProvider([
@@ -469,6 +506,7 @@ $this->toolbar['duplicate-task'] = Html::a([
                                     'update' => false,
                                     'delete' => false,
                                     'unassign' => [
+                                        'visible' => $model->visibility !== Task::VISIBILITY_PRIVATE && Yii::$app->user->can('admin.task.assignee'),
                                         'value' => function ($key, $model, $id, $index) {
                                             return [
                                                 'icon' => 'i8:trash',
@@ -479,7 +517,7 @@ $this->toolbar['duplicate-task'] = Html::a([
                                                 'url' => Url::to(['/task/admin/task/unassign', 'id' => $model->task_id, 'staff_id' => $model->assignee_id]),
                                                 'class' => 'text-danger',
                                                 'data-lazy-container' => false,
-                                                'data-lazy-options' => ['scroll' => false],
+                                                'data-lazy-options' => ['scroll' => false, 'method' => 'POST'],
                                             ];
                                         },
                                     ],
@@ -487,8 +525,6 @@ $this->toolbar['duplicate-task'] = Html::a([
                             ],
                         ],
                     ]);
-
-                    Lazy::end();
 
                     echo $this->block('@assignee:begin');
 
@@ -526,6 +562,7 @@ $this->toolbar['duplicate-task'] = Html::a([
 
     $jsOptions = Json::encode([
         'assignUrl' => Url::to(['/task/admin/task/assign', 'id' => $model->id]),
+        'setProgressUrl' => Url::to(['/task/admin/task/update-progress', 'id' => $model->id]),
     ]);
 
     $this->registerJs("$('#task-view-wrapper-{$this->uniqueId}').taskView({$jsOptions})");

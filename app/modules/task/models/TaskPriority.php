@@ -9,6 +9,7 @@ use modules\core\db\ActiveRecord;
 use modules\core\models\traits\VisibilityModel;
 use modules\task\models\query\TaskPriorityQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -19,10 +20,12 @@ use yii\behaviors\TimestampBehavior;
  * @property int    $id          [int(10) unsigned]
  * @property string $label
  * @property string $color_label [char(7)]
- * @property int    $order       [int(3) unsigned]
  * @property bool   $is_enabled  [tinyint(1)]
  * @property string $description
+ * @property int    $order       [int(3) unsigned]
+ * @property int    $creator_id  [int(11) unsigned]
  * @property int    $created_at  [int(11) unsigned]
+ * @property int    $updater_id  [int(11) unsigned]
  * @property int    $updated_at  [int(11) unsigned]
  */
 class TaskPriority extends ActiveRecord
@@ -61,6 +64,12 @@ class TaskPriority extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;

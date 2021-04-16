@@ -15,6 +15,34 @@ use yii\web\Response;
 class SettingController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['menu'],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.general'],
+                'matchCallback' => function () {
+                    return Yii::$app->request->get('section') === 'general' || Yii::$app->request->get('section') === 'crm';
+                },
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return string
      */
     public function actionMenu()

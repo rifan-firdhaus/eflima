@@ -20,14 +20,17 @@ echo Menu::widget([
         'task-setting' => [
             'label' => Yii::t('app', 'General'),
             'url' => ['/core/admin/setting/index', 'section' => 'task'],
+            'visible' => Yii::$app->user->can('admin.setting.task.general')
         ],
         'task-status' => [
             'label' => Yii::t('app', 'Status'),
             'url' => ['/task/admin/task-status/index'],
+            'visible' => Yii::$app->user->can('admin.setting.task.task-status.list')
         ],
         'task-priority' => [
             'label' => Yii::t('app', 'Priority'),
             'url' => ['/task/admin/task-priority/index'],
+            'visible' => Yii::$app->user->can('admin.setting.task.task-priority.list')
         ],
     ],
     'options' => [

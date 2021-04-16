@@ -21,6 +21,49 @@ use yii\web\Response;
 class CustomerContactController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.contact.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.customer.contact.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.customer.contact.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.customer.contact.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
      */
     public function actionIndex()

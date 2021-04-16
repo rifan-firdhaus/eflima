@@ -41,6 +41,9 @@ class LeadStatusDropdown extends ButtonDropdown
                 'label' => Html::tag('span', '', ["style" => "background-color: {$status['color_label']}", 'class' => 'color-description']) . Html::encode($status['label']),
                 'encode' => false,
                 'url' => $url,
+                'linkOptions' => [
+                    'data-lazy-options' => ['method' => "POST"]
+                ],
             ];
         }
 

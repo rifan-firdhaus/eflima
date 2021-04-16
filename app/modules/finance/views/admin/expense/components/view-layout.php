@@ -35,21 +35,24 @@ echo $this->block('@begin');
         'items' => [
             'detail' => [
                 'label' => Yii::t('app', 'Detail'),
-                'url' => ['/finance/admin/expense/view', 'id' => $model->id],
+                'url' => ['/finance/admin/expense/detail', 'id' => $model->id],
                 'icon' => 'i8:money-transfer',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.expense.view.detail'),
             ],
             'task' => [
                 'label' => Yii::t('app', 'Task'),
-                'url' => ['/finance/admin/expense/view', 'id' => $model->id, 'action' => 'task'],
+                'url' => ['/finance/admin/expense/task', 'id' => $model->id],
                 'icon' => 'i8:checked',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.expense.view.task'),
             ],
             'history' => [
                 'label' => Yii::t('app', 'History'),
-                'url' => ['/finance/admin/expense/view', 'id' => $model->id, 'action' => 'history'],
+                'url' => ['/finance/admin/expense/history', 'id' => $model->id],
                 'icon' => 'i8:activity-history',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.expense.view.history'),
             ],
         ],
         'options' => [

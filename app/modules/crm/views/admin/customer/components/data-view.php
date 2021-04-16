@@ -3,13 +3,14 @@
 
 use modules\account\web\admin\View;
 use modules\address\widgets\inputs\CountryInput;
+use modules\crm\assets\admin\CustomerDataViewAsset;
 use modules\crm\models\Customer;
 use modules\crm\models\forms\customer\CustomerSearch;
+use modules\ui\widgets\ButtonDropdown;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
 use modules\ui\widgets\Icon;
-use yii\bootstrap4\ButtonGroup;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
@@ -21,6 +22,8 @@ use yii\helpers\Html;
  */
 
 $dataProvider = $searchModel->dataProvider;
+
+$addUrl = ArrayHelper::getValue($searchModel->params, 'addUrl', ['/crm/admin/customer/add']);
 
 if (!isset($dataViewOptions)) {
     $dataViewOptions = [];
@@ -51,6 +54,9 @@ $dataView = DataView::begin(ArrayHelper::merge([
             'class' => CardField::class,
             'fields' => [
                 [
+                    'attribute' => 'q',
+                ],
+                [
                     'attribute' => 'type',
                     'type' => ActiveField::TYPE_RADIO_LIST,
                     'source' => array_merge(['' => Yii::t('app', 'All Type')], Customer::types()),
@@ -78,22 +84,69 @@ $dataView = DataView::begin(ArrayHelper::merge([
     ],
 ], $dataViewOptions));
 
-echo $this->render('data-table', compact('dataProvider', 'searchModel'));
+echo $this->render('data-table', [
+    'dataProvider' => $dataProvider,
+    'paramss' => $searchModel->params,
+]);
 
 $dataView->beginHeader();
 
-echo ButtonGroup::widget([
-    'buttons' => [
-        Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/crm/admin/customer/add'], [
-            'class' => 'btn btn-primary',
-            'data-lazy-modal' => 'customer-form-modal',
-            'data-lazy-container' => '#main-container',
-        ]),
+if ($addUrl !== false && Yii::$app->user->can('admin.customer.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'customer-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
+
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Icon::show('i8:hashtag', ['class' => 'icon mr-2']) .Yii::t('app', 'Set Group'),
+                'encode' => false,
+                'url' => ['/crm/admin/customer/bulk-set-group'],
+                'linkOptions' => [
+                    'class' => 'bulk-set-group',
+                    'data-lazy-modal' => 'customer-bulk-set-group-form-modal',
+                    'data-lazy-modal-size' => 'modal-sm',
+                    'data-lazy-container' => '#main-container',
+                    'data-lazy-options' => ['method' => 'POST'],
+                ],
+            ],
+            '-',
+            [
+                'label' => Icon::show('i8:trash', ['class' => 'icon mr-2']) .Yii::t('app', 'Delete'),
+                'encode' => false,
+                'url' => ['/crm/admin/customer/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Customer'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
     ],
 ]);
 
 $dataView->endHeader();
 
+CustomerDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').customerDataView()");
+
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

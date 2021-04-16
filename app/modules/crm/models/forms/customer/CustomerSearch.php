@@ -43,6 +43,16 @@ class CustomerSearch extends Customer implements SearchableModel
     }
 
     /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'q' => Yii::t('app', 'Keyword'),
+        ]);
+    }
+
+    /**
      * @param $params
      *
      * @return array

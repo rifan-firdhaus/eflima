@@ -3,11 +3,9 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\web\admin\Controller;
-use modules\crm\models\forms\customer\CustomerSearch;
-use modules\file_manager\web\UploadedFile;
+use modules\finance\models\forms\product\ProductSearch;
 use modules\finance\models\InvoiceStatus;
 use modules\finance\models\Product;
-use modules\finance\models\forms\product\ProductSearch;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -22,6 +20,26 @@ use yii\web\Response;
  */
 class ProductController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @return array|string|Response
      */
@@ -187,7 +205,8 @@ class ProductController extends Controller
      * @return Product|string|Response
      * @throws InvalidConfigException
      */
-    public function actionModel($id){
+    public function actionModel($id)
+    {
         $model = $this->getModel($id);
 
         if (!($model instanceof Product)) {

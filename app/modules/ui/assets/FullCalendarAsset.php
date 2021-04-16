@@ -11,21 +11,14 @@ use yii\web\JqueryAsset;
  */
 class FullCalendarAsset extends AssetBundle
 {
-    public $sourcePath = '@npm/fullcalendar/dist';
+    public $sourcePath = '@modules/ui/assets/source';
 
     public $js = [
-        'core/main.js',
-        'daygrid/main.js',
-        'interaction/main.js',
-        'timegrid/main.js',
-        'bootstrap/main.js',
+        'full-calendar/lib/main.js',
     ];
 
     public $css = [
-        'core/main.css',
-        'daygrid/main.css',
-        'timegrid/main.css',
-        'bootstrap/main.css',
+        'full-calendar/lib/main.css',
     ];
 
     public $depends = [

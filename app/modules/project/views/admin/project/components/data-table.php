@@ -5,6 +5,8 @@ use modules\crm\models\Customer;
 use modules\project\models\forms\project\ProjectSearch;
 use modules\project\models\Project;
 use modules\project\models\ProjectStatus;
+use modules\project\widgets\inputs\ProjectStatusDropdown;
+use modules\task\widgets\inputs\TaskStatusDropdown;
 use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\CheckboxColumn;
 use modules\ui\widgets\data_table\columns\DropdownColumn;
@@ -172,8 +174,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
         ],
         [
             'attribute' => 'status_id',
-            'content' => 'status.label',
-            'class' => DropdownColumn::class,
+            'format' => 'raw',
             'headerCell' => [
                 'hAlign' => Cell::H_ALIGN_CENTER,
             ],
@@ -181,36 +182,13 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 'hAlign' => Cell::H_ALIGN_CENTER,
                 'vAlign' => Cell::V_ALIGN_CENTER,
             ],
-            'items' => function ($model) use ($statuses) {
-                /** @var Project $model */
-
-                $statusItems = [];
-
-                foreach ($statuses AS $status) {
-                    $statusItems[] = [
-                        'label' => Html::tag('span', '', ["style" => "background-color: {$status['color_label']}", 'class' => 'color-description']) . Html::encode($status['label']),
-                        'encode' => false,
-                        'url' => ['/project/admin/project/change-status', 'id' => $model->id, 'status' => $status['id']],
-                        'linkOptions' => [
-                            'style' => "color: {$status['color_label']}",
-                        ],
-                    ];
-                }
-
-                return $statusItems;
-            },
-            'buttonDropdown' => function ($model) {
-                /** @var Project $model */
-
-                $backgroundColor = Html::hex2rgba($model->status->color_label, 0.1);
-
-                return [
-                    'tagName' => 'a',
-                    'buttonOptions' => [
-                        'class' => ['widget' => 'badge badge-clean text-uppercase p-2'],
-                        'style' => "background-color: {$backgroundColor};color:{$model->status->color_label}",
-                    ],
-                ];
+            'content' => function ($model) {
+                return ProjectStatusDropdown::widget([
+                    'value' => $model->status_id,
+                    'url' => function ($status) use ($model) {
+                        return ['/project/admin/project/change-status', 'status' => $status['id'], 'id' => $model->id];
+                    },
+                ]);
             },
         ],
         [
@@ -219,6 +197,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'sort' => 1000000,
             'buttons' => [
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.project.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'name' => Yii::t('app', 'Update'),
@@ -228,12 +207,26 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     ],
                 ],
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.project.view'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'name' => Yii::t('app', 'View'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'project-view-modal',
                         'data-toggle' => 'tooltip',
+                    ],
+                ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.project.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                     ],
                 ],
             ],

@@ -2,6 +2,8 @@
 
 namespace modules\finance\migrations;
 
+use modules\account\rbac\DbManager;
+use Yii;
 use yii\db\Migration;
 
 /**
@@ -49,7 +51,9 @@ class M190524083228Invoice extends Migration
             'is_paid' => $this->boolean()->defaultValue(0),
             'allowed_payment_method' => $this->text()->null(),
             'params' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned(),
             'created_at' => $this->integer()->unsigned(),
+            'updater_id' => $this->integer()->unsigned(),
             'updated_at' => $this->integer()->unsigned(),
         ], $tableOptions);
 
@@ -70,8 +74,9 @@ class M190524083228Invoice extends Migration
             'grand_total' => $this->decimal(25, 10)->defaultValue(0),
             'real_grand_total' => $this->decimal(25, 10)->defaultValue(0),
             'params' => $this->text()->null(),
-            'terms' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned(),
             'created_at' => $this->integer()->unsigned(),
+            'updater_id' => $this->integer()->unsigned(),
             'updated_at' => $this->integer()->unsigned(),
         ], $tableOptions);
 
@@ -125,7 +130,21 @@ class M190524083228Invoice extends Migration
         );
 
         $this->addForeignKey(
-            'product_of_item',
+            'creator_of_invoice',
+            '{{%invoice}}', 'creator_id',
+            '{{%account}}', 'id',
+            'SET NULL'
+        );
+
+        $this->addForeignKey(
+            'updater_of_invoice',
+            '{{%invoice}}', 'updater_id',
+            '{{%account}}', 'id',
+            'SET NULL'
+        );
+
+        $this->addForeignKey(
+            'product_of_invoice_item',
             '{{%invoice_item}}', 'product_id',
             '{{%product}}', 'id',
             'RESTRICT',
@@ -138,6 +157,20 @@ class M190524083228Invoice extends Migration
             '{{%invoice}}', 'id',
             'CASCADE',
             'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'creator_of_invoice_item',
+            '{{%invoice_item}}', 'creator_id',
+            '{{%account}}', 'id',
+            'SET NULL'
+        );
+
+        $this->addForeignKey(
+            'updater_of_invoice_item',
+            '{{%invoice_item}}', 'updater_id',
+            '{{%account}}', 'id',
+            'SET NULL'
         );
 
         $this->addForeignKey(
@@ -179,6 +212,126 @@ class M190524083228Invoice extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        $this->addForeignKey(
+            'profile_of_invoice_assignee',
+            '{{%invoice_assignee}}', 'assignee_id',
+            '{{%staff}}', 'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'profile_of_invoice_assignor',
+            '{{%invoice_assignee}}', 'assignor_id',
+            '{{%staff}}', 'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        $time = time();
+        $this->beginCommand('Register permissions');
+
+        if (!$auth->installPermissions($this->permissions())) {
+            return false;
+        }
+
+        $this->endCommand($time);
+    }
+
+    public function permissions(){
+        return [
+            'admin.invoice' => [
+                'parent' => 'admin.root',
+                'description' => 'Manage Invoice',
+            ],
+            'admin.invoice.list' => [
+                'parent' => 'admin.invoice',
+                'description' => 'List of Invoice'
+            ],
+            'admin.invoice.add' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Add Invoice'
+            ],
+            'admin.invoice.update' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Update Invoice'
+            ],
+            'admin.invoice.view' => [
+                'parent' => 'admin.invoice',
+                'description' => 'View Invoice Details'
+            ],
+            'admin.invoice.view.detail' => [
+                'parent' => 'admin.invoice.view',
+                'description' => 'Invoice Detail'
+            ],
+            'admin.invoice.view.payment' => [
+                'parent' => 'admin.invoice.view',
+                'description' => 'Invoice Payment'
+            ],
+            'admin.invoice.view.task' => [
+                'parent' => 'admin.invoice.view',
+                'description' => 'Invoice Task'
+            ],
+            'admin.invoice.view.history' => [
+                'parent' => 'admin.invoice.view',
+                'description' => 'Invoice History'
+            ],
+            'admin.invoice.delete' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Delete Invoice'
+            ],
+            'admin.invoice.publish' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Publish Invoice'
+            ],
+
+            'admin.invoice.item' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Manage Invoice Items'
+            ],
+            'admin.invoice.item.add' => [
+                'parent' => 'admin.invoice.item',
+                'description' => 'Add Invoice Item'
+            ],
+            'admin.invoice.item.update' => [
+                'parent' => 'admin.invoice.item',
+                'description' => 'Update Invoice Item'
+            ],
+            'admin.invoice.item.delete' => [
+                'parent' => 'admin.invoice.item',
+                'description' => 'Delete Invoice Item'
+            ],
+
+            'admin.invoice.payment' => [
+                'parent' => 'admin.invoice',
+                'description' => 'Manage Payments'
+            ],
+            'admin.invoice.payment.list' => [
+                'parent' => 'admin.invoice.payment',
+                'description' => 'List of Payment'
+            ],
+            'admin.invoice.payment.add' => [
+                'parent' => 'admin.invoice.payment',
+                'description' => 'Record Payment'
+            ],
+            'admin.invoice.payment.view' => [
+                'parent' => 'admin.invoice.payment',
+                'description' => 'View Payment Details'
+            ],
+
+            'admin.customer.view.invoice' => [
+                'parent' => 'admin.customer.view',
+                'description' => 'Customer Invoice'
+            ],
+            'admin.customer.view.payment' => [
+                'parent' => 'admin.customer.view',
+                'description' => 'Customer Payment'
+            ]
+        ];
     }
 
     /**
@@ -187,13 +340,19 @@ class M190524083228Invoice extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('customer_of_invoice', '{{%invoice}}');
+        $this->dropForeignKey('creator_of_invoice', '{{%invoice}}');
+        $this->dropForeignKey('updater_of_invoice', '{{%invoice}}');
         $this->dropForeignKey('invoice_of_item', '{{%invoice_item}}');
-        $this->dropForeignKey('product_of_item', '{{%invoice_item}}');
+        $this->dropForeignKey('creator_of_invoice_item', '{{%invoice_item}}');
+        $this->dropForeignKey('updater_of_invoice_item', '{{%invoice_item}}');
+        $this->dropForeignKey('product_of_invoice_item', '{{%invoice_item}}');
         $this->dropForeignKey('invoice_item_of_tax', '{{%invoice_item_tax}}');
         $this->dropForeignKey('tax_of_invoice_item', '{{%invoice_item_tax}}');
         $this->dropForeignKey('invoice_of_payment_schedule', '{{%invoice_payment_schedule}}');
         $this->dropForeignKey('invoice_of_payment', '{{%invoice_payment}}');
         $this->dropForeignKey('invoice_of_assignee', '{{%invoice_assignee}}');
+        $this->dropForeignKey('profile_of_invoice_assignee', '{{%invoice_assignee}}');
+        $this->dropForeignKey('profile_of_invoice_assignor', '{{%invoice_assignee}}');
 
         $this->dropTable('{{%invoice}}');
         $this->dropTable('{{%invoice_item_tax}}');
@@ -201,5 +360,12 @@ class M190524083228Invoice extends Migration
         $this->dropTable('{{%invoice_payment_schedule}}');
         $this->dropTable('{{%invoice_payment}}');
         $this->dropTable('{{%invoice_assignee}}');
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        if (!$auth->uninstallPermissions($this->permissions())) {
+            return false;
+        }
     }
 }

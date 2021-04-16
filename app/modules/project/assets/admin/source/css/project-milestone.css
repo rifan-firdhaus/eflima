@@ -7,12 +7,12 @@
   min-width: 300px;
   width: 100%;
   margin-right: 1.15rem;
-  border-radius: 0.35rem;
+  border-radius: 0.65rem;
   overflow: hidden; }
 
 .project-milestone-item-header {
   padding: 1.15rem;
-  background: #f2c942;
+  background: #eeb806;
   color: #fff; }
   .project-milestone-item-header .btn-menu {
     color: #fff; }
@@ -46,7 +46,7 @@
   max-width: 20%;
   padding-top: 0.575rem;
   padding-bottom: 0.575rem;
-  border-radius: 0.35rem;
+  border-radius: 0.65rem;
   background: transparent !important; }
   .project-milestone-colors > a:hover > .project-milestone-color {
     transform: scale(1.2); }
@@ -54,13 +54,13 @@
 .project-milestone-color {
   width: 20px;
   height: 20px;
-  background: #f2c942;
+  background: #eeb806;
   border-radius: 50%;
   margin: auto;
   transition: 0.1s; }
 
 .project-milestone-color-yellow {
-  background: #f2c942; }
+  background: #eeb806; }
 
 .project-milestone-color-red {
   background: #e46572; }

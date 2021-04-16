@@ -80,6 +80,9 @@ class Role extends Model
         return $this->_parent;
     }
 
+    /**
+     * @return array
+     */
     public static function tree()
     {
         $roots = self::getAuthManager()->getRootRoles();

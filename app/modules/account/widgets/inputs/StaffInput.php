@@ -23,18 +23,36 @@ class StaffInput extends Select2Input
             'data' => new JsExpression("function (params) {return {'q': params.term,page: params.page};}"),
         ];
 
+
+        $this->jsOptions['templateResult'] = new JsExpression(
+        /** @lang JavaScript */
+            "function(data){
+                if(data && data.name && data.avatar){
+                    var state = $('<div class=\"d-flex align-items-center\"><img style=\"width:3rem\" class=\"rounded-circle mr-2\" src=\"'+data.avatar+'\"><div><div class=\"align-middle\">'+data.text+'</div><small class=\"text-muted\">'+data.name+'</small></div></div>');
+                    
+                    if(!data.name){
+                      state.find('small').hide();
+                    }
+                    
+                    return state;
+                }
+                
+                return data.text;
+            }"
+        );
+
         if (!$this->selected) {
             $this->selected = function ($value, $select2) {
                 if ($select2->multiple) {
                     is_array($value) || ($value = explode(',', $value));
 
-                    return Staff::find()->andWhere(['id' => $value])->map('id', 'name');
+                    return Staff::find()->andWhere(['staff.id' => $value])->joinWith('account')->map('id', 'account.username');
                 }
 
-                $model = Staff::find()->andWhere(['id' => $value])->one();
+                $model = Staff::find()->andWhere(['staff.id' => $value])->one();
 
                 if ($model) {
-                    return [$value => $model->name];
+                    return [$value => $model->account->username];
                 }
             };
         }

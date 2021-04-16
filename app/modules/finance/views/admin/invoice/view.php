@@ -13,37 +13,51 @@ use yii\helpers\Url;
  * @var View    $this
  * @var Invoice $model
  */
-
-$this->toolbar['delete-invoice'] = Html::a(
-    '',
-    ['/finance/admin/invoice/delete', 'id' => $model->id],
-    [
+if (Yii::$app->user->can('admin.invoice.delete')) {
+    $this->toolbar['delete-invoice'] = Html::a([
+        'url' => ['/finance/admin/invoice/delete', 'id' => $model->id],
         'class' => 'btn btn-outline-danger btn-icon',
         'icon' => 'i8:trash',
-        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
             'object_name' => Html::tag('strong', $model->number),
         ]),
         'data-placement' => 'bottom',
+        'data-toggle' => 'tooltip',
         'title' => Yii::t('app', 'Delete'),
-    ]
-);
+        'data-lazy-options' => ['method' => 'DELETE'],
+    ]);
+}
 
-$this->toolbar['update-invoice'] = Html::a(
-    Yii::t('app', 'Update'),
-    ['/finance/admin/invoice/update', 'id' => $model->id],
-    [
+if (Yii::$app->user->can('admin.invoice.update')) {
+    $this->toolbar['download-invoice'] = Html::a([
+        'url' => ['/finance/admin/invoice/download', 'id' => $model->id],
+        'class' => 'btn btn-outline-secondary btn-icon',
+        'title' => Yii::t('app', 'Download as PDF'),
+        'data-toggle' => 'tooltip',
+        'icon' => 'i8:download',
+        'data-lazy' => 0
+    ]);
+}
+
+if (Yii::$app->user->can('admin.invoice.update')) {
+    $this->toolbar['update-invoice'] = Html::a([
+        'label' => Yii::t('app', 'Update'),
+        'url' => ['/finance/admin/invoice/update', 'id' => $model->id],
         'class' => 'btn btn-outline-secondary',
         'data-lazy-modal' => 'invoice-form-modal',
         'data-lazy-container' => '#main-container',
         'icon' => 'i8:edit',
-    ]
-);
-$this->toolbar['add-invoice-payment'] = Html::a(Icon::show('i8:plus') . Yii::t('app', 'Add Payment'), Url::to(['/finance/admin/invoice-payment/add', 'invoice_id' => $model->id]), [
-    'class' => 'btn btn-outline-primary ' . ($model->is_paid ? 'disabled' : ''),
-    'data-lazy-modal' => 'invoice-payment-form-modal',
-    'data-lazy-container' => '#main-container',
-    'data-lazy-modal-size' => 'modal-md',
-]);
+    ]);
+}
+
+if (Yii::$app->user->can('admin.invoice.payment.add')) {
+    $this->toolbar['add-invoice-payment'] = Html::a(Icon::show('i8:plus') . Yii::t('app', 'Add Payment'), Url::to(['/finance/admin/invoice-payment/add', 'invoice_id' => $model->id]), [
+        'class' => 'btn btn-outline-primary ' . ($model->is_paid ? 'disabled' : ''),
+        'data-lazy-modal' => 'invoice-payment-form-modal',
+        'data-lazy-container' => '#main-container',
+        'data-lazy-modal-size' => 'modal-md',
+    ]);
+}
 
 $this->beginContent('@modules/finance/views/admin/invoice/components/view-layout.php', [
     'model' => $model,
@@ -58,8 +72,8 @@ echo $this->block('@begin');
             ],
         ]); ?>
 
-        <div id="invoice-view-wrapper" class="h-100">
-            <div class="d-flex justify-content-between border-right bg-really-light p-3">
+        <div id="invoice-view-wrapper-<?= $this->uniqueId ?>" data-rid="invoice-view-wrapper" class="h-100">
+            <div class="d-flex border-bottom justify-content-between border-right bg-really-light p-3">
                 <div class="invoice-view-header">
                     <h1 class="text-uppercase"><?= Yii::t('app', 'Invoice') ?></h1>
                     <div>
@@ -99,7 +113,7 @@ echo $this->block('@begin');
 
             <div class="invoice-view-items">
                 <?php
-                echo Html::tag('div', $this->render('components/data-view-payment-statistic', compact('model')), ['class' => 'border-bottom']);
+                echo Html::tag('div', $this->render('components/data-view-payment-statistic', compact('model')),['class' => 'border-bottom']);
                 echo $this->render('/admin/invoice-item/components/item-table', [
                     'model' => $model,
                     'hardcoded' => true,
@@ -124,7 +138,7 @@ echo $this->block('@begin');
             'sortUrl' => Url::to(['/finance/admin/invoice-item/sort', 'invoice_id' => $model->id]),
         ]);
 
-        $this->registerJs("$('#invoice-view-wrapper').invoiceView({$jsOptions})");
+        $this->registerJs("$('#invoice-view-wrapper-{$this->uniqueId}').invoiceView({$jsOptions})");
         ?>
         <?php Lazy::end(); ?>
 

@@ -47,14 +47,16 @@ if (!isset($hardcoded)) {
         ?>
     </tbody>
     <tfoot>
-        <tr>
-            <td colspan="6">
-                <?= Html::a(Icon::show('i8:plus') . Yii::t('app', 'Add Item'), ['/finance/admin/invoice-item/add', 'invoice_id' => $model->id], [
-                    'class' => 'btn text-uppercase btn-block btn-outline-primary add-invoice-item-button',
-                    'data-lazy' => 0,
-                ]) ?>
-            </td>
-        </tr>
+        <?php if (Yii::$app->user->can('admin.invoice.item.add')): ?>
+            <tr>
+                <td colspan="6">
+                    <?= Html::a(Icon::show('i8:plus') . Yii::t('app', 'Add Item'), ['/finance/admin/invoice-item/add', 'invoice_id' => $model->id], [
+                        'class' => 'btn text-uppercase btn-block btn-outline-primary add-invoice-item-button',
+                        'data-lazy' => 0,
+                    ]) ?>
+                </td>
+            </tr>
+        <?php endif ?>
 
         <?= $this->render('item-summary', compact('model')) ?>
     </tfoot>

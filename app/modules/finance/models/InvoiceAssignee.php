@@ -2,6 +2,7 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
+use modules\account\Account;
 use modules\account\components\notification\DatabaseNotificationChannel;
 use modules\account\components\notification\Notification;
 use modules\account\models\Staff;
@@ -9,26 +10,27 @@ use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\finance\models\queries\InvoiceAssigneeQuery;
 use modules\finance\models\queries\InvoiceQuery;
-use modules\task\models\Task;
-use modules\task\models\TaskAssignee;
+use Throwable;
 use Yii;
+use yii\base\Event;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
  *
- * @property Invoice       $invoice
- * @property Staff $assignee
- * @property Staff $assignor
+ * @property Invoice $invoice
+ * @property Staff   $assignee
+ * @property Staff   $assignor
  *
- * @property int           $id          [int(10) unsigned]
- * @property int           $invoice_id  [int(11) unsigned]
- * @property int           $assignee_id [int(11) unsigned]
- * @property int           $assigned_at [int(11) unsigned]
- * @property int           $assignor_id [int(11) unsigned]
+ * @property int     $id          [int(10) unsigned]
+ * @property int     $invoice_id  [int(11) unsigned]
+ * @property int     $assignee_id [int(11) unsigned]
+ * @property int     $assigned_at [int(11) unsigned]
+ * @property int     $assignor_id [int(11) unsigned]
  */
 class InvoiceAssignee extends ActiveRecord
 {
@@ -131,18 +133,27 @@ class InvoiceAssignee extends ActiveRecord
     /**
      * @param InvoiceAssignee[] $assignees
      * @param Invoice           $invoice
-     * @param Staff     $assignor
+     * @param Staff             $assignor
      *
      * @throws InvalidConfigException
+     * @throws Exception
      */
     public static function sendAssignNotification($assignees, $invoice, $assignor)
     {
-        if (empty($assignees)) {
-            return;
+        if (!$assignor instanceof Staff) {
+            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+
+            if(!$assignor){
+                throw new Exception('Invalid assignor');
+            }
         }
 
-        if(is_numeric($assignor)){
-            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+        $assignees = array_filter($assignees, function ($assignee) {
+            return $assignee->assignee_id != $assignee->assignor_id;
+        });
+
+        if (empty($assignees)) {
+            return;
         }
 
         $accountIds = ArrayHelper::getColumn($assignees, 'assignee.account_id');
@@ -153,10 +164,10 @@ class InvoiceAssignee extends ActiveRecord
             'titleParams' => [
                 'assignor' => $assignor->name,
             ],
-            'body' => Yii::t('app','Invoice #{number} on behalf of {customer_name}'),
+            'body' => Yii::t('app', 'Invoice #{number} on behalf of {customer_name}'),
             'bodyParams' => [
-              'number' => $invoice->number,
-              'customer_name' => $invoice->customer->name
+                'number' => $invoice->number,
+                'customer_name' => $invoice->customer->name,
             ],
             'channels' => [
                 DatabaseNotificationChannel::class => [
@@ -167,5 +178,100 @@ class InvoiceAssignee extends ActiveRecord
         ]);
 
         $notification->send();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert && in_array($this->scenario, ['admin/invoice/add', 'admin/add'])) {
+            $this->recordAssignedHistory();
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        $this->recordRemoveAssignementHistory();
+    }
+
+    /**
+     * @return bool
+     * @throws Throwable
+     * @throws Exception
+     */
+    public function recordRemoveAssignementHistory()
+    {
+        return Account::history()->save('invoice_assignee.delete', [
+            'params' => $this->getHistoryParams(),
+            'description' => 'Removing assignment of {assignee_name} from lead "{invoice_number}"',
+            'tag' => 'release_assignment',
+            'model' => Invoice::class,
+            'model_id' => $this->invoice_id,
+        ]);
+    }
+
+    /**
+     * @return bool
+     * @throws Throwable
+     * @throws Exception
+     */
+    public function recordAssignedHistory()
+    {
+        return Account::history()->save('invoice_assignee.add', [
+            'params' => $this->getHistoryParams(),
+            'description' => 'Assigning {assignee_name} to lead "{invoice_number}"',
+            'tag' => 'assign',
+            'model' => Invoice::class,
+            'model_id' => $this->invoice_id,
+        ]);
+    }
+
+    /**
+     * @return array
+     */
+    public function getHistoryParams()
+    {
+        $params = $this->getAttributes(['assignee_id', 'assignor_id', 'invoice_id']);
+
+        return array_merge($params, [
+            'assignee_name' => $this->assignee->name,
+            'assignor_name' => $this->assignor->name,
+            'invoice_number' => $this->invoice->number,
+        ]);
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public static function deleteAllRelatedToDeletedStaff($event)
+    {
+        /** @var Staff $staff */
+        $staff = $event->sender;
+
+        $models = InvoiceAssignee::find()
+            ->andWhere([
+                'OR',
+                ['assignor_id' => $staff->id],
+                ['assignee_id' => $staff->id],
+            ])
+            ->all();
+
+        foreach($models AS $model){
+            if(!$model->delete()){
+                throw new Exception('Failed to delete related assignee');
+            }
+        }
     }
 }

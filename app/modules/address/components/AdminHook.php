@@ -40,7 +40,7 @@ class AdminHook
         $view->menu->addItems([
             'setting/address' => [
                 'label' => Yii::t('app', 'Address'),
-                'url' => ['/address/admin/country/index'],
+                'url' => ['/address/admin/setting/index'],
                 'icon' => 'i8:map',
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',

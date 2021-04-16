@@ -60,4 +60,17 @@ class ArrayHelper extends \yii\helpers\BaseArrayHelper
             return [$object];
         }
     }
+
+    public static function insertAfter(&$array, $key, $value)
+    {
+        $position = array_search($key, array_keys($array)) + 1;
+
+        $newArray = array_slice($array, 0, $position, true);
+        $newArray += $value;
+        $newArray += array_slice($array, $position, count($array) - $position, true);
+
+        $array = $newArray;
+
+        return $newArray;
+    }
 }

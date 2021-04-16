@@ -10,7 +10,7 @@
       var items = [];
 
       Object.values(data).forEach(function(role){
-        let item = {
+        var item = {
           title: role.role.description,
           key: role.role.name,
           folder: false,
@@ -70,6 +70,18 @@
       });
     };
 
+    this.setPermission = function(node){
+      return $.ajax({
+        url: this.options.permissionUrl,
+        data: { role: node.key},
+        type: "get",
+        dataType: "json",
+        success: function(result){
+          permission.setSource(node.key,result);
+        }
+      });
+    };
+
     var init = function(){
       self.$element.fancytree({
         extensions: ["glyph", "dnd5", "edit", "table"],
@@ -91,7 +103,7 @@
           autoExpandMS: 400,
           focusOnClick: true,
           preventVoidMoves: true,
-          preventRecursiveMoves: true,
+          preventRecursion: true,
           dragStart: function(){
             return true;
           },
@@ -157,6 +169,14 @@
 
             node.setActive(true);
             node.editStart();
+          });
+
+          $permissionButton.on('click',function(e){
+            e.preventDefault();
+
+            node.setActive(true);
+
+            self.setPermission(node);
           });
 
           $deleteButton.on("click", function(e){

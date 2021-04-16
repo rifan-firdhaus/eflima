@@ -14,19 +14,27 @@ class ExpenseQuickSearch extends QuickSearch
 {
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getLabel()
     {
-        return Yii::t('app','Expense');
+        return Yii::t('app', 'Expense');
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getId()
     {
         return 'expense';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.expense.list');
     }
 
     /**

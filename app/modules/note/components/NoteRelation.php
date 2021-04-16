@@ -70,6 +70,16 @@ abstract class NoteRelation extends Component
     }
 
     /**
+     * @param null|string|int $modelId
+     *
+     * @return bool
+     */
+    public function isActive($modelId = null)
+    {
+        return true;
+    }
+
+    /**
      * @param string                    $id
      * @param string|array|NoteRelation $class
      */

@@ -26,10 +26,6 @@ class Controller extends BaseController
         $behaviors['access'] = [
             'class' => AccessControl::class,
             'rules' => [
-                [
-                    'allow' => true,
-                    'roles' => ['@'],
-                ],
             ],
         ];
 
@@ -48,10 +44,6 @@ class Controller extends BaseController
         if (Lazy::isLazyRequest()) {
             Yii::$app->response->format = 'lazy';
         }
-
-//        if (Yii::$app->request->get()) {
-            Yii::$app->user->setReturnUrl(Yii::$app->request->referrer);
-//        }
 
         return true;
     }
@@ -73,7 +65,7 @@ class Controller extends BaseController
         Lazy::begin([
             'id' => 'main-container',
             'options' => [
-                'id' => 'main-container'
+                'id' => 'main-container',
             ],
             'jsOptions' => [
                 'pushState' => true,

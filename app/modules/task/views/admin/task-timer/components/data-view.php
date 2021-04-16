@@ -5,7 +5,9 @@ use modules\account\models\StaffAccount;
 use modules\account\web\admin\View;
 use modules\account\widgets\inputs\StaffInput;
 use modules\core\validators\DateValidator;
+use modules\task\assets\admin\TaskTimerDataViewAsset;
 use modules\task\models\forms\task_timer\TaskTimerSearch;
+use modules\ui\widgets\ButtonDropdown;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
@@ -185,7 +187,7 @@ echo $this->render('data-table', [
 
 $dataView->beginHeader();
 
-if ($addUrl !== false) {
+if ($addUrl !== false && isset($searchModel->currentTask) && Yii::$app->user->can('admin.task.timer.add')) {
     echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
         'class' => 'btn btn-primary mr-1',
         'data-lazy-modal' => 'task-timer-form-modal',
@@ -194,18 +196,54 @@ if ($addUrl !== false) {
     ]);
 }
 
-if (isset($searchModel->currentTask) && $searchModel->currentTask->is_timer_enabled) {
+
+if (isset($searchModel->currentTask) && $searchModel->currentTask->is_timer_enabled && Yii::$app->user->can('admin.task.timer.toggle')) {
     $isTimerStarted = $searchModel->currentTask->isTimerStarted($account->profile->id);
+
     echo Html::a([
         'url' => ['/task/admin/task/toggle-timer', 'id' => $searchModel->currentTask->id, 'start' => !$isTimerStarted],
         'icon' => !$isTimerStarted ? 'i8:play' : 'i8:stop',
         'title' => !$isTimerStarted ? Yii::t('app', 'Start Timer') : Yii::t('app', 'Stop Timer'),
         'class' => 'btn btn-primary btn-icon',
         'data-toggle' => 'tooltip',
+        'data-lazy-options' => ['method' => 'POST'],
     ]);
 }
 
+
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Yii::t('app', 'Delete'),
+                'url' => ['/task/admin/task-timer/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Timer'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
+    ],
+]);
+
 $dataView->endHeader();
+
+TaskTimerDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').taskTimerDataView()");
 
 DataView::end();
 

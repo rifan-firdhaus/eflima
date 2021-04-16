@@ -33,54 +33,65 @@ LeadViewAsset::register($this);
 FlagIconAsset::register($this);
 
 $this->beginContent('@modules/crm/views/admin/lead/components/view-layout.php', compact('model'));
+
 echo $this->block('@begin');
 
-$this->toolbar['delete-lead'] = Html::a([
-    'url' => ['/crm/admin/lead/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->name),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-]);
+if (Yii::$app->user->can('admin.lead.delete')) {
+    $this->toolbar['delete-lead'] = Html::a([
+        'url' => ['/crm/admin/lead/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+            'object_name' => Html::tag('strong', $model->name),
+        ]),
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
+        'data-lazy-options' => ['method' => 'DELETE'],
+    ]);
+}
 
-$this->toolbar['update-lead'] = Html::a([
-    'label' => Yii::t('app', 'Update'),
-    'url' => ['/crm/admin/lead/update', 'id' => $model->id],
-    'class' => 'btn btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'lead-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.lead.update')) {
+    $this->toolbar['update-lead'] = Html::a([
+        'label' => Yii::t('app', 'Update'),
+        'url' => ['/crm/admin/lead/update', 'id' => $model->id],
+        'class' => 'btn btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'lead-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
-$this->toolbar['convert-lead'] = Html::a([
-    'label' => Yii::t('app', 'Convert'),
-    'url' => ['/crm/admin/lead/convert', 'id' => $model->id],
-    'class' => 'btn btn-outline-primary',
-    'icon' => 'i8:refresh',
-    'data-lazy-modal' => 'lead-form-modal',
-    'data-lazy-container' => '#main-container',
-    'title' => Yii::t('app', 'Convert to Customer'),
-    'data-toggle' => 'tooltip',
-]);
+if (empty($model->customer_id)) {
+    $this->toolbar['convert-lead'] = Html::a([
+        'label' => Yii::t('app', 'Convert'),
+        'url' => ['/crm/admin/customer/add', 'lead_id' => $model->id],
+        'class' => 'btn btn-outline-primary',
+        'icon' => 'i8:refresh',
+        'data-lazy-modal' => 'lead-convert-form-modal',
+        'data-lazy-container' => '#main-container',
+        'title' => Yii::t('app', 'Convert to Customer'),
+        'data-toggle' => 'tooltip',
+    ]);
+}
 
 
 $leadStatusMenuItems = [
     [
         'label' => Yii::t('app', 'Set status to:'),
+        'visible' => Yii::$app->user->can('admin.lead.status'),
     ],
 ];
 
-foreach (LeadStatus::find()->enabled()->andWhere(['!=', 'id', $model->status_id])->all() AS $projectStatus) {
-    $leadStatusMenuItems[] = [
-        'label' => Html::tag('span', '', ['class' => 'color-description', 'style' => ['background-color' => $projectStatus->color_label]]) . Html::encode($projectStatus->label),
-        'url' => ['/crm/admin/lead/change-status', 'id' => $model->id, 'status' => $projectStatus->id],
-    ];
-}
+if (Yii::$app->user->can('admin.lead.status')) {
+    foreach (LeadStatus::find()->enabled()->andWhere(['!=', 'id', $model->status_id])->all() AS $projectStatus) {
+        $leadStatusMenuItems[] = [
+            'label' => Html::tag('span', '', ['class' => 'color-description', 'style' => ['background-color' => $projectStatus->color_label]]) . Html::encode($projectStatus->label),
+            'url' => ['/crm/admin/lead/change-status', 'id' => $model->id, 'status' => $projectStatus->id],
+        ];
+    }
 
-$leadStatusMenuItems[] = '-';
+    $leadStatusMenuItems[] = '-';
+}
 
 $this->toolbar['lead-more'] = ButtonDropdown::widget([
     'label' => Icon::show('i8:double-down'),
@@ -101,6 +112,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                     'data-lazy-container' => '#main-container',
                     'data-lazy-modal' => 'task-form-modal',
                 ],
+                'visible' => Yii::$app->user->can('admin.lead.view.task'),
             ],
             [
                 'label' => Icon::show('i8:event', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -112,6 +124,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                     'data-lazy-modal' => 'event-form-modal',
                     'data-lazy-modal-size' => 'modal-lg',
                 ],
+                'visible' => Yii::$app->user->can('admin.lead.view.event'),
             ],
         ]),
     ],
@@ -122,6 +135,17 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
         <div class="overflow-auto py-3 w-100 d-flex flex-column container-fluid mh-100">
             <div class="d-flex row border-bottom">
                 <?= $this->block('@main:begin') ?>
+
+                <div class="col-md-12">
+                    <div class="alert alert-outline alert-warning">
+                        <?= Yii::t('app', 'This lead has been converted to customer {customer}',[
+                            'customer' => Html::a($model->name,['/crm/admin/customer/view','id' => $model->customer_id],[
+                                'data-lazy-modal' => 'customer-view-modal',
+                                'data-lazy-container' => '#main-container',
+                            ])
+                        ]); ?>
+                    </div>
+                </div>
 
                 <div class="col-md-5">
                     <?= $this->block('@main/left:begin') ?>
@@ -187,7 +211,9 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                                     <div>
                                         <?= Html::encode($model->fullAddress) ?>
                                     </div>
-                                    <div style="width:30px;height: 25px" class="flag-icon flex-shrink-0 ml-2 border align-self-center flag-icon-<?= strtolower($model->country->iso2) ?>"></div>
+                                    <?php if ($model->country_code): ?>
+                                        <div style="width:30px;height: 25px" class="flag-icon flex-shrink-0 ml-2 border align-self-center flag-icon-<?= strtolower($model->country->iso2) ?>"></div>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -214,29 +240,34 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                     <?= $this->block('@main/right:begin'); ?>
 
                     <?php
-                    $followUpCard = Card::begin([
-                        'title' => Yii::t('app', 'Follow Up'),
-                        'icon' => 'i8:phone',
-                        'headerOptions' => [
-                            'class' => 'card-header px-0',
-                        ],
-                        'bodyOptions' => false,
-                    ]);
+                    if (Yii::$app->user->can('admin.lead.follow-up.list')) {
+                        $followUpCard = Card::begin([
+                            'title' => Yii::t('app', 'Follow Up'),
+                            'icon' => 'i8:phone',
+                            'headerOptions' => [
+                                'class' => 'card-header px-0',
+                            ],
+                            'bodyOptions' => false,
+                        ]);
 
-                    $followUpCard->addToHeader(
-                        Html::a(Icon::show('i8:phone') . Yii::t('app', 'Add Follow Up'), ['/crm/admin/lead-follow-up/add', 'lead_id' => $model->id], [
-                            'class' => 'btn btn-sm btn-outline-primary',
-                            'data-lazy-modal' => 'lead-follow-up-form-modal',
-                            'data-lazy-modal-size' => 'modal-md',
-                            'data-lazy-container' => '#main-container',
-                        ])
-                    );
+                        if (Yii::$app->user->can('admin.lead.follow-up.add')) {
+                            $followUpCard->addToHeader(
+                                Html::a(Icon::show('i8:phone') . Yii::t('app', 'Add Follow Up'), ['/crm/admin/lead-follow-up/add', 'lead_id' => $model->id], [
+                                    'class' => 'btn btn-sm btn-outline-primary',
+                                    'data-lazy-modal' => 'lead-follow-up-form-modal',
+                                    'data-lazy-modal-size' => 'modal-md',
+                                    'data-lazy-container' => '#main-container',
+                                ])
+                            );
+                        }
 
-                    echo $this->render('../lead-follow-up/components/data-view', [
-                        'searchModel' => $followUpSearchModel,
-                    ]);
+                        echo $this->render('../lead-follow-up/components/data-view', [
+                            'searchModel' => $followUpSearchModel,
+                        ]);
 
-                    Card::end(); ?>
+                        Card::end();
+                    }
+                    ?>
 
                     <?php
                     $assigneeCard = Card::begin([
@@ -249,17 +280,19 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                     ]);
 
 
-                    $assigneeButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Assign'), '#', [
-                        'class' => 'btn btn-outline-primary btn-sm btn-lead-assignee',
-                    ]);
-                    $assigneeInput = StaffInput::widget([
-                        'name' => 'assignee',
-                        'url' => ['/crm/admin/lead/staff-assignable-auto-complete', 'id' => $model->id],
-                        'id' => 'event-member-input',
-                        'options' => [
-                            'class' => 'lead-assignee-input',
-                        ],
-                    ]);
+                    if (Yii::$app->user->can('admin.lead.assignee')) {
+                        $assigneeButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Assign'), '#', [
+                            'class' => 'btn btn-outline-primary btn-sm btn-lead-assignee',
+                        ]);
+                        $assigneeInput = StaffInput::widget([
+                            'name' => 'assignee',
+                            'url' => ['/crm/admin/lead/staff-assignable-auto-complete', 'id' => $model->id],
+                            'id' => 'event-member-input',
+                            'options' => [
+                                'class' => 'lead-assignee-input',
+                            ],
+                        ]);
+                    }
 
                     $assigneeCard->addToHeader(
                         Html::tag('div', $assigneeInput . $assigneeButton, [
@@ -274,7 +307,7 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                             'allModels' => $model->assigneesRelationship,
                             'pagination' => false,
                         ]),
-                        'id' => 'event-member-list',
+                        'id' => 'lead-assignee-list',
                         'idAttribute' => 'id',
                         'columns' => [
                             [
@@ -327,21 +360,26 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
                             ],
                             [
                                 'class' => ActionColumn::class,
-                                'controller' => '/task/admin/task-assignee',
+                                'controller' => '/crm/admin/lead',
                                 'buttons' => [
                                     'view' => false,
                                     'update' => false,
-                                    'delete' => [
-                                        'value' => [
-                                            'icon' => 'i8:trash',
-                                            'label' => Yii::t('app', 'Delete'),
-                                            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                                                'object_name' => Yii::t('app', 'this item'),
-                                            ]),
-                                            'class' => 'text-danger',
-                                            'data-lazy-container' => false,
-                                            'data-lazy-options' => ['scroll' => false],
-                                        ],
+                                    'delete' => false,
+                                    'unassign' => [
+                                        'visible' => Yii::$app->user->can('admin.lead.assignee'),
+                                        'value' => function ($key, $model, $id, $index) {
+                                            return [
+                                                'icon' => 'i8:trash',
+                                                'label' => Yii::t('app', 'Unassign'),
+                                                'data-confirmation' => Yii::t('app', 'You are about to unassign {object_name}, are you sure', [
+                                                    'object_name' => Yii::t('app', 'this staff'),
+                                                ]),
+                                                'url' => Url::to(['/crm/admin/lead/unassign', 'id' => $model->lead_id, 'staff_id' => $model->assignee_id]),
+                                                'class' => 'text-danger',
+                                                'data-lazy-container' => false,
+                                                'data-lazy-options' => ['scroll' => false, 'method' => 'POST'],
+                                            ];
+                                        },
                                     ],
                                 ],
                             ],
@@ -396,11 +434,11 @@ $this->toolbar['lead-more'] = ButtonDropdown::widget([
 
 <?php
 $jsOptions = Json::encode([
-    'inviteUrl' => Url::to(['/crm/admin/lead/assign', 'id' => $model->id]),
+    'assignUrl' => Url::to(['/crm/admin/lead/assign', 'id' => $model->id]),
 ]);
 
 $this->registerJs("$('#lead-view-wrapper-{$this->uniqueId}').leadView({$jsOptions})");
 
-
 echo $this->block('@end');
+
 $this->endContent();

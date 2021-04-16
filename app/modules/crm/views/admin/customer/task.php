@@ -7,10 +7,9 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\ReplaceArrayValue;
 
 /**
- * @var Customer           $model
- * @var TaskSearch         $searchModel
- * @var ActiveDataProvider $dataProvider
- * @var View               $this
+ * @var Customer   $model
+ * @var TaskSearch $taskSearchModel
+ * @var View       $this
  */
 
 $active = 'task';
@@ -20,10 +19,9 @@ $this->beginContent('@modules/crm/views/admin/customer/components/view-layout.ph
 echo $this->block('@begin');
 
 echo $this->render('@modules/task/views/admin/task/components/data-view', [
-    'dataProvider' => $dataProvider,
-    'searchModel' => $searchModel,
+    'searchModel' => $taskSearchModel,
     'dataViewOptions' => [
-        'searchAction' => new ReplaceArrayValue($searchModel->searchUrl('/crm/admin/customer/view', [
+        'searchAction' => new ReplaceArrayValue($taskSearchModel->searchUrl('/crm/admin/customer/view', [
             'id' => $model->id,
             'action' => 'task',
         ], false)),

@@ -2,7 +2,6 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use modules\account\web\admin\View;
-use modules\crm\models\forms\customer\CustomerSearch;
 use modules\project\models\forms\project\ProjectSearch;
 use modules\project\models\Project;
 use modules\quick_access\components\QuickSearch;
@@ -14,9 +13,8 @@ use yii\data\BaseDataProvider;
  */
 class ProjectQuickSearch extends QuickSearch
 {
-
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getLabel()
     {
@@ -24,11 +22,19 @@ class ProjectQuickSearch extends QuickSearch
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getId()
     {
         return 'project';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.project.list');
     }
 
     /**
@@ -47,7 +53,7 @@ class ProjectQuickSearch extends QuickSearch
 
     /**
      * @param Project $model
-     * @param View  $view
+     * @param View    $view
      *
      * @return string
      */

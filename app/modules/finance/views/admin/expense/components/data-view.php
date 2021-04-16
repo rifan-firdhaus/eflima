@@ -4,9 +4,11 @@
 use modules\account\web\admin\View;
 use modules\core\validators\DateValidator;
 use modules\crm\widgets\inputs\CustomerInput;
+use modules\finance\assets\admin\ExpenseDataViewAsset;
 use modules\finance\models\forms\expense\ExpenseSearch;
 use modules\finance\widgets\inputs\CurrencyInput;
 use modules\finance\widgets\inputs\ExpenseCategoryInput;
+use modules\ui\widgets\ButtonDropdown;
 use modules\ui\widgets\DataView;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
@@ -261,13 +263,13 @@ if (empty($searchModel->params['customer_id']) && (!isset($searchModel->params['
 echo Html::tag('div', $this->render('data-bill-statistic', [
     'searchModel' => $searchModel,
     'searchAction' => $dataView->searchAction,
-]),['class' => 'border-top']);
+]), ['class' => 'border-top']);
 
 echo $this->render('data-table', compact('dataProvider', 'searchModel'));
 
 $dataView->beginHeader();
 
-if ($addUrl !== false) {
+if ($addUrl !== false && Yii::$app->user->can('admin.expense.add')) {
     echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), $addUrl, [
         'class' => 'btn btn-primary',
         'data-lazy-modal' => 'expense-form-modal',
@@ -275,7 +277,40 @@ if ($addUrl !== false) {
     ]);
 }
 
+echo ButtonDropdown::widget([
+    'label' => Yii::t('app', 'Bulk Action'),
+    'options' => [
+        'class' => 'bulk-actions',
+    ],
+    'buttonOptions' => [
+        'class' => 'ml-1 btn-outline-primary',
+    ],
+    'dropdown' => [
+        'items' => [
+            [
+                'label' => Icon::show('i8:trash', ['class' => 'icon mr-2']) . Yii::t('app', 'Delete'),
+                'encode' => false,
+                'url' => ['/finance/admin/expense/bulk-delete'],
+                'linkOptions' => [
+                    'class' => 'bulk-delete text-danger',
+                    'title' => Yii::t('app', 'Bulk Delete'),
+                    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                        'object_name' => Yii::t('app', 'selected {object}', [
+                            'object' => Yii::t('app', 'Expenses'),
+                        ]),
+                    ]),
+                    'data-lazy-options' => ['method' => 'DELETE'],
+                ],
+            ],
+        ],
+    ],
+]);
+
 $dataView->endHeader();
+
+ExpenseDataViewAsset::register($this);
+
+$this->registerJs("$('#{$dataView->getId()}').expenseDataView()");
 
 DataView::end();
 

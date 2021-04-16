@@ -8,5 +8,12 @@ use yii\web\Controller as BaseController;
  */
 class Controller extends BaseController
 {
+    const EVENT_INIT = 'init';
 
+    public function init()
+    {
+        $this->trigger(self::EVENT_INIT);
+
+        parent::init();
+    }
 }

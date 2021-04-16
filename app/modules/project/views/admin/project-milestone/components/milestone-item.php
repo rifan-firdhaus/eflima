@@ -3,10 +3,9 @@
 use modules\account\web\admin\View;
 use modules\project\models\ProjectMilestone;
 use modules\task\models\Task;
-use modules\task\widgets\inputs\TaskStatusDropdown;
 use modules\ui\widgets\Icon;
+use modules\ui\widgets\lazy\Lazy;
 use yii\bootstrap4\ButtonDropdown;
-use yii\bootstrap4\Progress;
 use yii\helpers\Html;
 
 /**
@@ -18,20 +17,24 @@ use yii\helpers\Html;
 $tasks = $model->taskDataProvider->models;
 $colors = '';
 
-foreach (ProjectMilestone::colors() AS $colorId => $color) {
-    $colors .= Html::a([
-        'label' => Html::tag('div', '', ['class' => "project-milestone-color project-milestone-color-{$colorId}"]),
-        'url' => ['/project/admin/project-milestone/change-color', 'id' => $model->id, 'color' => $colorId],
-        'class' => 'dropdown-item',
-        'data-toggle' => 'tooltip',
-        'title' => $color,
-    ]);
+if (Yii::$app->user->can('admin.project.view.milestone.update')) {
+    foreach (ProjectMilestone::colors() AS $colorId => $color) {
+        $colors .= Html::a([
+            'label' => Html::tag('div', '', ['class' => "project-milestone-color project-milestone-color-{$colorId}"]),
+            'url' => ['/project/admin/project-milestone/change-color', 'id' => $model->id, 'color' => $colorId],
+            'class' => 'dropdown-item',
+            'data-toggle' => 'tooltip',
+            'title' => $color,
+            'data-lazy-options' => ['method' => "POST"],
+        ]);
+    }
+
+    $colors = Html::tag('div', $colors, ['class' => 'd-flex flex-wrap project-milestone-colors']);
 }
 
-$colors = Html::tag('div', $colors, ['class' => 'd-flex flex-wrap project-milestone-colors'])
-?>
 
-<div data-id="<?= $model->id; ?>" class="project-milestone-item  h-100 d-flex flex-column">
+?>
+<div class="project-milestone-item  h-100 d-flex flex-column" data-id="<?= $model->id ?>">
     <div class="project-milestone-item-header align-items-center <?= "project-milestone-color-{$model->color}" ?> flex-shrink-0 flex-grow-0 d-flex">
         <div class="handle d-flex align-items-center"><?= Icon::show('i8:move', ['class' => 'icon icons8-size']) ?></div>
         <div class="project-milestone-item-information">
@@ -69,6 +72,7 @@ $colors = Html::tag('div', $colors, ['class' => 'd-flex flex-wrap project-milest
                                 'data-lazy-modal' => 'task-form',
                                 'data-lazy-container' => '#main-container',
                             ],
+                            'visible' => Yii::$app->user->can('admin.project.view.milestone.task'),
                         ],
                         [
                             'encode' => false,
@@ -79,6 +83,7 @@ $colors = Html::tag('div', $colors, ['class' => 'd-flex flex-wrap project-milest
                                 'data-lazy-container' => '#main-container',
                                 'data-lazy-modal-size' => 'modal-md',
                             ],
+                            'visible' => Yii::$app->user->can('admin.project.view.milestone.update'),
                         ],
                         '-',
                         $colors,
@@ -92,75 +97,25 @@ $colors = Html::tag('div', $colors, ['class' => 'd-flex flex-wrap project-milest
                                 'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
                                     'object_name' => $model->name,
                                 ]),
+                                'title' => Yii::t('app', 'Delete'),
+                                'data-lazy-options' => ['method' => "DELETE"],
                             ],
+                            'visible' => Yii::$app->user->can('admin.project.view.milestone.delete'),
                         ],
                     ],
                 ],
             ]) ?>
         </div>
     </div>
-    <div class="project-milestone-item-content h-100 overflow-auto">
-        <?php foreach ($tasks AS $task): ?>
-            <div data-id="<?= $task->id ?>" class="project-milestone-item-task" style="background: <?= Html::hex2rgba($task->status->color_label, 0.05) ?>">
-                <div class="project-milestone-item-task-header  d-flex">
-                    <?= Html::a(Html::encode($task->title), ['/task/admin/task/view', 'id' => $task->id], [
-                        'data-lazy-modal' => 'task-view-modal',
-                        'data-lazy-container' => '#main-container',
-                        'class' => 'project-milestone-item-task-title',
-                    ]) ?>
-                </div>
-                <div class="d-flex align-items-center mb-2">
-                    <div class="task-list-progress-label mr-3 text-primary font-weight-bold"><?= $task->progress * 100 ?>%</div>
-                    <?= Progress::widget([
-                        'percent' => $task->progress * 100,
-                        'options' => [
-                            'style' => 'height:4px',
-                            'class' => 'flex-grow-1',
-                        ],
-                    ]);
-                    ?>
-                </div>
-                <div class="project-milestone-item-task-content">
-                    <div data-toggle="tooltip" title="<?= Html::encode($task->status->label) ?>" class="project-milestone-item-task-status" style="background: <?= $task->status->color_label ?>"></div>
-                    <div class="d-flex align-items-center">
-                        <div class="project-milestone-item-task-assignee">
-                            <?php
-                            $assignees = $task->assignees;
-                            $result = [];
-                            $more = count($assignees) - 6;
-
-                            foreach ($assignees AS $index => $assignee) {
-                                $result[] = Html::tag('div', Html::img($assignee->account->getFileVersionUrl('avatar', 'thumbnail')), [
-                                    'class' => 'task-avatar',
-                                    'data-toggle' => 'tooltip',
-                                    'title' => $assignee->name,
-                                ]);
-
-                                if ($index === 1 && $more > 0) {
-                                    $result[] = Html::tag('div', "+{$more}", [
-                                        'class' => 'task-avatar-more',
-                                        'data-toggle' => 'tooltip',
-                                    ]);
-
-                                    break;
-                                }
-                            }
-
-                            echo implode('', $result);
-                            ?>
-                        </div>
-                        <div class="ml-auto">
-                            <?= TaskStatusDropdown::widget([
-                                'value' => $task->status_id,
-                                'url' => function ($status) use ($task) {
-                                    return ['/task/admin/task/change-status', 'id' => $task->id, 'status' => $status['id']];
-                                },
-                            ]) ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
+    <div class="project-milestone-item-content h-100 overflow-hidden">
+        <?php Lazy::begin([
+            'id' => "project-milestone-items-{$model->id}",
+            'options' => [
+                'class' => ' h-100 overflow-auto',
+            ],
+        ]); ?>
+        <a href="#" class="btn btn-outline-primary btn-block btn-load-more"><?= Yii::t('app', 'Load More'); ?></a>
+        <?php Lazy::end(); ?>
     </div>
 </div>
 

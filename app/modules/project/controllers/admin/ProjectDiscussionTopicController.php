@@ -19,6 +19,40 @@ class ProjectDiscussionTopicController extends Controller
 {
 
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.project.view.discussion.add'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.project.view.discussion.update'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.project.view.discussion.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @param ProjectDiscussionTopic $model
      * @param                        $data
      *

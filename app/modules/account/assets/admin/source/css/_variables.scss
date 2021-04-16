@@ -1,4 +1,4 @@
-@import "../../../../../../vendor/npm-asset/bootstrap/scss/functions.scss";
+@import "../../../../../../vendor/npm-asset/bootstrap/scss/functions";
 
 $app-theme: 'dark';
 
@@ -66,7 +66,7 @@ $colors: map-merge((
         "gray-dark": $gray-800
 ), $colors);
 
-$primary: #468bef !default;
+$primary: #3b74c8 !default;
 $secondary: $gray-600 !default;
 $success: $green !default;
 $info: $cyan !default;
@@ -225,9 +225,9 @@ $border-width: 1px !default;
 $border-lg-width: 2px !default;
 $border-color: $gray-200 !default;
 
-$border-radius: .35rem !default;
-$border-radius-lg: .6rem !default;
-$border-radius-sm: .3rem !default;
+$border-radius: .575rem !default;
+$border-radius-lg: 1rem !default;
+$border-radius-sm: .4rem !default;
 
 $box-shadow-sm: 0 .12rem .2rem rgba($black, .075) !default;
 $box-shadow: 0 .5rem 1rem rgba($black, .15) !default;
@@ -586,7 +586,7 @@ $form-feedback-icon-invalid: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0i
 $dropdown-min-width: 15rem !default;
 $dropdown-padding-y: .5rem !default;
 $dropdown-spacer: .125rem !default;
-$dropdown-bg: $white !default;
+$dropdown-bg: rgba($white, 0.8) !default;
 $dropdown-border-color: color-level($body-bg, 0.7) !default;
 $dropdown-border-radius: $border-radius !default;
 $dropdown-border-width: $border-width !default;
@@ -636,7 +636,7 @@ $nav-tabs-link-active-border-color: transparent !default;
 
 $nav-pills-border-radius: 2rem !default;
 $nav-pills-link-active-color: $primary !default;
-$nav-pills-link-active-bg: color-level($component-active-bg, -11.7) !default;
+$nav-pills-link-active-bg: color-level($component-active-bg, -11) !default;
 
 $nav-divider-color: $gray-200 !default;
 $nav-divider-margin-y: ($spacer / 2) !default;
@@ -800,8 +800,8 @@ $modal-content-border-radius: $border-radius-lg !default;
 $modal-content-box-shadow-xs: 0 .25rem 4rem rgba($black, .2) !default;
 $modal-content-box-shadow-sm-up: 0 .5rem 5rem rgba($black, .2) !default;
 
-$modal-backdrop-bg: $gray-400 !default;
-$modal-backdrop-opacity: .6 !default;
+$modal-backdrop-bg: rgba(theme-color-level('primary',10), 0.7) !default;
+$modal-backdrop-opacity: 1 !default;
 $modal-header-bg: $white !default;
 $modal-header-border-color: $gray-200 !default;
 $modal-footer-border-color: $modal-header-border-color !default;
@@ -947,22 +947,27 @@ $print-body-min-width: map-get($grid-breakpoints, "lg") !default;
 /********** THEME VARIABLES **********/
 $font-size: 12px;
 
+$sidenav-width: 50px;
+$sidenav-bg: theme-color-level('primary', 8);
+$sidenav-color: theme-color-level('primary', -5);
+
 $sidebar-width: 255px;
 $sidebar-box-shadow: $card-box-shadow;
 $sidebar-collapse-width: 110px;
-$sidebar-background-color: $really-light;
-$sidebar-header-background-color: $really-light;
-$sidebar-header-border-color: $gray-200;
-$sidebar-color: rgba(0, 0, 0, 0.65);
+$sidebar-background-color: theme-color-level('primary', 6);
+$sidebar-header-background-color: $sidebar-background-color;
+$sidebar-header-border-color: $sidenav-bg;
+$sidebar-color: theme-color-level('primary', -8);
 $sidebar-header-color: $sidebar-color;
 
-$sidenav-width: 50px;
-$sidenav-bg: $app-color;
+$sidebar-light-color: $link-color;
 
-$header-bg: $body-bg;
+$app-foreground: theme-color-level('primary', -11);
+
+$header-bg: $app-foreground;
 $header-box-shadow: 0px 1px 15px 1px rgba(53, 58, 93, 0.08);
 $header-color: $body-color;
-$header-title-font-size: $font-size-lg * 1.3;
+$header-title-font-size: $font-size-lg * 1.1;
 $header-title-line-height: calc((#{$btn-line-height} * #{$font-size}) + (#{$btn-padding-y} * 2) + #{$btn-border-width} * 2 + 2px);
 $topbar-content-height: calc(#{$header-title-font-size} * #{$header-title-line-height});
 $topbar-height: calc(#{$header-title-line-height} + #{map-get($spacers, 2)} * 1.2 * 2);

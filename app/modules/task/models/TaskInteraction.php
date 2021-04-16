@@ -11,8 +11,10 @@ use modules\account\models\StaffAccount;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\task\models\query\TaskInteractionQuery;
+use Throwable;
 use Yii;
 use yii\db\Exception as DbException;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 
@@ -23,7 +25,6 @@ use yii\helpers\StringHelper;
  * @property Task             $task
  * @property TaskStatus       $status
  * @property TaskAttachment[] $attachments
- * @property bool             $isMe
  *
  * @property int              $id               [int(10) unsigned]
  * @property int              $task_id          [int(11) unsigned]
@@ -220,6 +221,30 @@ class TaskInteraction extends ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        $this->deleteRelations();
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @throws DbException
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
+    public function deleteRelations()
+    {
+        foreach ($this->attachments AS $attachment) {
+            if (!$attachment->delete()) {
+                throw new DbException('Failed to delete related attachments');
+            }
+        }
     }
 
     /**

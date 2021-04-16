@@ -47,12 +47,14 @@ echo $this->render('data-table', [
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/project/admin/project-status/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'project-status-form',
-    'data-lazy-modal-size' => 'modal-md',
-    'data-lazy-container' => '#main-container',
-]);
+if(Yii::$app->user->can('admin.setting.project.project-status.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/project/admin/project-status/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'project-status-form',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 

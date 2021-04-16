@@ -237,6 +237,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'controller' => '/finance/admin/expense',
             'buttons' => [
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.expense.view.detail'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'name' => Yii::t('app', 'View'),
@@ -246,6 +247,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     ],
                 ],
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.expense.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'name' => Yii::t('app', 'Update'),
@@ -257,7 +259,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 'add-to-invoice' => function($url,$model){
                     /** @var Expense $model */
 
-                    if($model->is_billable && empty($model->invoice_item_id)) {
+                    if($model->is_billable && !$model->isBilled && Yii::$app->user->can('admin.expense.bill')) {
                         return Html::a(Icon::show('i8:transaction-2'), $url, [
                             'title' => Yii::t('app', 'Add to Invoice'),
                             'data-lazy-container' => '#main-container',
@@ -266,7 +268,20 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                             'data-toggle' => 'tooltip',
                         ]);
                     }
-                }
+                },
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.expense.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false,'method' => 'DELETE'],
+                    ],
+                ],
             ],
         ],
     ],

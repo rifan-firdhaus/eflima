@@ -15,6 +15,7 @@ use modules\task\widgets\inputs\TaskStatusInput;
 use modules\ui\widgets\form\fields\ActiveField;
 use modules\ui\widgets\form\fields\CardField;
 use modules\ui\widgets\form\fields\ContainerField;
+use modules\ui\widgets\form\fields\MultiField;
 use modules\ui\widgets\form\fields\RawField;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\inputs\DatepickerInput;
@@ -249,15 +250,7 @@ echo $form->fields([
                             ],
                         ],
                         [
-                            'attribute' => 'is_notified_when_progress_updated',
-                            'type' => ActiveField::TYPE_CHECKBOX,
-                            'standalone' => true,
-                            'inputOptions' => [
-                                'custom' => true,
-                            ],
-                        ],
-                        [
-                            'attribute' => 'is_comment_allowed',
+                            'attribute' => 'is_visible_to_customer',
                             'type' => ActiveField::TYPE_CHECKBOX,
                             'standalone' => true,
                             'inputOptions' => [
@@ -268,33 +261,8 @@ echo $form->fields([
                             'attribute' => 'is_customer_allowed_to_comment',
                             'type' => ActiveField::TYPE_CHECKBOX,
                             'standalone' => true,
-                            'options' => [
-                                'class' => 'pl-4 form-group',
-                            ],
                             'inputOptions' => [
                                 'custom' => true,
-                            ],
-                        ],
-                        [
-                            'attribute' => 'is_notified_when_comment',
-                            'type' => ActiveField::TYPE_CHECKBOX,
-                            'standalone' => true,
-                            'inputOptions' => [
-                                'custom' => true,
-                            ],
-                            'options' => [
-                                'class' => 'pl-4 form-group',
-                            ],
-                        ],
-                        [
-                            'attribute' => 'is_notified_only_when_customer_comment',
-                            'type' => ActiveField::TYPE_CHECKBOX,
-                            'standalone' => true,
-                            'inputOptions' => [
-                                'custom' => true,
-                            ],
-                            'options' => [
-                                'class' => 'pl-4 form-group',
                             ],
                         ],
                         [
@@ -309,52 +277,62 @@ echo $form->fields([
                             ],
                         ],
                         [
-                            'attribute' => 'timer_type',
-                            'type' => ActiveField::TYPE_RADIO_LIST,
-                            'standalone' => true,
-                            'source' => Task::timerTypes(),
+                            'class' => MultiField::class,
                             'options' => [
-                                'class' => 'pl-4 form-group',
+                                'class' => 'timer-group'
                             ],
-                            'inputOptions' => [
-                                'itemOptions' => [
-                                    'custom' => true,
-                                    'containerOptions' => ['class' => 'mb-2'],
-                                ],
-                            ],
-                        ],
-                        [
-                            'class' => ContainerField::class,
-                            'inputOnly' => true,
-                            'inputOptions' => [
-                                'class' => 'd-flex pl-4 ml-1',
-                            ],
+                            'label' => false,
+                            'hint' => false,
                             'fields' => [
                                 [
-                                    'size' => '',
-                                    'field' => [
-                                        'attribute' => 'estimation',
-                                        'type' => 'number',
-                                        'class' => ActiveField::class,
-                                        'standalone' => true,
-                                        'inputGroups' => ['before' => Yii::t('app', 'Estimation')],
+                                    'attribute' => 'timer_type',
+                                    'type' => ActiveField::TYPE_RADIO_LIST,
+                                    'standalone' => true,
+                                    'source' => Task::timerTypes(),
+                                    'options' => [
+                                        'class' => 'pl-4 form-group',
                                     ],
-                                ],
-                                [
-                                    'size' => '',
-                                    'field' => [
-                                        'attribute' => 'estimation_modifier',
-                                        'class' => ActiveField::class,
-                                        'type' => ActiveField::TYPE_DROP_DOWN_LIST,
-                                        'standalone' => true,
-                                        'source' => Task::estimationModifiers(),
-                                        'inputOptions' => [
-                                            'class' => 'form-control',
-                                            'style' => 'min-width: 100px',
+                                    'inputOptions' => [
+                                        'itemOptions' => [
+                                            'custom' => true,
+                                            'containerOptions' => ['class' => 'mb-2'],
                                         ],
                                     ],
                                 ],
-                            ],
+                                [
+                                    'class' => ContainerField::class,
+                                    'inputOnly' => true,
+                                    'inputOptions' => [
+                                        'class' => 'd-flex pl-4 ml-1',
+                                    ],
+                                    'fields' => [
+                                        [
+                                            'size' => '',
+                                            'field' => [
+                                                'attribute' => 'estimation',
+                                                'type' => 'number',
+                                                'class' => ActiveField::class,
+                                                'standalone' => true,
+                                                'inputGroups' => ['before' => Yii::t('app', 'Estimation')],
+                                            ],
+                                        ],
+                                        [
+                                            'size' => '',
+                                            'field' => [
+                                                'attribute' => 'estimation_modifier',
+                                                'class' => ActiveField::class,
+                                                'type' => ActiveField::TYPE_DROP_DOWN_LIST,
+                                                'standalone' => true,
+                                                'source' => Task::estimationModifiers(),
+                                                'inputOptions' => [
+                                                    'class' => 'form-control',
+                                                    'style' => 'min-width: 100px',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ]
                         ],
                     ],
                 ],

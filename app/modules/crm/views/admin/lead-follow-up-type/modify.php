@@ -21,30 +21,19 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:handshake';
 $this->menu->active = 'setting/crm';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-lead-follow-up-type'] = Html::a(
-            '',
-            ['/crm/admin/lead-follow-up-type/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-
-        $this->toolbar['add-lead-follow-up-type'] = Html::a(
-            Yii::t('app', 'Add'),
-            ['/crm/admin/lead-follow-up-type/add', 'id' => $model->id],
-            [
-                'class' => 'btn btn-secondary',
-                'icon' => 'i8:plus',
-            ]
-        );
+if (!$model->isNewRecord && !Lazy::isLazyModalRequest()) {
+    if (Yii::$app->user->can('admin.setting.crm.lead-follow-up-type.delete')) {
+        $this->toolbar['delete-lead-follow-up-type'] = Html::a([
+            'url' => ['/crm/admin/lead-follow-up-type/delete', 'id' => $model->id],
+            'class' => 'btn btn-outlline-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->label),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE']
+        ]);
     }
 }
 

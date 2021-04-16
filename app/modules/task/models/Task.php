@@ -4,6 +4,7 @@
 
 use Exception;
 use modules\account\Account;
+use modules\account\models\queries\AccountQuery;
 use modules\account\models\queries\StaffQuery;
 use modules\account\models\Staff;
 use modules\account\models\StaffAccount;
@@ -12,10 +13,12 @@ use modules\core\components\Setting;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\core\validators\DateValidator;
+use modules\note\models\Note;
 use modules\task\components\TaskRelation;
 use modules\task\models\queries\TaskAttachmentQuery;
 use modules\task\models\query\TaskAssigneeQuery;
 use modules\task\models\query\TaskChecklistQuery;
+use modules\task\models\query\TaskInteractionQuery;
 use modules\task\models\query\TaskPriorityQuery;
 use modules\task\models\query\TaskQuery;
 use modules\task\models\query\TaskStatusQuery;
@@ -23,6 +26,7 @@ use modules\task\models\query\TaskTimerQuery;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception as DbException;
 use yii\db\StaleObjectException;
@@ -31,7 +35,7 @@ use yii\helpers\ArrayHelper;
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property Staff                  $creator
+ * @property StaffAccount           $creator
  * @property Task                   $parent
  * @property Task[]                 $children
  * @property TaskPriority           $priority
@@ -54,41 +58,41 @@ use yii\helpers\ArrayHelper;
  * @property null|TaskRelation      $relatedObject
  * @property TaskTimer[]|array      $timers
  * @property string|float|int       $totalRecordedTime
+ * @property-read TaskInteraction[] $interactions
+ * @property-read StaffAccount      $updater
  *
- * @property int                    $id                                     [int(10) unsigned]
- * @property int                    $parent_id                              [int(11) unsigned]
+ * @property int                    $id                             [int(10) unsigned]
+ * @property int                    $parent_id                      [int(11) unsigned]
  * @property string                 $model
  * @property string                 $model_id
- * @property int                    $status_id                              [int(11) unsigned]
- * @property int                    $priority_id                            [int(11) unsigned]
+ * @property int                    $status_id                      [int(11) unsigned]
+ * @property int                    $priority_id                    [int(11) unsigned]
  * @property string                 $title
  * @property string                 $description
- * @property int                    $started_date                           [int(11) unsigned]
- * @property int                    $deadline_date                          [int(11) unsigned]
- * @property string                 $progress                               [decimal(5,4)]
- * @property string                 $estimation                             [decimal(7,2)]
- * @property string                 $estimation_modifier                    [char(1)]
- * @property bool                   $is_timer_enabled                       [tinyint(1) unsigned]
- * @property string                 $timer_type                             [char(1)]
- * @property bool                   $is_timer_active                        [tinyint(1) unsigned]
- * @property bool                   $is_individual_timer                    [tinyint(1) unsigned]
- * @property bool                   $is_billable                            [tinyint(1) unsigned]
- * @property bool                   $is_archieved                           [tinyint(1) unsigned]
- * @property string                 $price                                  [decimal(25,8)]
- * @property string                 $price_modifier                         [char(1)]
- * @property string                 $progress_calculation                   [char(1)]
- * @property string                 $visibility                             [char(1)]
- * @property bool                   $is_comment_allowed                     [tinyint(1) unsigned]
- * @property bool                   $is_customer_allowed_to_comment         [tinyint(1) unsigned]
- * @property bool                   $is_notified_when_comment               [tinyint(1) unsigned]
- * @property bool                   $is_notified_only_when_customer_comment [tinyint(1) unsigned]
- * @property bool                   $is_notified_when_progress_updated      [tinyint(1) unsigned]
- * @property bool                   $is_checklist_exists                    [tinyint(1) unsigned]
- * @property int                    $creator_id                             [int(11) unsigned]
- * @property int                    $created_at                             [int(11) unsigned]
- * @property int                    $updated_at                             [int(11) unsigned]
- * @property int                    $milestone_id                           [int(11) unsigned]
- * @property int                    $milestone_order                        [int(11) unsigned]
+ * @property int                    $started_date                   [int(11) unsigned]
+ * @property int                    $deadline_date                  [int(11) unsigned]
+ * @property string                 $progress                       [decimal(5,4)]
+ * @property string                 $estimation                     [decimal(7,2)]
+ * @property string                 $estimation_modifier            [char(1)]
+ * @property bool                   $is_timer_enabled               [tinyint(1) unsigned]
+ * @property string                 $timer_type                     [char(1)]
+ * @property bool                   $is_timer_active                [tinyint(1) unsigned]
+ * @property bool                   $is_individual_timer            [tinyint(1) unsigned]
+ * @property bool                   $is_billable                    [tinyint(1) unsigned]
+ * @property bool                   $is_archieved                   [tinyint(1) unsigned]
+ * @property string                 $price                          [decimal(25,8)]
+ * @property string                 $price_modifier                 [char(1)]
+ * @property string                 $progress_calculation           [char(1)]
+ * @property string                 $visibility                     [char(1)]
+ * @property bool                   $is_visible_to_customer         [tinyint(1) unsigned]
+ * @property bool                   $is_customer_allowed_to_comment [tinyint(1) unsigned]
+ * @property bool                   $is_checklist_exists            [tinyint(1) unsigned]
+ * @property int                    $creator_id                     [int(11) unsigned]
+ * @property int                    $created_at                     [int(11) unsigned]
+ * @property int                    $updater_id                     [int(11) unsigned]
+ * @property int                    $updated_at                     [int(11) unsigned]
+ * @property int                    $milestone_id                   [int(11) unsigned]
+ * @property int                    $milestone_order                [int(11) unsigned]
  */
 class Task extends ActiveRecord
 {
@@ -98,7 +102,6 @@ class Task extends ActiveRecord
 
     const VISIBILITY_PRIVATE = 'P';
     const VISIBILITY_PUBLIC = 'X';
-    const VISIBILITY_ASSIGNEE = 'A';
     const VISIBILITY_INVOLVED = 'I';
 
     const PROGRESS_CALCULATION_OWN = 'O';
@@ -110,9 +113,13 @@ class Task extends ActiveRecord
 
     const EVENT_PROGRESS_UPDATED = 'eventProgressUpdated';
 
+    public $assignor_id;
     public $assignee_ids = [];
     public $checklists = [];
     public $uploaded_attachments;
+
+    /** @var Staff */
+    public $staff;
 
     /** @var bool Wether the task updated from interaction or not */
     public $_fromInteraction = false;
@@ -187,21 +194,11 @@ class Task extends ActiveRecord
             ],
             [
                 [
-                    'is_notified_when_progress_updated',
-                    'is_comment_allowed',
                     'is_customer_allowed_to_comment',
-                    'is_notified_only_when_customer_comment',
-                    'is_notified_when_comment',
+                    'is_visible_to_customer',
                     'is_timer_enabled',
                 ],
                 'boolean',
-            ],
-            [
-                ['creator_id'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Staff::class,
-                'targetAttribute' => ['creator_id' => 'id'],
             ],
             [
                 ['parent_id'],
@@ -313,11 +310,8 @@ class Task extends ActiveRecord
             'price' => Yii::t('app', 'Price'),
             'price_modifier' => Yii::t('app', 'Price Modifier'),
             'is_internal' => Yii::t('app', 'Is Internal'),
-            'is_notified_when_progress_updated' => Yii::t('app', 'Notify when progress updated'),
-            'is_comment_allowed' => Yii::t('app', 'Allow comment'),
+            'is_visible_to_customer' => Yii::t('app', 'Visible to customer'),
             'is_customer_allowed_to_comment' => Yii::t('app', 'Allow customer to comment'),
-            'is_notified_when_comment' => Yii::t('app', 'Notify when someone post comment'),
-            'is_notified_only_when_customer_comment' => Yii::t('app', 'Notify only when customer post comment'),
             'visibility' => Yii::t('app', 'Visibility'),
             'creator' => Yii::t('app', 'Creator'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -338,6 +332,15 @@ class Task extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+            'defaultValue' => function ($event) {
+                return !empty($this->staff) ? $this->staff->account_id : null;
+            },
+        ];
+
         $behaviors['attributeTypecast'] = [
             'class' => AttributeTypecastBehavior::class,
             'attributeTypes' => [
@@ -346,12 +349,9 @@ class Task extends ActiveRecord
                 'started_date' => AttributeTypecastBehavior::TYPE_INTEGER,
                 'deadline_date' => AttributeTypecastBehavior::TYPE_INTEGER,
                 'is_timer_enabled' => AttributeTypecastBehavior::TYPE_BOOLEAN,
-                'is_comment_allowed' => AttributeTypecastBehavior::TYPE_BOOLEAN,
+                'is_visible_to_customer' => AttributeTypecastBehavior::TYPE_BOOLEAN,
                 'is_customer_allowed_to_comment' => AttributeTypecastBehavior::TYPE_BOOLEAN,
-                'is_notified_when_comment' => AttributeTypecastBehavior::TYPE_BOOLEAN,
                 'estimation' => AttributeTypecastBehavior::TYPE_FLOAT,
-                'is_notified_when_progress_updated' => AttributeTypecastBehavior::TYPE_BOOLEAN,
-                'is_notified_only_when_customer_comment' => AttributeTypecastBehavior::TYPE_BOOLEAN,
             ],
         ];
 
@@ -506,6 +506,78 @@ class Task extends ActiveRecord
         parent::afterSave($insert, $changedAttributes);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        $this->deleteRelations();
+
+        return parent::beforeDelete();
+    }
+
+    /**
+     * @throws DbException
+     * @throws StaleObjectException
+     * @throws Throwable
+     */
+    public function deleteRelations()
+    {
+        foreach ($this->assigneesRelationship AS $assignee) {
+            if (!$assignee->delete()) {
+                throw new DbException('Failed to delete task assignee');
+            }
+        }
+
+        foreach ($this->attachments AS $attachment) {
+            if (!$attachment->delete()) {
+                throw new DbException('Failed to delete related attachments');
+            }
+        }
+
+        foreach ($this->timers AS $timer) {
+            if (!$timer->delete()) {
+                throw new DbException('Failed to delete related timers');
+            }
+        }
+
+        foreach ($this->interactions AS $interaction) {
+            if (!$interaction->delete()) {
+                throw new DbException('Failed to delete related comments');
+            }
+        }
+
+        foreach (TaskChecklist::find()->andWhere(['task_id' => $this->id])->all() AS $checklist) {
+            if (!$checklist->delete()) {
+                throw new DbException('Failed to delete related checklist');
+            }
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'task', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new DbException('Failed to delete related note');
+                }
+            }
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function normalizeAttributes($save = false)
+    {
+        if ($save) {
+            if ($this->visibility === self::VISIBILITY_PRIVATE) {
+                $this->assignee_ids = [$this->creator->profile->id];
+            }
+        }
+
+        parent::normalizeAttributes($save);
+    }
+
 
     /**
      * @inheritdoc
@@ -606,7 +678,7 @@ class Task extends ActiveRecord
                 continue;
             }
 
-            if (!$this->assign($assigneeId, false)) {
+            if (!$this->assign($assigneeId, $this->assignor_id, false)) {
                 return false;
             }
         }
@@ -615,7 +687,7 @@ class Task extends ActiveRecord
             ->andWhere(['NOT IN', 'assignee_id', array_keys($currentModels)])
             ->all();
 
-        TaskAssignee::sendAssignNotification($addedModels, $this, $this->creator);
+        TaskAssignee::sendAssignNotification($addedModels, $this, $this->assignor_id);
 
         foreach ($currentModels AS $key => $model) {
             if (in_array($key, $this->assignee_ids)) {
@@ -696,22 +768,38 @@ class Task extends ActiveRecord
     }
 
     /**
-     * @param Staff|int $staff
+     * @param Staff|int $assignee
+     * @param Staff|int $assignor
      * @param bool      $notify
      *
      * @return bool
      *
      * @throws InvalidConfigException
+     * @throws DbException
      */
-    public function assign($staff, $notify = true)
+    public function assign($assignee, $assignor, $notify = true)
     {
-        $staffId = $staff instanceof Staff ? $staff->id : $staff;
+        if (!$assignor instanceof Staff) {
+            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+
+            if (!$assignor) {
+                throw new DbException('Invalid assignor');
+            }
+        }
+
+        if (!$assignee instanceof Staff) {
+            $assignee = Staff::find()->andWhere(['id' => $assignee])->one();
+
+            if (!$assignee) {
+                throw new DbException('Invalid assignee');
+            }
+        }
 
         $model = new TaskAssignee([
             'scenario' => 'admin/task/add',
             'task_id' => $this->id,
-            'assignee_id' => $staffId,
-            'assignor_id' => $this->creator_id,
+            'assignee_id' => $assignee->id,
+            'assignor_id' => $assignor->id,
         ]);
 
         $model->loadDefaultValues();
@@ -721,7 +809,7 @@ class Task extends ActiveRecord
         }
 
         if ($notify) {
-            TaskAssignee::sendAssignNotification([$model], $this, $this->creator);
+            TaskAssignee::sendAssignNotification([$model], $this, $assignor);
         }
 
         return true;
@@ -867,10 +955,9 @@ class Task extends ActiveRecord
     public static function visibilities($visibility = false)
     {
         $visibilities = [
-            self::VISIBILITY_INVOLVED => Yii::t('app', 'Visible to assignee, customer and you'),
-            self::VISIBILITY_ASSIGNEE => Yii::t('app', 'Visible only to assignee and you'),
-            self::VISIBILITY_PUBLIC => Yii::t('app', 'Visible to everyone, including customer'),
-            self::VISIBILITY_PRIVATE => Yii::t('app', 'Visible only to you'),
+            self::VISIBILITY_INVOLVED => Yii::t('app', 'Involved Only (Only you and assignee can view this task)'),
+            self::VISIBILITY_PUBLIC => Yii::t('app', 'Public (Everyone can see this task)'),
+            self::VISIBILITY_PRIVATE => Yii::t('app', 'Private (Only you can view this task)'),
         ];
 
         if ($visibility !== false) {
@@ -889,11 +976,27 @@ class Task extends ActiveRecord
     }
 
     /**
-     * @return ActiveQuery
+     * @return ActiveQuery|AccountQuery
      */
     public function getCreator()
     {
-        return $this->hasOne(Staff::class, ['id' => 'creator_id'])->alias('creator_of_task');
+        return $this->hasOne(StaffAccount::class, ['id' => 'creator_id'])->alias('creator_of_task');
+    }
+
+    /**
+     * @return ActiveQuery|AccountQuery
+     */
+    public function getUpdater()
+    {
+        return $this->hasOne(StaffAccount::class, ['id' => 'updater_id'])->alias('updater_of_task');
+    }
+
+    /**
+     * @return ActiveQuery|TaskInteractionQuery
+     */
+    public function getInteractions()
+    {
+        return $this->hasMany(TaskInteraction::class, ['task_id' => 'id'])->alias('interactions_of_task');
     }
 
     /**
@@ -1065,57 +1168,6 @@ class Task extends ActiveRecord
     }
 
     /**
-     * @param int|string     $statusId
-     * @param int[]|string[] $taskIds
-     *
-     * @return bool
-     *
-     * @throws DbException
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
-    public function changeStatuses($statusId, $taskIds)
-    {
-        if (is_string($taskIds)) {
-            $taskIds = explode(',', $taskIds);
-        }
-
-        if (empty($taskIds)) {
-            return true;
-        }
-
-        $tasks = Task::find()->andWhere(['id' => $taskIds])
-            ->andWhere(['!=', 'status_id', $statusId])
-            ->all();
-
-        $transaction = self::getDb()->beginTransaction();
-
-        try {
-            foreach ($tasks AS $task) {
-                if ($task->changeStatus($statusId)) {
-                    continue;
-                }
-
-                $transaction->rollBack();
-
-                return false;
-            }
-        } catch (Exception $e) {
-            $transaction->rollBack();
-
-            throw $e;
-        } catch (Throwable $e) {
-            $transaction->rollBack();
-
-            throw $e;
-        }
-
-        $transaction->commit();
-
-        return true;
-    }
-
-    /**
      * @param integer $priorityId
      *
      * @return bool
@@ -1138,58 +1190,6 @@ class Task extends ActiveRecord
         $this->priority_id = $priorityId;
 
         return $this->save(false);
-    }
-
-
-    /**
-     * @param int|string     $priorityId
-     * @param int[]|string[] $taskIds
-     *
-     * @return bool
-     *
-     * @throws DbException
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
-    public function changePriorities($priorityId, $taskIds)
-    {
-        if (is_string($taskIds)) {
-            $taskIds = explode(',', $taskIds);
-        }
-
-        if (empty($taskIds)) {
-            return true;
-        }
-
-        $tasks = Task::find()->andWhere(['id' => $taskIds])
-            ->andWhere(['!=', 'priority_id', $priorityId])
-            ->all();
-
-        $transaction = self::getDb()->beginTransaction();
-
-        try {
-            foreach ($tasks AS $task) {
-                if ($task->changePriority($priorityId)) {
-                    continue;
-                }
-
-                $transaction->rollBack();
-
-                return false;
-            }
-        } catch (Exception $e) {
-            $transaction->rollBack();
-
-            throw $e;
-        } catch (Throwable $e) {
-            $transaction->rollBack();
-
-            throw $e;
-        }
-
-        $transaction->commit();
-
-        return true;
     }
 
     /**
@@ -1309,6 +1309,10 @@ class Task extends ActiveRecord
         return $timer->stop($stopperId);
     }
 
+    /**
+     * @return bool
+     * @throws Throwable
+     */
     public function stopAllTimers()
     {
         $timers = $this->getTimers()->started()->all();
@@ -1399,17 +1403,14 @@ class Task extends ActiveRecord
      */
     protected function getCurrentInteraction()
     {
-        if (Yii::$app->user->isGuest) {
+        if (!$this->staff) {
             return false;
         }
 
         if (!$this->_currentInteraction) {
-            /** @var StaffAccount $account */
-            $account = Yii::$app->user->identity;
-
             $this->_currentInteraction = new TaskInteraction([
                 'scenario' => 'admin/task/add',
-                'staff_id' => $account->profile->id,
+                'staff_id' => $this->staff->id,
                 'task_id' => $this->id,
             ]);
         }
@@ -1506,5 +1507,45 @@ class Task extends ActiveRecord
             'model' => self::class,
             'model_id' => $this->id,
         ]);
+    }
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = Task::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $task) {
+                if (!$task->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
     }
 }

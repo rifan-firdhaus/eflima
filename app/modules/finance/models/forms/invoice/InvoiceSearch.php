@@ -379,26 +379,42 @@ class InvoiceSearch extends Invoice implements SearchableModel
             $query = $this->getQuery();
         }
 
+        // Filter by date range
         $query->andFilterWhere(['>=', 'invoice.date', $this->date_from])
-            ->andFilterWhere(['<=', 'invoice.date', $this->date_to])
-            ->andFilterWhere(['>=', 'invoice.due_date', $this->due_date_from])
-            ->andFilterWhere(['<=', 'invoice.due_date', $this->due_date_to])
-            ->andFilterWhere(['invoice.currency_code' => $this->currency_code])
-            ->andFilterWhere(['invoice.is_paid' => $this->is_paid])
-            ->andFilterWhere(['invoice.customer_id' => $this->customer_id])
-            ->andFilterWhere(['invoice.is_paid' => $this->is_published]);
+            ->andFilterWhere(['<=', 'invoice.date', $this->date_to]);
 
+        // Filter by due date range
+        $query->andFilterWhere(['>=', 'invoice.due_date', $this->due_date_from])
+            ->andFilterWhere(['<=', 'invoice.due_date', $this->due_date_to]);
+
+        // Filter by currency
+        $query->andFilterWhere(['invoice.currency_code' => $this->currency_code]);
+
+        // Filter by payment
+        $query->andFilterWhere(['invoice.is_paid' => $this->is_paid]);
+
+        // Filter by customer
+        $query->andFilterWhere(['invoice.customer_id' => $this->customer_id]);
+
+        // Filter by publication
+        $query->andFilterWhere(['invoice.is_published' => $this->is_published]);
+
+        // Show only past due invoice
         if (!Common::isEmpty($this->is_past_due)) {
             $query->pastDue($this->is_past_due);
         }
 
+        // Show only invoice that has payment
         if (!Common::isEmpty($this->has_payment)) {
             $query->hasPayment($this->has_payment);
         }
+
+        // Show only invoice that has due
         if (!Common::isEmpty($this->has_due)) {
             $query->hasPaymentDue($this->has_due);
         }
 
+        // Filter invoice by query string
         $query->andFilterWhere([
             'or',
             ['like', 'invoice.number', $this->q],

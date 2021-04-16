@@ -5,11 +5,16 @@ use modules\account\models\StaffAccount;
 use modules\account\web\admin\Controller;
 use modules\account\web\admin\View;
 use modules\core\components\HookTrait;
-use yii\helpers\Html;
+use modules\core\controllers\admin\SettingController;
 use modules\ui\widgets\Icon;
+use modules\ui\widgets\lazy\Lazy;
 use Yii;
 use yii\base\Event;
+use yii\base\InvalidConfigException;
 use yii\bootstrap4\Modal;
+use yii\filters\AccessControl;
+use yii\helpers\Html;
+use yii\web\Response;
 use yii\widgets\LinkPager;
 
 /**
@@ -22,6 +27,55 @@ class AdminHook
     protected function __construct()
     {
         Event::on(Controller::class, Controller::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+
+        Event::on(SettingController::class, SettingController::EVENT_INIT, [$this, 'registerSettingPermission']);
+
+        Yii::$app->response->on(Response::EVENT_BEFORE_SEND, [$this, 'beforeSendResponse']);
+    }
+
+    public function beforeSendResponse()
+    {
+        $req = Yii::$app->request;
+        $res = Yii::$app->response;
+
+        if ($req->isGet && $res->statusCode == 200 && (!$req->isAjax || ($res->data instanceof Lazy && $req->headers->get('X-Page','true') === 'true'))) {
+            Yii::$app->user->setReturnUrl(Yii::$app->request->absoluteUrl);
+        }
+    }
+
+    /**
+     * @param Event $event
+     *
+     * @throws InvalidConfigException
+     */
+    public function registerSettingPermission($event)
+    {
+        /**
+         * @var SettingController $settingController
+         * @var AccessControl     $accessBehaviors
+         */
+        $settingController = $event->sender;
+        $accessBehaviors = $settingController->getBehavior('access');
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.account'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'account';
+            },
+        ], $accessBehaviors->ruleConfig));
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.company'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'company';
+            },
+        ], $accessBehaviors->ruleConfig));
     }
 
     /**
@@ -131,6 +185,7 @@ class AdminHook
                 'label' => Yii::t('app', 'Staffs'),
                 'icon' => 'i8:account',
                 'url' => ['/account/admin/staff/index'],
+                'visible' => Yii::$app->user->can('admin.staff.list'),
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,
@@ -140,6 +195,7 @@ class AdminHook
                 'label' => Yii::t('app', 'Role & Permission'),
                 'icon' => 'i8:user-shield',
                 'url' => ['/account/admin/role/index'],
+                'visible' => Yii::$app->user->can('admin.staff.role.list'),
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,
@@ -149,6 +205,7 @@ class AdminHook
                 'label' => Yii::t('app', 'Account'),
                 'icon' => 'i8:user-menu-male',
                 'url' => ['/core/admin/setting/index', 'section' => 'account'],
+                'visible' => Yii::$app->user->can('admin.setting.account'),
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,
@@ -158,6 +215,7 @@ class AdminHook
                 'label' => Yii::t('app', 'Company'),
                 'icon' => 'i8:smart-card',
                 'url' => ['/core/admin/setting/index', 'section' => 'company'],
+                'visible' => Yii::$app->user->can('admin.setting.company'),
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,

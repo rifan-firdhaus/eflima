@@ -21,7 +21,7 @@ trait MigrationSettingInstaller
     protected function unregisterSettings()
     {
         foreach ($this->settings() AS $setting) {
-            $time = $this->beginCommand("Register \"{$setting['id']}\" setting");
+            $time = $this->beginCommand("Unregister \"{$setting['id']}\" setting");
 
             $model = Setting::find()->andWhere(['id' => $setting['id']])->one();
 

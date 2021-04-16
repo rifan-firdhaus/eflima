@@ -6,6 +6,7 @@ use modules\account\models\Account as AccountModel;
 use modules\account\models\AccountSession;
 use modules\core\components\HookTrait;
 use modules\core\components\SettingRenderer;
+use modules\core\controllers\admin\SettingController;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;

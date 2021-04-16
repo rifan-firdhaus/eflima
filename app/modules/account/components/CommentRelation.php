@@ -31,6 +31,16 @@ abstract class CommentRelation extends Component
     abstract public function getModel($id);
 
     /**
+     * @param null|string|int $modelId
+     *
+     * @return bool
+     */
+    public function isActive($modelId = null)
+    {
+        return true;
+    }
+
+    /**
      * @param mixed $model
      *
      * @return string

@@ -3,6 +3,7 @@
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 use Closure;
 use modules\account\models\forms\history\HistorySearch;
+use modules\account\models\forms\staff\StaffSearch;
 use modules\account\models\queries\HistoryQuery;
 use modules\account\web\admin\Controller;
 use modules\calendar\models\Event;
@@ -14,6 +15,7 @@ use modules\finance\models\forms\expense\ExpenseSearch;
 use modules\finance\models\forms\invoice\InvoiceSearch;
 use modules\finance\models\forms\invoice_payment\InvoicePaymentSearch;
 use modules\finance\models\Invoice;
+use modules\project\models\forms\project\ProjectBulkSetStatus;
 use modules\project\models\forms\project\ProjectSearch;
 use modules\project\models\forms\project_discussion_topic\ProjectDiscussionTopicSearch;
 use modules\project\models\Project;
@@ -41,6 +43,188 @@ use yii\web\Response;
  */
 class ProjectController extends Controller
 {
+    public $viewMenu = [
+        'detail' => [
+            'route' => ['/project/admin/project/detail'],
+            'role' => 'admin.project.view.detail',
+        ],
+        'task' => [
+            'route' => ['/project/admin/project/task'],
+            'role' => 'admin.project.view.task',
+        ],
+        'milestone' => [
+            'route' => ['/project/admin/project/milestone'],
+            'role' => 'admin.project.view.milestone.list',
+        ],
+        'timer' => [
+            'route' => ['/project/admin/project/task-timer'],
+            'role' => 'admin.project.view.task-timer',
+        ],
+        'invoice' => [
+            'route' => ['/project/admin/project/invoice'],
+            'role' => 'admin.project.view.invoice',
+        ],
+        'payment' => [
+            'route' => ['/project/admin/project/payment'],
+            'role' => 'admin.project.view.payment',
+        ],
+        'expense' => [
+            'route' => ['/project/admin/project/expense'],
+            'role' => 'admin.project.view.expense',
+        ],
+        'ticket' => [
+            'route' => ['/project/admin/project/ticket'],
+            'role' => 'admin.project.view.ticket',
+        ],
+        'event' => [
+            'route' => ['/project/admin/project/event'],
+            'role' => 'admin.project.view.event',
+        ],
+        'discussion' => [
+            'route' => ['/project/admin/project/discussion'],
+            'role' => 'admin.project.view.discussion',
+        ],
+        'history' => [
+            'route' => ['/project/admin/project/history'],
+            'role' => 'admin.project.view.history',
+        ],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.list'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.project.add'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.project.update'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.project.delete'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['change-status','bulk-set-status'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.project.status'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['detail'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.detail'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['invoice'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.invoice'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['expense'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.expense'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['ticket'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.ticket'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['task-timer'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.task-timer'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['discussion'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.discussion'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['milestone'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.milestone.list'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['event'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.milestone.list'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['payment'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.payment'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['task'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.task'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.project.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'view',
+                    'auto-complete',
+                    'staff-invitable-auto-complete',
+                ],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param string $view
      *
@@ -106,40 +290,45 @@ class ProjectController extends Controller
 
     /**
      * @param        $id
-     * @param string $action
+     *
+     * @return Response
+     *
+     */
+    public function actionView($id)
+    {
+        foreach ($this->viewMenu AS $item) {
+            if (!Yii::$app->user->can($item['role'])) {
+                continue;
+            }
+
+            $route = $item['route'];
+
+            if (is_callable($route)) {
+                call_user_func($route, $id);
+            } else {
+                $route['id'] = $id;
+            }
+
+
+            return $this->redirect($route);
+        }
+
+        return $this->redirect(['/']);
+    }
+
+    /**
+     * @param $id
      *
      * @return Project|string|Response
+     *
      * @throws InvalidConfigException
      */
-    public function actionView($id, $action = 'detail')
+    public function actionDetail($id)
     {
         $model = $this->getModel($id);
 
         if (!($model instanceof Project)) {
             return $model;
-        }
-
-        switch ($action) {
-            case 'task':
-                return $this->task($model);
-            case 'task-timer':
-                return $this->taskTimer($model);
-            case 'invoice':
-                return $this->invoice($model);
-            case 'payment':
-                return $this->payment($model);
-            case 'expense':
-                return $this->expense($model);
-            case 'ticket':
-                return $this->ticket($model);
-            case 'event':
-                return $this->event($model);
-            case 'milestone':
-                return $this->milestone($model);
-            case 'history':
-                return $this->history($model);
-            case 'discussion':
-                return $this->discussion($model);
         }
 
         $taskSearchModel = $this->taskSearchModel($model);
@@ -167,22 +356,38 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function milestone($model)
+    public function actionMilestone($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         return $this->render('milestone', compact('model'));
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function history($model)
+    public function actionHistory($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $historySearchParams = [
             'model' => Project::class,
             'model_id' => $model->id,
@@ -264,12 +469,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function invoice($model)
+    public function actionInvoice($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = new InvoiceSearch([
             'params' => [
                 'customer_id' => $model->customer_id,
@@ -284,14 +497,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function expense($model)
+    public function actionExpense($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = new ExpenseSearch([
             'params' => [
                 'customer_id' => $model->customer_id,
@@ -306,14 +525,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function discussion($model)
+    public function actionDiscussion($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = new ProjectDiscussionTopicSearch([
             'params' => [
                 'project_id' => $model->id,
@@ -332,12 +557,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function ticket($model)
+    public function actionTicket($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = new TicketSearch([
             'params' => [
                 'customer_id' => $model->customer_id,
@@ -352,14 +585,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string|array
      *
      * @throws InvalidConfigException
      */
-    public function event($model)
+    public function actionEvent($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $view = Yii::$app->request->get('view', 'default');
         $params = Yii::$app->request->queryParams;
 
@@ -389,14 +628,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function payment($model)
+    public function actionPayment($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = new InvoicePaymentSearch([
             'params' => [
                 'customer_id' => $model->customer_id,
@@ -411,14 +656,20 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function task($model)
+    public function actionTask($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
+
         $searchModel = $this->taskSearchModel($model);
 
         $dataProvider = $searchModel->apply(Yii::$app->request->queryParams);
@@ -467,14 +718,19 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function taskTimer($model)
+    public function actionTaskTimer($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Project)) {
+            return $model;
+        }
 
         $searchModel = new TaskTimerSearch();
 
@@ -631,6 +887,80 @@ class ProjectController extends Controller
     }
 
     /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Project::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Project'),
+            ]));
+        }
+
+        if (Project::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Projects'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @return array|string|void|Response
+     * @throws Throwable
+     */
+    public function actionBulkSetStatus()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+        $model = new ProjectBulkSetStatus([
+            'ids' => $ids,
+        ]);
+        $data = Yii::$app->request->post();
+
+        if ($model->load($data)) {
+            if (Yii::$app->request->getHeaders()->get('X-Validate') == 1) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+
+                return Form::validate($model);
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully updated', [
+                    'number' => count($model->ids),
+                    'object' => Yii::t('app', 'Projects'),
+                ]));
+
+                if (Lazy::isLazyModalRequest() || Lazy::isLazyInsideModalRequest()) {
+                    Lazy::close();
+
+                    return;
+                }
+
+                return $this->redirect(['index']);
+            } elseif ($model->hasErrors()) {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Some of the information you entered is invalid'));
+            } else {
+                Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to update {object}', [
+                    'object' => Yii::t('app', 'Project'),
+                ]));
+            }
+        }
+
+        return $this->render('bulk-set-status', compact('model'));
+    }
+
+    /**
      * @param int|string $id
      * @param int        $status
      *
@@ -658,6 +988,44 @@ class ProjectController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @param $id
+     *
+     * @return array|Event|string|Response
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionStaffInvitableAutoComplete($id)
+    {
+
+        if (!Yii::$app->request->isAjax) {
+            throw new MethodNotAllowedHttpException('This URL only serve ajax request');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $searchModel = new StaffSearch();
+
+        $model = $this->getModel($id);
+
+        if (!$model instanceof Project) {
+            return $model;
+        }
+
+        $invited = $model->getMembersRelationship()
+            ->select('staff_id')
+            ->createCommand()
+            ->queryColumn();
+
+        $searchModel->getQuery()
+            ->andWhere(['NOT IN', 'staff.id', $invited]);
+
+        return $searchModel->autoComplete(Yii::$app->request->queryParams);
     }
 
     /**

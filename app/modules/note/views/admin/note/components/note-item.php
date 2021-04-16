@@ -93,8 +93,9 @@ use yii\helpers\Html;
             <?= Html::a(Icon::show('i8:edit'), ['/note/admin/note/update', 'id' => $model->id], [
                 'class' => 'btn-update-note btn-icon btn btn-link btn-lg',
             ]) ?>
-            <?= Html::button(Icon::show('i8:push-pin'), [
+            <?= Html::a(Icon::show('i8:push-pin', ['class' => 'icon-pin icon']) . Icon::show('i8:unpin', ['class' => 'icon icon-unpin']), ['/note/admin/note/toggle-pin', 'id' => $model->id], [
                 'class' => 'btn-pin-note btn-icon btn btn-link btn-lg',
+                'data-pin' => (int) $model->is_pinned,
             ]) ?>
         </div>
         <div class="ml-auto">

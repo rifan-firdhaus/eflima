@@ -21,30 +21,20 @@ if ($model->isNewRecord) {
 $this->icon = 'i8:map-marker';
 $this->menu->active = 'setting/address';
 
-if (!$model->isNewRecord) {
-    if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-country'] = Html::a(
-            '',
-            ['/address/admin/country/delete', 'code' => $model->code],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-
-        $this->toolbar['add-country'] = Html::a(
-            Yii::t('app', 'Add'),
-            ['/address/admin/country/add'],
-            [
-                'class' => 'btn btn-secondary',
-                'icon' => 'i8:plus',
-            ]
-        );
+if (!$model->isNewRecord && !Lazy::isLazyModalRequest()) {
+    if (Yii::$app->user->can('admin.setting.country.delete')) {
+        $this->toolbar['delete-country'] = Html::a([
+            'url' => ['/address/admin/country/delete', 'code' => $model->code],
+            'class' => 'btn btn-outline-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->name),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE'],
+            'visible' => Yii::$app->user->can('admin.setting.country.delete'),
+        ]);
     }
 }
 

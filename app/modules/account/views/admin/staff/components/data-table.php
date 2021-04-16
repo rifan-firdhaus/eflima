@@ -178,6 +178,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'headerCell' => [
                 'hAlign' => Cell::H_ALIGN_CENTER,
             ],
+            'updatable' => Yii::$app->user->can('admin.staff.block'),
             'buttonOptions' => function ($value) {
                 return [
                     'buttonOptions' => [
@@ -197,6 +198,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'data-confirmation' => Yii::t('app', 'You are about to unblock {object_name}, are you sure?', [
                             'object_name' => $model->name,
                         ]),
+                        'data-lazy-options' => ['method' => 'POST']
                     ],
                 ];
             },
@@ -208,6 +210,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'data-confirmation' => Yii::t('app', 'You are about to block {object_name}, are you sure?', [
                             'object_name' => $model->name,
                         ]),
+                        'data-lazy-options' => ['method' => 'POST']
                     ],
                 ];
             },
@@ -225,8 +228,22 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'icon' => 'i8:edit',
                         'data-toggle' => 'tooltip',
                         'label' => Yii::t('app', 'Update'),
+                        'visible' => Yii::$app->user->can('admin.staff.update'),
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal' => 'staff-form-modal',
+                    ],
+                ],
+                'delete' => [
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'visible' => Yii::$app->user->can('admin.staff.delete'),
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'POST'],
                     ],
                 ],
             ],

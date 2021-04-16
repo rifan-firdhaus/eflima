@@ -8,8 +8,6 @@ use modules\account\widgets\history\HistoryWidgetEvent;
 use modules\core\components\HookTrait;
 use Yii;
 use yii\base\Event;
-use yii\base\InvalidConfigException;
-use yii\db\Exception;
 use yii\helpers\Html;
 
 /**
@@ -18,6 +16,17 @@ use yii\helpers\Html;
 class AdminHook
 {
     use HookTrait;
+
+    protected $historyOptions = [
+        'event_member.add' => [
+            'icon' => 'i8:paper-plane',
+            'iconOptions' => ['class' => 'icon bg-success'],
+        ],
+        'event_member.delete' => [
+            'icon' => 'i8:paper-plane',
+            'iconOptions' => ['class' => 'icon bg-warning'],
+        ],
+    ];
 
     protected function __construct()
     {
@@ -50,6 +59,7 @@ class AdminHook
                 'icon' => 'i8:event',
                 'url' => ['/calendar/admin/event/index'],
                 'sort' => -1,
+                'visible' => Yii::$app->user->can('admin.event.list'),
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,
@@ -60,9 +70,6 @@ class AdminHook
 
     /**
      * @param HistoryWidgetEvent $event
-     *
-     * @throws InvalidConfigException
-     * @throws Exception
      */
     public function renderHistoryWidgetItem($event)
     {
@@ -83,6 +90,29 @@ class AdminHook
                 'data-lazy-modal-size' => 'modal-lg',
                 'class' => 'important',
             ]);
+        } elseif (in_array($model->key, [
+            'event_member.add',
+            'event_member.delete',
+        ])) {
+            $event->params['event_name'] = Html::a([
+                'url' => ['/calendar/admin/event/view', 'id' => $model->params['event_id']],
+                'label' => Html::encode($model->params['event_name']),
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal' => 'event-view-modal',
+                'data-lazy-modal-size' => 'modal-lg',
+                'class' => 'important',
+            ]);
+            $event->params['staff_name'] = Html::a([
+                'label' => Html::encode($model->params['staff_name']),
+                'url' => ['/account/admin/staff/profile', 'id' => $model->params['staff_id']],
+                'class' => 'important',
+            ]);
+        }
+
+        if (isset($this->historyOptions[$model->key])) {
+            foreach ($this->historyOptions[$model->key] AS $attribute => $value) {
+                $event->{$attribute} = $value;
+            }
         }
     }
 }

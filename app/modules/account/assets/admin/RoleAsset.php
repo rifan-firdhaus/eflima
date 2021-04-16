@@ -14,6 +14,7 @@ class RoleAsset extends AssetBundle
 
     public $js = [
         'js/role.js',
+        'js/permission.js',
     ];
 
     public $depends = [

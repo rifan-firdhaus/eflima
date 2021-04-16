@@ -83,7 +83,7 @@ table th {
   top: 0;
   z-index: 999;
   background: $modal-content-bg;
-  border-bottom: 1px solid $gray-200;
+  border-bottom: 1px solid color-level($app-foreground, 1);
 }
 
 .modal-title > .icon {
@@ -100,6 +100,14 @@ table th {
 
 .modal-title {
   font-size: $font-size-lg;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+}
+
+.modal-backdrop {
+  backdrop-filter: blur(6px);
 }
 
 /***** CARD *****/
@@ -127,6 +135,18 @@ table th {
   vertical-align: middle;
   font-size: $font-size-lg * 1.5;
   line-height: 1;
+}
+
+/****** ALERT *****/
+@each $color, $value in $theme-colors {
+  .alert-outline.alert-#{$color} {
+    color: theme-color-level($color, $alert-border-level);
+  }
+}
+
+.alert-outline {
+  background-color: transparent;
+  border-width: 2px;
 }
 
 /****** MENU *****/
@@ -188,10 +208,15 @@ table th {
 .page-link {
   font-weight: 500;
   text-align: center;
-  border-radius: 5px;
-  min-width: 2rem;
+  border-radius: 50%;
+  min-width: 2.25rem;
   margin-left: map-get($spacers, 1);
   margin-right: map-get($spacers, 1);
+}
+
+.page-item:last-child .page-link,
+.page-item:first-child .page-link {
+  border-radius: 50%;
 }
 
 /***** FORM *****/
@@ -244,8 +269,8 @@ div.form-control {
   min-height: $input-height;
 }
 
-@media screen and (max-width: map-get($grid-breakpoints,'sm')) {
-  .form-group{
+@media screen and (max-width: map-get($grid-breakpoints, 'sm')) {
+  .form-group {
     margin-bottom: $form-group-margin-bottom * 0.5;
   }
 }
@@ -316,7 +341,7 @@ div.form-control {
 
 @mixin bg-soft-variant($parent, $color) {
   #{$parent} {
-    background-color: color-level($color, -12) !important;
+    background-color: color-level($color, -11) !important;
   }
   a#{$parent},
   button#{$parent} {
@@ -392,6 +417,15 @@ div.form-control {
   &:hover > ul {
     @extend .dropdown-menu.show;
   }
+}
+
+/***** DROPDOWN MENU *****/
+.dropdown-menu {
+  backdrop-filter: blur(4px);
+}
+
+.dropdown-toggle-none:after {
+  display: none;
 }
 
 /***** FONT SIZE *****/

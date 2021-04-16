@@ -8,7 +8,6 @@ use modules\finance\models\Invoice;
 use modules\finance\models\InvoiceItem;
 use modules\finance\models\InvoiceItemTax;
 use modules\finance\models\queries\InvoiceItemQuery;
-use modules\task\models\TaskChecklist;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
 use Throwable;
@@ -26,6 +25,54 @@ use yii\web\Response;
  */
 class InvoiceItemController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET','POST'],
+                'roles' => ['admin.invoice.item.add'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET','POST','PATCH'],
+                'roles' => ['admin.invoice.item.update'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['DELETE','POST'],
+                'roles' => ['admin.invoice.item.delete'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['sort'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.invoice.item.update', 'admin.invoice.item.add'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['reevaluate'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.invoice.item.update','admin.invoice.item.delete', 'admin.invoice.item.add'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param InvoiceItem $model
      * @param             $data
@@ -324,6 +371,13 @@ class InvoiceItemController extends Controller
         return $this->goBack(['index']);
     }
 
+    /**
+     * @param $invoice_id
+     *
+     * @return array
+     * @throws MethodNotAllowedHttpException
+     * @throws Throwable
+     */
     public function actionSort($invoice_id)
     {
         if (!Yii::$app->request->isAjax) {
@@ -352,7 +406,6 @@ class InvoiceItemController extends Controller
                 'targetClass' => Invoice::class,
                 'targetAttribute' => 'id',
             ]);
-
 
 
         if ($model->validate() && InvoiceItem::sort($invoice_id, $model->sort)) {

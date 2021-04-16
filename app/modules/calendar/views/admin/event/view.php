@@ -11,7 +11,6 @@ use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\DateColumn;
 use modules\ui\widgets\data_table\DataTable;
 use modules\ui\widgets\Icon;
-use modules\ui\widgets\lazy\Lazy;
 use modules\ui\widgets\table\cells\Cell;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
@@ -30,27 +29,32 @@ $this->menu->active = 'main/calendar';
 $this->icon = 'i8:event';
 $this->fullHeightContent = true;
 
-$this->toolbar['delete-event'] = Html::a([
-    'url' => ['/calendar/admin/event/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->name),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-    'data-toggle' => 'tooltip',
-]);
+if (Yii::$app->user->can('admin.event.delete')) {
+    $this->toolbar['delete-event'] = Html::a([
+        'url' => ['/calendar/admin/event/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+            'object_name' => Html::tag('strong', $model->name),
+        ]),
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
+        'data-toggle' => 'tooltip',
+        'data-lazy-options' => ['method' => 'DELETE'],
+    ]);
+}
 
-$this->toolbar['update-event'] = Html::a([
-    'label' => Yii::t('app', 'Update'),
-    'url' => ['/calendar/admin/event/update', 'id' => $model->id],
-    'class' => 'btn btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'event-form-modal',
-    'data-lazy-container' => '#main-container',
-    'data-lazy-modal-size' => 'modal-md',
-]);
+if (Yii::$app->user->can('admin.event.update')) {
+    $this->toolbar['update-event'] = Html::a([
+        'label' => Yii::t('app', 'Update'),
+        'url' => ['/calendar/admin/event/update', 'id' => $model->id],
+        'class' => 'btn btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'event-form-modal',
+        'data-lazy-container' => '#main-container',
+        'data-lazy-modal-size' => 'modal-md',
+    ]);
+}
 ?>
 <div class="d-flex h-100">
     <div id="event-view-wrapper-<?= $this->uniqueId; ?>" class="pt-3 event-view-wrapper mh-100 w-100 overflow-auto container-fluid">
@@ -119,24 +123,25 @@ $this->toolbar['update-event'] = Html::a([
 
         echo $this->block('@member:begin');
 
+        if (Yii::$app->user->can('admin.event.update') || Yii::$app->user->can('admin.event.add')) {
+            $memberButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
+                'class' => 'btn btn-outline-primary btn-sm btn-event-member',
+            ]);
+            $memberInput = StaffInput::widget([
+                'name' => 'assignee',
+                'url' => ['/calendar/admin/event/staff-invitable-auto-complete', 'id' => $model->id],
+                'id' => 'event-member-input',
+                'options' => [
+                    'class' => 'event-member-input',
+                ],
+            ]);
 
-        $memberButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
-            'class' => 'btn btn-outline-primary btn-sm btn-event-member',
-        ]);
-        $memberInput = StaffInput::widget([
-            'name' => 'assignee',
-            'url' => ['/calendar/admin/event/staff-invitable-auto-complete', 'id' => $model->id],
-            'id' => 'event-member-input',
-            'options' => [
-                'class' => 'event-member-input',
-            ],
-        ]);
-
-        $memberCard->addToHeader(
-            Html::tag('div', $memberInput . $memberButton, [
-                'class' => 'event-member-input-container',
-            ])
-        );
+            $memberCard->addToHeader(
+                Html::tag('div', $memberInput . $memberButton, [
+                    'class' => 'event-member-input-container',
+                ])
+            );
+        }
 
         echo DataTable::widget([
             'dataProvider' => new ArrayDataProvider([
@@ -201,15 +206,16 @@ $this->toolbar['update-event'] = Html::a([
                         'view' => false,
                         'update' => false,
                         'delete' => [
+                            'visible' => Yii::$app->user->can('admin.event.update') || Yii::$app->user->can('admin.event.add'),
                             'value' => [
                                 'icon' => 'i8:trash',
                                 'label' => Yii::t('app', 'Delete'),
-                                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
                                     'object_name' => Yii::t('app', 'this item'),
                                 ]),
                                 'class' => 'text-danger',
                                 'data-lazy-container' => false,
-                                'data-lazy-options' => ['scroll' => false],
+                                'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                             ],
                         ],
                     ],

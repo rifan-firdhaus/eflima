@@ -14,6 +14,7 @@ use modules\task\models\query\TaskChecklistQuery;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception;
 use function array_key_exists;
@@ -26,13 +27,17 @@ use function time;
  *
  * @property Staff  $checker
  * @property Task   $task
+ *
  * @property int    $id         [int(10) unsigned]
  * @property int    $task_id    [int(11) unsigned]
  * @property string $label
  * @property bool   $is_checked [tinyint(1) unsigned]
+ * @property int    $order      [int(3) unsigned]
  * @property int    $checked_at [int(11) unsigned]
  * @property int    $checker_id [int(11) unsigned]
+ * @property int    $creator_id [int(11) unsigned]
  * @property int    $created_at [int(11) unsigned]
+ * @property int    $updater_id [int(11) unsigned]
  * @property int    $updated_at [int(11) unsigned]
  */
 class TaskChecklist extends ActiveRecord
@@ -119,6 +124,12 @@ class TaskChecklist extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         $behaviors['attributeTypecast'] = [

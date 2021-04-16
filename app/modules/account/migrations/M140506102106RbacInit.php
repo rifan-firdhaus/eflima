@@ -48,12 +48,14 @@ class M140506102106RbacInit extends Migration
             'description' => $this->text(),
             'rule_name' => $this->string(64),
             'data' => $this->binary(),
+            'order' => $this->integer(),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
             'PRIMARY KEY ([[name]])',
             'FOREIGN KEY ([[rule_name]]) REFERENCES ' . $authManager->ruleTable . ' ([[name]])' .
             $this->buildFkClause('ON DELETE SET NULL', 'ON UPDATE CASCADE'),
         ], $tableOptions);
+
         $this->createIndex('idx-auth_item-type', $authManager->itemTable, 'type');
 
         $this->createTable($authManager->itemChildTable, [

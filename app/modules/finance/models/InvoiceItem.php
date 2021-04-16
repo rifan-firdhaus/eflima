@@ -14,6 +14,7 @@ use Throwable;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception as DbException;
 use yii\db\StaleObjectException;
@@ -25,7 +26,8 @@ use yii\helpers\Json;
  *
  * @property Invoice          $invoice
  * @property InvoiceItemTax[] $taxes
- * @property Product          $product
+ * @property-read Product     $product
+ * @property-read array       $historyParams
  *
  * @property int              $id               [int(10) unsigned]
  * @property int              $invoice_id       [int(11) unsigned]
@@ -45,9 +47,10 @@ use yii\helpers\Json;
  * @property string           $params
  * @property int              $order            [smallint(5) unsigned]
  * @property string           $terms
+ * @property int              $creator_id       [int(11) unsigned]
  * @property int              $created_at       [int(11) unsigned]
+ * @property int              $updater_id       [int(11) unsigned]
  * @property int              $updated_at       [int(11) unsigned]
- *
  */
 class InvoiceItem extends ActiveRecord
 {
@@ -80,6 +83,15 @@ class InvoiceItem extends ActiveRecord
         return $query->alias("invoice_item");
     }
 
+    /**
+     * @param $invoiceId
+     * @param $sort
+     *
+     * @return bool
+     * @throws DbException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public static function sort($invoiceId, $sort)
     {
         $models = self::find()->andWhere(['invoice_id' => $invoiceId, 'id' => $sort])->indexBy('id')->all();
@@ -151,6 +163,10 @@ class InvoiceItem extends ActiveRecord
                 },
             ],
             [
+                'order',
+                'integer'
+            ],
+            [
                 ['tax_inputs', 'params'],
                 'safe',
             ],
@@ -180,9 +196,16 @@ class InvoiceItem extends ActiveRecord
             'class' => TimestampBehavior::class,
         ];
 
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
+        ];
+
         $behaviors['attributeTypecast'] = [
             'class' => AttributeTypecastBehavior::class,
             'attributeTypes' => [
+                'invoice_id' => AttributeTypecastBehavior::TYPE_INTEGER,
                 'product_id' => AttributeTypecastBehavior::TYPE_INTEGER,
 
                 'amount' => AttributeTypecastBehavior::TYPE_FLOAT,
@@ -453,13 +476,14 @@ class InvoiceItem extends ActiveRecord
      * @throws DbException
      * @throws Throwable
      */
-    public function recordDeleteHistory(){
+    public function recordDeleteHistory()
+    {
         return Account::history()->save('invoice_item.delete', [
             'params' => $this->getHistoryParams(),
             'model' => Invoice::class,
             'model_id' => $this->invoice_id,
             'tag' => 'delete',
-            'description' => 'Deleting item "{name}" of invoice "{invoice_number}"'
+            'description' => 'Deleting item "{name}" of invoice "{invoice_number}"',
         ]);
     }
 

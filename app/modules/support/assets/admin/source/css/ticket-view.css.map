@@ -3,7 +3,7 @@
 	"file": "ticket-view.css",
 	"sources": [
 		"ticket-view.scss",
-		"../../../../../account/assets/admin/source/css/_variables.scss",
+		"../../../../../account/assets/admin/source/css/backup/_variables.scss",
 		"../../../../../../vendor/npm-asset/bootstrap/scss/_functions.scss"
 	],
 	"names": [],

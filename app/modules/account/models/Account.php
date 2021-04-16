@@ -11,6 +11,7 @@ use yii\base\ErrorException;
 use yii\base\Exception;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\Exception as DbException;
 use yii\web\IdentityInterface;
 
 /**
@@ -33,20 +34,23 @@ use yii\web\IdentityInterface;
  * @property AccountSession[]    $sessions
  *
  * - Database Properties
+ *
  * @property int                 $id                              [int(10) unsigned]
  * @property string              $username
  * @property string              $email
  * @property string              $password
  * @property string              $type                            [varchar(16)]
- * @property string              $avatar
  * @property bool                $is_blocked                      [tinyint(1)]
+ * @property string              $avatar
  * @property string              $access_token
  * @property string              $auth_key
  * @property string              $password_reset_token
  * @property int                 $password_reset_token_expired_at [int(11) unsigned]
  * @property int                 $last_activity_at                [int(11) unsigned]
  * @property int                 $confirmed_at                    [int(11) unsigned]
+ * @property int                 $creator_id                      [int(11) unsigned]
  * @property int                 $created_at                      [int(11) unsigned]
+ * @property int                 $updater_id                      [int(11) unsigned]
  * @property int                 $updated_at                      [int(11) unsigned]
  */
 class Account extends ActiveRecord implements IdentityInterface
@@ -340,6 +344,46 @@ class Account extends ActiveRecord implements IdentityInterface
                 throw new ErrorException("Failed to save contact of this account");
             }
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        $comments = AccountComment::find()->andWhere(['account_id' => $this->id])->all();
+
+        foreach ($comments AS $comment) {
+            if (!$comment->delete()) {
+                throw new DbException('Failed to delete related comments');
+            }
+        }
+
+        $preferences = AccountPreference::find()->andWhere(['account_id' => $this->id])->all();
+
+        foreach ($preferences AS $preference) {
+            if (!$preference->delete()) {
+                throw new DbException('Account preferences can\'t be deleted');
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        if (!empty($this->contact) && !$this->contact->delete()) {
+            throw new DbException('Failed to delete related contact');
+        }
+
+        return true;
     }
 
     /**

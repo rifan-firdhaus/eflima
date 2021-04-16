@@ -2,13 +2,16 @@
 /*********** MIXINS **********/
 /********** THEME VARIABLES **********/
 /********** THEME VARIABLES **********/
+.proposal-item-table tbody > tr > td:first-child,
 .invoice-item-table tbody > tr > td:first-child {
   position: relative;
   padding-left: 1.725rem; }
 
+.proposal-item-table tbody > tr.sortable-chosen td,
 .invoice-item-table tbody > tr.sortable-chosen td {
   background: #fff5e6; }
 
+.proposal-item-table .handle,
 .invoice-item-table .handle {
   position: absolute;
   top: 6px;

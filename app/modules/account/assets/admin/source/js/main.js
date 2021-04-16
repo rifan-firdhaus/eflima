@@ -33,7 +33,7 @@
             style: "eflima",
             position: "bottom right",
             className: className,
-            autoHide: true
+            autoHide: false
           });
         },
 
@@ -79,6 +79,7 @@
         notifies: function(messages){
           $.each(messages, function(className, texts){
             $.each(texts, function(index, text){
+              console.log(className,text);
               published.notify(className, text);
             });
           });
@@ -116,13 +117,28 @@
 
       initDropdown = function(){
         $(document).on("show.bs.dropdown", function(e){
-          var dropdown = $(e.target).find(".dropdown-menu");
+          var $target = $(e.target);
+          var $trigger = $(e.relatedTarget);
+          var dropdown = $trigger.data("bs.dropdown");
+          var $dropdownMenu = $(dropdown._menu);
 
-          dropdown.appendTo("body");
+          $dropdownMenu.appendTo($("body"));
 
-          $(this).on("hidden.bs.dropdown", function(){
-            dropdown.appendTo(e.target);
+          $target.one("hidden.bs.dropdown", function(){
+            $dropdownMenu.appendTo($target);
           });
+        });
+
+        $(document).on("hide.bs.dropdown", function(e){
+          var $target = $(e.target);
+          var $trigger = $(e.relatedTarget);
+
+          if (e.clickEvent && $target.hasClass("dropdown-keep-open")) {
+            var dropdown = $trigger.data("bs.dropdown");
+            var $dropdownMenu = $(dropdown._menu);
+
+            return !$.contains($dropdownMenu.get(0), e.clickEvent.target) && !$dropdownMenu.is($(e.clickEvent.target));
+          }
         });
       },
 
@@ -418,10 +434,10 @@
         $.notify.addStyle("eflima", {
           html:
             "<div>" +
-            "<div class=\"alert-icon\" data-notify-html=\"image\"/>" +
+            "<div class=\"alert-icon\" data-notify-html=\"image\"></div>" +
             "<div class=\"text-wrapper\">" +
-            "<div class=\"alert-heading\" data-notify-html=\"title\"/>" +
-            "<div class=\"alert-text\" data-notify-html=\"text\"/>" +
+            "<div class=\"alert-heading\" data-notify-html=\"title\"></div>" +
+            "<div class=\"alert-text\" data-notify-html=\"text\"></div>" +
             "</div>" +
             "</div>",
           classes: {

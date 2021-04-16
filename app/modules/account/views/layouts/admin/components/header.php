@@ -21,6 +21,14 @@ $breadcrumbs = array_map(function ($item) {
     ];
 }, $breadcrumbs);
 
+if (!$this->icon && $this->menu->active) {
+    $menu = $this->menu->getItem($this->menu->active);
+
+    if (isset($menu['icon'])) {
+        $this->icon = $menu['icon'];
+    }
+}
+
 ?>
 
 <?= $this->block('@begin') ?>

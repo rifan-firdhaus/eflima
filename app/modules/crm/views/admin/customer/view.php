@@ -20,33 +20,36 @@ $this->beginContent('@modules/crm/views/admin/customer/components/view-layout.ph
 
 echo $this->block('@begin');
 
-$this->toolbar['delete-customer'] = Html::a([
-    'url' => ['/crm/admin/customer/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->name),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-]);
+if (Yii::$app->user->can('admin.customer.delete')) {
+    $this->toolbar['delete-customer'] = Html::a([
+        'url' => ['/crm/admin/customer/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+            'object_name' => Html::tag('strong', $model->name),
+        ]),
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
+    ]);
+}
 
-$this->toolbar['update-customer'] = Html::a([
-    'label' => Yii::t('app', 'Update'),
-    'url' => ['/crm/admin/customer/update', 'id' => $model->id],
-    'class' => 'btn btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'customer-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
-
+if (Yii::$app->user->can('admin.customer.update')) {
+    $this->toolbar['update-customer'] = Html::a([
+        'label' => Yii::t('app', 'Update'),
+        'url' => ['/crm/admin/customer/update', 'id' => $model->id],
+        'class' => 'btn btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'customer-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $this->toolbar['customer-more'] = ButtonDropdown::widget([
     'label' => Icon::show('i8:double-down'),
     'encodeLabel' => false,
     'id' => 'customer-more-action',
     'buttonOptions' => [
-        'class' => ['btn btn-outline-secondary btn-icon', 'toggle' => ''],
+        'class' => ['btn btn-outline-secondary btn-icon dropdown-toggle-none'],
     ],
     'dropdown' => [
         'encodeLabels' => false,
@@ -60,6 +63,7 @@ $this->toolbar['customer-more'] = ButtonDropdown::widget([
                     'data-lazy-container' => '#main-container',
                     'data-lazy-modal' => 'task-form-modal',
                 ],
+                'visible' => Yii::$app->user->can('admin.customer.view.task')
             ],
             [
                 'label' => Icon::show('i8:address-book', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -70,6 +74,7 @@ $this->toolbar['customer-more'] = ButtonDropdown::widget([
                     'data-lazy-container' => '#main-container',
                     'data-lazy-modal' => 'customer-contact-form-modal',
                 ],
+                'visible' => Yii::$app->user->can('admin.customer.view.contact')
             ],
             [
                 'label' => Icon::show('i8:event', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -81,6 +86,7 @@ $this->toolbar['customer-more'] = ButtonDropdown::widget([
                     'data-lazy-modal' => 'event-form-modal',
                     'data-lazy-modal-size' => 'modal-lg',
                 ],
+                'visible' => Yii::$app->user->can('admin.customer.view.event')
             ],
         ],
     ],

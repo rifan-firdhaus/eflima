@@ -53,7 +53,7 @@
 [data-rid=ticket-reply-form] {
   border: 1px solid #e9ecef;
   margin-bottom: 1.15rem;
-  border-radius: 0.35rem;
+  border-radius: 0.65rem;
   border-bottom: 0; }
   [data-rid=ticket-reply-form] .form-action {
     padding: 0;
@@ -62,7 +62,7 @@
 
 [data-rid=card-field-ticketreply-general_section] {
   border: 5px solid #468bef;
-  border-radius: 0.35rem; }
+  border-radius: 0.65rem; }
 
 [data-rid=active-field-ticketreply-blind_carbon_copy],
 [data-rid=active-field-ticketreply-carbon_copy] {

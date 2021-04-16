@@ -4,6 +4,7 @@
     var self = this;
     var milestonesSortable = null;
     var tasksSortable = [];
+    this.taskPagination = {};
 
     this.$tasks = $element.find(".project-milestone-item-content");
 
@@ -21,6 +22,29 @@
           }
         }
       });
+    };
+
+    this.loadTask = function(milestoneId, reload){
+      var page = this.taskPagination[milestoneId] ? this.taskPagination[milestoneId].page + 1 : 1;
+
+      if (reload === true) {
+        page = this.taskPagination[milestoneId].page;
+      }
+
+      var url = admin.updateQueryParam(options.loadTaskUrl, {
+        id: milestoneId,
+        page: page
+      });
+
+      $element.find("[data-rid=\"project-milestone-items-" + milestoneId + "\"]").lazyContainer("load", url, "GET", {}, {
+        renderer: function($content){
+          var scrollTop = $(this).scrollTop();
+
+          $content.insertBefore($(this).find('.btn-load-more'));
+
+          $(this).scrollTop(scrollTop);
+        }
+      }, false);
     };
 
     this.sendSortTask = function(milestoneId, sort){
@@ -69,10 +93,37 @@
       });
 
       self.$tasks.each(function(){
-        var milestoneId = $(this).closest(".project-milestone-item").data("id");
+        var $tasksWrapper = $(this);
+        var milestoneId = $tasksWrapper.closest(".project-milestone-item").data("id");
+        var $tasks = $tasksWrapper.find("[data-rid=\"project-milestone-items-" + milestoneId + "\"]");
+        var $loadMoreButton = $tasksWrapper.find(".btn-load-more");
 
-        tasksSortable[milestoneId] = new Sortable(this, {
+        $loadMoreButton.on("click", function(e){
+          e.preventDefault();
+
+          self.loadTask(milestoneId);
+        });
+
+        $tasks.on("lazy.loaded", function(e, data){
+          if (!data.page) {
+            self.loadTask(milestoneId, true);
+          }
+
+          self.taskPagination[milestoneId] = {
+            hasMorePage: data.has_more_page,
+            page: data.page
+          };
+
+          if(!data.has_more_page){
+            $tasksWrapper.find(".btn-load-more").hide();
+          }
+        });
+
+        self.loadTask(milestoneId);
+
+        tasksSortable[milestoneId] = new Sortable($tasks.get(0), {
           group: "task-container",
+          draggable: ".project-milestone-item-task-container",
           animation: 200,
           scroll: this,
           scrollSensitivity: 85,

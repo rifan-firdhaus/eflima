@@ -2,15 +2,24 @@
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
 
+use modules\account\Account;
 use modules\address\models\Country;
+use modules\calendar\models\Event as CalendarEvent;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\crm\behaviors\CustomerGroupCreationBehavior;
 use modules\crm\models\queries\CustomerQuery;
 use modules\file_manager\behaviors\FileUploaderBehavior;
+use modules\note\models\Note;
+use modules\task\models\Task;
+use Throwable;
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Exception;
 use yii\db\Exception as DbException;
+use yii\db\StaleObjectException;
 use yii\helpers\Html;
 use yii\web\JsExpression;
 use function array_filter;
@@ -31,25 +40,27 @@ use function array_keys;
  * @property mixed             $fullAddress
  * @property string            $name
  *
- * @property int               $id             [int(10) unsigned]
- * @property int               $group_id       [int(11) unsigned]
- * @property int               $lead_id        [int(11) unsigned]
+ * @property int               $id            [int(10) unsigned]
+ * @property int               $group_id      [int(11) unsigned]
+ * @property int               $customer_id   [int(11) unsigned]
  * @property string            $company_name
  * @property string            $company_logo
  * @property string            $vat_number
- * @property string            $currency_code  [char(3)]
+ * @property string            $currency_code [char(3)]
  * @property string            $city
  * @property string            $province
- * @property string            $country_code   [char(3)]
+ * @property string            $country_code  [char(3)]
  * @property string            $address
- * @property string            $type           [char(1)]
+ * @property string            $type          [char(1)]
  * @property string            $phone
  * @property string            $postal_code
  * @property string            $fax
  * @property string            $email
- * @property bool              $is_archieved   [tinyint(1)]
- * @property int               $created_at     [int(11) unsigned]
- * @property int               $updated_at     [int(11) unsigned]
+ * @property bool              $is_archieved  [tinyint(1)]
+ * @property int               $creator_id    [int(11) unsigned]
+ * @property int               $created_at    [int(11) unsigned]
+ * @property int               $updater_id    [int(11) unsigned]
+ * @property int               $updated_at    [int(11) unsigned]
  */
 class Customer extends ActiveRecord
 {
@@ -57,6 +68,9 @@ class Customer extends ActiveRecord
     const TYPE_PERSONAL = 'I';
 
     public $new_group;
+
+    /** @var Lead */
+    public $fromLead;
 
     /** @var CustomerContact */
     public $primaryContactModel;
@@ -106,8 +120,39 @@ class Customer extends ActiveRecord
                 'company_logo',
                 'image',
             ],
-            ['email', 'email'],
-            [['phone', 'new_group', 'fax', 'address', 'province', 'country_code', 'vat_number', 'postal_code', 'city'], 'safe'],
+            [
+                'group_id',
+                'exist',
+                'targetRelation' => 'group',
+                'when' => function ($model) {
+                    /** @var Customer $model */
+
+                    return empty($model->new_group);
+                },
+            ],
+            [
+                'email',
+                'email',
+                'when' => function ($model) {
+                    /** @var Customer $model */
+
+                    return $model->type === self::TYPE_COMPANY;
+                },
+            ],
+            [
+                [
+                    'phone',
+                    'new_group',
+                    'fax',
+                    'address',
+                    'province',
+                    'country_code',
+                    'vat_number',
+                    'postal_code',
+                    'city',
+                ],
+                'safe',
+            ],
         ];
     }
 
@@ -139,6 +184,12 @@ class Customer extends ActiveRecord
 
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         $behaviors['customerGroupCreation'] = [
@@ -182,6 +233,7 @@ class Customer extends ActiveRecord
     {
         $transactions = parent::transactions();
 
+        $transactions['default'] = self::OP_ALL;
         $transactions['admin/add'] = self::OP_ALL;
         $transactions['admin/update'] = self::OP_ALL;
 
@@ -291,6 +343,9 @@ class Customer extends ActiveRecord
      */
     public function afterSave($insert, $changedAttributes)
     {
+        $isManualUpdate = in_array($this->scenario, ['admin/add', 'admin/update']);
+        $realChangedAttributes = $changedAttributes;
+
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->primaryContactModel) {
@@ -300,6 +355,57 @@ class Customer extends ActiveRecord
                 throw new DbException('Failed to save primary contact');
             }
         }
+
+        if (
+            $isManualUpdate &&
+            !empty($realChangedAttributes)
+        ) {
+            $this->recordSavedHistory($insert);
+        }
+
+        if ($insert) {
+            if ($this->fromLead && !$this->fromLead->converted($this)) {
+                throw new DbException('Failed to convert lead to customer');
+            }
+        }
+    }
+
+    /**
+     * @param boolean $insert
+     *
+     * @return bool
+     * @throws DbException
+     * @throws Throwable
+     */
+    public function recordSavedHistory($insert)
+    {
+        $history = [
+            'params' => $this->getHistoryParams(),
+        ];
+
+        if ($this->scenario === 'admin/add' && $insert) {
+            $history['description'] = 'Adding customer "{name}"';
+        } else {
+            $history['description'] = 'Updating customer "{name}"';
+        }
+
+        $historyEvent = $this->scenario === 'admin/add' ? 'customer.add' : 'customer.update';
+        $history['tag'] = $this->scenario === 'admin/add' ? 'add' : 'update';
+
+        $history['model'] = Customer::class;
+        $history['model_id'] = $this->id;
+
+        return Account::history()->save($historyEvent, $history);
+    }
+
+    /**
+     * @return array
+     */
+    public function getHistoryParams()
+    {
+        $params = $this->getAttributes(['id', 'name']);
+
+        return $params;
     }
 
     /**
@@ -332,6 +438,64 @@ class Customer extends ActiveRecord
     /**
      * @inheritdoc
      */
+    public function beforeDelete()
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        $this->deleteRelations();
+
+        return true;
+    }
+
+    /**
+     * @throws Throwable
+     * @throws InvalidConfigException
+     * @throws StaleObjectException
+     */
+    public function deleteRelations()
+    {
+        foreach ($this->contacts AS $contact) {
+            if (!$contact->delete()) {
+                throw new Exception('Failed to delete related contact');
+            }
+        }
+
+        if (Yii::$app->hasModule('task')) {
+            $tasks = Task::find()->andWhere(['model' => 'customer', 'model_id' => $this->id])->all();
+
+            foreach ($tasks AS $task) {
+                if (!$task->delete()) {
+                    throw new Exception('Failed to delete related tasks');
+                }
+            }
+        }
+
+        if (Yii::$app->hasModule('calendar')) {
+            $events = CalendarEvent::find()->andWhere(['model' => 'customer', 'model_id' => $this->id])->all();
+
+            foreach ($events AS $event) {
+                if (!$event->delete()) {
+                    throw new Exception('Failed to delete related event');
+                }
+            }
+        }
+
+        if (Yii::$app->hasModule('note')) {
+            $notes = Note::find()->andWhere(['model' => 'customer', 'model_id' => $this->id])->all();
+
+            foreach ($notes AS $note) {
+                if (!$note->delete()) {
+                    throw new Exception('Failed to delete related note');
+                }
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function loadDefaultValues($skipIfSet = true)
     {
         if (!$skipIfSet || !isset($this->type)) {
@@ -350,7 +514,7 @@ class Customer extends ActiveRecord
      */
     public function getName()
     {
-        if ($this->type === self::TYPE_PERSONAL) {
+        if ($this->type === self::TYPE_PERSONAL && $this->primaryContact) {
             return $this->primaryContact->name;
         }
 
@@ -371,6 +535,46 @@ class Customer extends ActiveRecord
         $components = array_filter($components);
 
         return implode(', ', $components);
+    }
+
+    /**
+     * @param int[]|string[] $ids
+     *
+     * @return bool
+     *
+     * @throws Throwable
+     */
+    public static function bulkDelete($ids)
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $transaction = self::getDb()->beginTransaction();
+
+        try {
+            $query = Customer::find()->andWhere(['id' => $ids]);
+
+            foreach ($query->each(10) AS $customer) {
+                if (!$customer->delete()) {
+                    $transaction->rollBack();
+
+                    return false;
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        } catch (\Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        return true;
     }
 
 }

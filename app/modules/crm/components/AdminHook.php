@@ -6,11 +6,13 @@ use modules\account\web\admin\View;
 use modules\account\widgets\history\HistoryWidget;
 use modules\account\widgets\history\HistoryWidgetEvent;
 use modules\core\components\HookTrait;
+use modules\core\controllers\admin\SettingController;
 use modules\crm\models\LeadStatus;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
+use yii\filters\AccessControl;
 use yii\helpers\Html;
 
 /**
@@ -24,13 +26,17 @@ class AdminHook
         'lead' => [
             'lead.add' => 'Creating lead',
             'lead.update' => 'Updating lead',
-            'lead.status' => 'Changing status to {status_label}',
-            'lead_assignee.delete' => 'Removing assignment of {assignee_name}',
-            'lead_assignee.add' => 'Assigning {assignee_name}',
+            'lead.status' => 'Changing status to "{status_label}"',
+            'lead_assignee.delete' => 'Removing assignment of "{assignee_name}"',
+            'lead_assignee.add' => 'Assigning "{assignee_name}"',
+        ],
+        'customer' => [
+            'customer_contact.add' => 'Adding contact "{name}"',
+            'customer_contact.update' => 'Updating contact "{name}"',
         ],
     ];
 
-    public $historyOptions= [
+    public $historyOptions = [
         'lead.status' => [
             'icon' => 'i8:hammer',
         ],
@@ -47,8 +53,34 @@ class AdminHook
     protected function __construct()
     {
         Event::on(Controller::class, Controller::EVENT_BEFORE_ACTION, [$this, 'beforeAction']);
+
+        Event::on(SettingController::class, SettingController::EVENT_INIT, [$this, 'registerSettingPermission']);
     }
 
+    /**
+     * @param Event $event
+     *
+     * @throws InvalidConfigException
+     */
+    public function registerSettingPermission($event)
+    {
+        /**
+         * @var SettingController $settingController
+         * @var AccessControl     $accessBehaviors
+         */
+        $settingController = $event->sender;
+        $accessBehaviors = $settingController->getBehavior('access');
+
+        $accessBehaviors->rules[] = Yii::createObject(array_merge([
+            'allow' => true,
+            'actions' => ['index'],
+            'verbs' => ['GET', 'POST'],
+            'roles' => ['admin.setting.crm.general'],
+            'matchCallback' => function () {
+                return Yii::$app->request->get('section') === 'crm';
+            },
+        ], $accessBehaviors->ruleConfig));
+    }
     /**
      * @param Event $event
      */
@@ -81,8 +113,7 @@ class AdminHook
         if (in_array($model->key, [
             'lead_assignee.add',
             'lead_assignee.delete',
-        ])
-        ) {
+        ])) {
             $event->params['lead_name'] = Html::a([
                 'label' => Html::encode($model->params['lead_name']),
                 'url' => ['/crm/admin/lead/view', 'id' => $model->params['lead_id']],
@@ -124,6 +155,25 @@ class AdminHook
                     'class' => 'important',
                 ]);
             }
+        } elseif (in_array($model->key, [
+            'customer_contact.add',
+            'customer_contact.delete',
+            'customer_contact.update',
+        ])) {
+            $event->params['name'] = Html::a([
+                'label' => Html::encode($model->params['name']),
+                'url' => ['/crm/admin/customer-contact/update', 'id' => $model->params['id']],
+                'class' => 'important',
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal' => 'customer-contact-form-modal',
+            ]);
+            $event->params['customer_name'] = Html::a([
+                'label' => Html::encode($model->params['customer_name']),
+                'url' => ['/crm/admin/customer/view', 'id' => $model->params['customer_id']],
+                'class' => 'important',
+                'data-lazy-container' => '#main-container',
+                'data-lazy-modal' => 'customer-view-modal',
+            ]);
         }
 
 
@@ -133,10 +183,12 @@ class AdminHook
             }
         }
 
-        if ($widget->realId == 'lead-history') {
-            if (isset($this->historyShortDescription['lead'][$model->key])) {
-                $event->description = $this->historyShortDescription['lead'][$model->key];
-            }
+        if ($widget->realId == 'lead-history' && isset($this->historyShortDescription['lead'][$model->key])) {
+            $event->description = $this->historyShortDescription['lead'][$model->key];
+        }
+
+        if ($widget->realId == 'customer-history' && isset($this->historyShortDescription['customer'][$model->key])) {
+            $event->description = $this->historyShortDescription['customer'][$model->key];
         }
     }
 
@@ -159,6 +211,7 @@ class AdminHook
                 'icon' => 'i8:contacts',
                 'url' => ['/crm/admin/customer/index'],
                 'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.customer.list'),
                 'linkOptions' => [
                     'data-lazy-link' => true,
                     'data-lazy-container' => '#main-container',
@@ -169,6 +222,7 @@ class AdminHook
                 'icon' => 'i8:connect',
                 'url' => ['/crm/admin/lead/index'],
                 'sort' => 1,
+                'visible' => Yii::$app->user->can('admin.lead.list'),
                 'linkOptions' => [
                     'data-lazy-link' => true,
                     'data-lazy-container' => '#main-container',
@@ -187,7 +241,7 @@ class AdminHook
             'setting/crm' => [
                 'label' => Yii::t('app', 'Customer Relation'),
                 'icon' => 'i8:address-book',
-                'url' => ['/core/admin/setting/index', 'section' => 'crm'],
+                'url' => ['/crm/admin/setting/index'],
                 'linkOptions' => [
                     'data-lazy-container' => '#main-container',
                     'data-lazy-link' => true,

@@ -66,9 +66,6 @@ class NoteSearch extends Note implements SearchableModel
             $query = $this->getQuery();
         }
 
-        $query->andFilterWhere(['model' => $this->model])
-            ->andFilterWhere(['model_id' => $this->model_id]);
-
         $query->andFilterWhere([
             'OR',
             ['LIKE', 'note.title', $this->q],
@@ -96,6 +93,14 @@ class NoteSearch extends Note implements SearchableModel
         }
 
         $this->_query = Note::find();
+
+        if (!empty($this->params['model'])) {
+            $this->_query->andFilterWhere(['model' => $this->params['model']]);
+        }
+
+        if (!empty($this->params['model_id'])) {
+            $this->_query->andFilterWhere(['model_id' => $this->params['model_id']]);
+        }
 
         $this->trigger(self::EVENT_QUERY);
 

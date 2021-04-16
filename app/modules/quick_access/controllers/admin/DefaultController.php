@@ -11,6 +11,24 @@ use yii\web\Response;
  */
 class DefaultController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['quick-add', 'quick-search'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     public function actionQuickAdd()
     {
         return $this->renderPartial('quick-add');
@@ -20,6 +38,6 @@ class DefaultController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        return QuickSearch::run($q, $this->view);
+        return QuickSearch::run($q, Yii::$app->request->get('models', []), $this->view);
     }
 }

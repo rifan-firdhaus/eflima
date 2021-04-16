@@ -30,28 +30,32 @@ $this->fullHeightContent = true;
         'items' => [
             'detail' => [
                 'label' => Yii::t('app', 'Detail'),
-                'url' => ['/finance/admin/invoice/view', 'id' => $model->id],
+                'url' => ['/finance/admin/invoice/detail', 'id' => $model->id],
                 'icon' => 'i8:cash',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.invoice.view.detail')
             ],
             'payment' => [
                 'label' => Yii::t('app', 'Payments'),
-                'url' => ['/finance/admin/invoice/view', 'id' => $model->id, 'action' => 'payment'],
+                'url' => ['/finance/admin/invoice/payment', 'id' => $model->id],
                 'icon' => 'i8:receive-cash',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.invoice.view.payment')
             ],
             'task' => [
                 'label' => Yii::t('app', 'Tasks'),
-                'url' => ['/finance/admin/invoice/view', 'id' => $model->id, 'action' => 'task'],
+                'url' => ['/finance/admin/invoice/task', 'id' => $model->id],
                 'icon' => 'i8:checked',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
+                'visible' => Yii::$app->user->can('admin.invoice.view.task')
             ],
             'history' => [
                 'label' => Yii::t('app', 'History'),
-                'url' => ['/finance/admin/invoice/view', 'id' => $model->id, 'action' => 'history'],
+                'url' => ['/finance/admin/invoice/history', 'id' => $model->id],
                 'icon' => 'i8:activity-history',
                 'iconOptions' => ['class' => 'icon icons8-size mr-1'],
                 'order' => 99,
+                'visible' => Yii::$app->user->can('admin.invoice.view.history')
             ],
         ],
         'options' => [

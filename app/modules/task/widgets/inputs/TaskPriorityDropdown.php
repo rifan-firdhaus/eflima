@@ -43,6 +43,9 @@ class TaskPriorityDropdown extends ButtonDropdown
                 'label' => Html::tag('span', '', ["style" => "background-color: {$priority['color_label']}", 'class' => 'color-description']) . Html::encode($priority['label']),
                 'encode' => false,
                 'url' => $url,
+                'linkOptions' => [
+                    'data-lazy-options' => ['method' => 'POST']
+                ],
             ];
         }
 

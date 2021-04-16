@@ -11,6 +11,6 @@ class SortableJSAsset extends AssetBundle
     public $sourcePath = '@npm/sortablejs';
 
     public $js = [
-        'Sortable.js',
+        'dist/sortable.umd.js',
     ];
 }

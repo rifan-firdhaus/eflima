@@ -23,6 +23,7 @@ use Throwable;
 use Yii;
 use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
+use yii\base\InvalidRouteException;
 use yii\db\Exception;
 use yii\db\Expression;
 use yii\db\StaleObjectException;
@@ -37,6 +38,97 @@ use yii\web\Response;
  */
 class ExpenseController extends Controller
 {
+    public $viewMenu = [
+        'detail' => [
+            'route' => ['/finance/admin/expense/detail'],
+            'role' => 'admin.expense.view.detail',
+        ],
+        'task' => [
+            'route' => ['/finance/admin/expense/task'],
+            'role' => 'admin.expense.view.task',
+        ],
+        'history' => [
+            'route' => ['/finance/admin/expense/history'],
+            'role' => 'admin.expense.view.history',
+        ],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.expense.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.expense.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.expense.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['detail'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.expense.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['task'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.expense.view.task'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.expense.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete','bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.expense.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add-to-invoice','billable-picker'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.expense.bill'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update-invoice-item'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.invoice.item.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'auto-complete',
+                    'view',
+                ],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param string $view
      *
@@ -152,8 +244,50 @@ class ExpenseController extends Controller
      * @return Expense|string|Response
      *
      * @throws InvalidConfigException
+     *                               |
+     * @throws InvalidRouteException
      */
     public function actionView($id, $action = 'default')
+    {
+        foreach ($this->viewMenu AS $item) {
+            if (!Yii::$app->user->can($item['role'])) {
+                continue;
+            }
+
+            $route = $item['route'];
+
+            if (is_callable($route)) {
+                call_user_func($route, $id);
+            } else {
+                $route['id'] = $id;
+            }
+
+
+            return $this->redirect($route);
+        }
+
+        return $this->redirect(['/']);
+
+    }
+
+    public function actionDetail($id){
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Expense)) {
+            return $model;
+        }
+
+        return $this->render('view', compact('model'));
+    }
+
+    /**
+     * @param int|string $id
+     *
+     * @return string
+     *
+     * @throws InvalidConfigException
+     */
+    public function actionTask($id)
     {
         $model = $this->getModel($id);
 
@@ -161,25 +295,6 @@ class ExpenseController extends Controller
             return $model;
         }
 
-        switch ($action) {
-            case 'task':
-                return $this->task($model);
-            case 'history':
-                return $this->history($model);
-        }
-
-        return $this->render('view', compact('model'));
-    }
-
-    /**
-     * @param Expense $model
-     *
-     * @return string
-     *
-     * @throws InvalidConfigException
-     */
-    public function task($model)
-    {
         $taskSearchModel = new TaskSearch([
             'params' => [
                 'model' => 'expense',
@@ -193,12 +308,20 @@ class ExpenseController extends Controller
     }
 
     /**
-     * @param Expense $model
+     * @param int|string $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function history($model)
+    public function actionHistory($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Expense)) {
+            return $model;
+        }
+
         $historySearchParams = [
             'model' => Expense::class,
             'model_id' => $model->id,
@@ -326,6 +449,36 @@ class ExpenseController extends Controller
         } else {
             Yii::$app->session->addFlash('danger', Yii::t('app', 'Failed to delete {object}', [
                 'object' => Yii::t('app', 'Expense'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Expense::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Expense'),
+            ]));
+        }
+
+        if (Expense::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Expenses'),
             ]));
         }
 

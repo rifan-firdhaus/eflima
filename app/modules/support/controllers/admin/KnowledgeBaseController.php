@@ -19,6 +19,54 @@ use yii\web\Response;
 class KnowledgeBaseController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.knowledge-base.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.knowledge-base.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['view'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.knowledge-base.view'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+    /**
      * @return array|string|Response
      *
      * @throws InvalidConfigException

@@ -14,8 +14,10 @@ use modules\task\models\query\TaskAssigneeQuery;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\base\ModelEvent;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use function array_merge;
 use function in_array;
@@ -53,7 +55,7 @@ class TaskAssignee extends ActiveRecord
             [
                 ['task_id', 'assignee_id'],
                 'required',
-                'on' => ['admin/add','admin/update','admin/task/add']
+                'on' => ['admin/add', 'admin/update', 'admin/task/add'],
             ],
             [
                 ['assignee_id'],
@@ -162,6 +164,10 @@ class TaskAssignee extends ActiveRecord
         if ($insert && in_array($this->scenario, ['admin/task/add', 'admin/add'])) {
             $this->recordAssignedHistory();
         }
+
+        if ($insert && $this->scenario === 'admin/add') {
+            self::sendAssignNotification([$this], $this->task, $this->assignor);
+        }
     }
 
     /**
@@ -181,21 +187,12 @@ class TaskAssignee extends ActiveRecord
      */
     public function recordAssignedHistory()
     {
-        $historyRelationship = [
-            Task::class => $this->task_id,
-            TaskAssignee::class => $this->id,
-        ];
-
-        if (!empty($this->task->model)) {
-            $historyRelationship[get_class($this->task->getRelatedModel())] = $this->task->model_id;
-        }
-
         return Account::history()->save('task_assignee.add', [
             'params' => $this->getHistoryParams(),
             'description' => 'Assigning {assignee_name} to task "{task_title}"',
             'tag' => 'assign',
             'model' => Task::class,
-            'model_id' => $this->task_id
+            'model_id' => $this->task_id,
         ]);
     }
 
@@ -211,7 +208,7 @@ class TaskAssignee extends ActiveRecord
             'description' => 'Removing assignment of {assignee_name} from task "{task_title}"',
             'tag' => 'release_assignment',
             'model' => Task::class,
-            'model_id' => $this->task_id
+            'model_id' => $this->task_id,
         ]);
     }
 
@@ -235,9 +232,22 @@ class TaskAssignee extends ActiveRecord
      * @param Staff          $assignor
      *
      * @throws InvalidConfigException
+     * @throws Exception
      */
     public static function sendAssignNotification($assignees, $task, $assignor)
     {
+        if (!$assignor instanceof Staff) {
+            $assignor = Staff::find()->andWhere(['id' => $assignor])->one();
+
+            if (!$assignor) {
+                throw new Exception('Invalid assignor');
+            }
+        }
+
+        $assignees = array_filter($assignees, function ($assignee) {
+            return $assignee->assignee_id != $assignee->assignor_id;
+        });
+
         if (empty($assignees)) {
             return;
         }
@@ -260,5 +270,34 @@ class TaskAssignee extends ActiveRecord
         ]);
 
         $notification->send();
+    }
+
+
+    /**
+     * @param ModelEvent $event
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
+    public static function deleteAllAssigneeRelatedToDeletedStaff($event)
+    {
+        /** @var Staff $model */
+        $staff = $event->sender;
+
+        $taskAssignees = TaskAssignee::find()
+            ->andWhere([
+                'OR',
+                ['assignee_id' => $staff->id],
+                ['assignor_id' => $staff->id],
+            ])
+            ->all();
+
+        foreach ($taskAssignees AS $assignee) {
+            if (!$assignee->delete()) {
+                throw new Exception('Failed to delete related task assignee');
+            }
+        }
     }
 }

@@ -49,10 +49,10 @@ trait InvoicePaymentRelatedTrait
      *
      * @inheritDoc
      */
-    public function validate($model, $invoice)
+    public function validate($model, $relatedModel)
     {
         if (!$model) {
-            $invoice->addError('model_id', Yii::t('app', '{object} you are looking for doesn\'t exists', [
+            $relatedModel->addError('model_id', Yii::t('app', '{object} you are looking for doesn\'t exists', [
                 'object' => Yii::t('app', 'Payment'),
             ]));
         }

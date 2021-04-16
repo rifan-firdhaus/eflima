@@ -30,6 +30,14 @@ class StaffQuickSearch extends QuickSearch
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isActive()
+    {
+        return Yii::$app->user->can('admin.staff.list');
+    }
+
+    /**
      * @param $q
      *
      * @return BaseDataProvider

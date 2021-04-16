@@ -29,6 +29,14 @@ class ProjectDiscussionTopicCommentRelation extends CommentRelation
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isActive($modelId = null)
+    {
+        return Yii::$app->user->can('admin.project.view.discussion');
+    }
+
+    /**
      * @param ProjectDiscussionTopic $model
      *
      * @inheritDoc

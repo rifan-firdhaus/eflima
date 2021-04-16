@@ -1,16 +1,21 @@
 <?php namespace modules\finance\components;
 
 // "Keep the essence of your code, code isn't just a code, it's an art." -- Rifan Firdhaus Widigdo
-use modules\finance\models\Invoice;
-use modules\note\components\NoteRelation;
+use modules\account\components\CommentRelation;
 use Yii;
-use yii\helpers\Html;
-use yii\helpers\Url;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  */
-class InvoiceCommentRelation extends NoteRelation
+class InvoiceCommentRelation extends CommentRelation
 {
     use InvoiceRelatedTrait;
+
+    /**
+     * @inheritDoc
+     */
+    public function isActive($modelId = null)
+    {
+        return Yii::$app->user->can('admin.invoice.view.detail');
+    }
 }

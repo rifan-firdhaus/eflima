@@ -20,9 +20,59 @@ use yii\web\Response;
  */
 class CityController extends Controller
 {
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.setting.city.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.setting.city.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.setting.city.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['POST', 'DELETE'],
+                'roles' => ['admin.setting.city.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['POST'],
+                'roles' => ['admin.setting.city.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete'],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
 
     /**
      * @return array|string|Response
+     *
+     * @throws InvalidConfigException
      */
     public function actionIndex()
     {
@@ -47,7 +97,7 @@ class CityController extends Controller
             'view' => $this->view,
         ]);
 
-        return $this->render('index', compact('searchModel','renderer'));
+        return $this->render('index', compact('searchModel', 'renderer'));
     }
 
     /**

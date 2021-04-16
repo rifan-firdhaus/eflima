@@ -21,6 +21,40 @@ use yii\web\Response;
 class InvoicePaymentController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.payment.list'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.invoice.payment.add'],
+            ],
+            [
+
+                'allow' => true,
+                'actions' => ['view'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.payment.view'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @param string $view
      *
      * @return array|string|Response

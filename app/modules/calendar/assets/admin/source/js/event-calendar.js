@@ -73,13 +73,11 @@
 
     var init = function(){
       self.calendar = new FullCalendar.Calendar(self.$calendar.get(0), {
-        plugins: ["bootstrap", "interaction", "dayGrid", "timeGrid"],
         themeSystem: "bootstrap",
-        height: "parent",
-        header: false,
+        height: "100%",
+        headerToolbar: false,
         editable: true,
         selectable: true,
-        eventLimit: true,
         events: function(info, onSuccess, onFailed){
           self.fetchEvent(info.start, info.end).done(function(data){
             onSuccess(data);
@@ -88,8 +86,8 @@
         select: function(info){
           self.addEvent(info.start, info.end);
         },
-        datesRender: function(view, element){
-          self.$header.html(view.view.title);
+        datesSet: function(dateInfo){
+          self.$header.html(dateInfo.view.title);
         },
         eventClick: function(info){
           self.view(info.event.id);

@@ -51,8 +51,14 @@ if (isset($widget)) {
             ],
         ],
     ]);
-
 }
+
+$form->options['class'] = 'mce-d tox-d';
+
+$form->formActionsSections['tinymce'] = [
+    'sort' => -2,
+    'class' => 'tinymce-toolbar',
+];
 
 echo $this->block('@form:begin', compact('form'));
 
@@ -68,6 +74,7 @@ $form->addAction(FileUploaderInput::widget([
         ],
     ],
 ]), 'attach-file', 'secondary');
+$form->addAction('', 'tinymce-toolbar', 'tinymce');
 
 echo Html::activeHiddenInput($model, 'model');
 echo Html::activeHiddenInput($model, 'model_id');
@@ -104,7 +111,19 @@ echo $form->fields([
                             'widget' => [
                                 'class' => TinyMceInput::class,
                                 'inline' => true,
-                                'type' => TinyMceInput::TYPE_FLOATING,
+                                'type' => TinyMceInput::TYPE_BASIC,
+                                'jsOptions' => [
+                                    'fixed_toolbar_container' => "#{$form->options['id']} .tinymce-toolbar",
+                                    'auto_focus' => false,
+                                    'plugins' => 'autoresize table quickbars lists link image code imagetools paste searchreplace  codesample textpattern',
+                                    'contextmenu' => "image media inserttable | paste pastetext searchreplace | pagebreak charmap | code",
+                                    'menubar' => false,
+                                    'statusbar' => false,
+                                    'quickbars_insert_toolbar' => false,
+                                    'toolbar_drawer' => 'floating',
+                                    'quickbars_selection_toolbar' => 'bold underline italic strikethrough subscript superscript | forecolor | quicklink',
+                                    'toolbar' => 'bold underline italic strikethrough subscript superscript | forecolor backcolor | bullist numlist outdent indent | image table link codesample',
+                                ],
                             ],
                         ],
                         [

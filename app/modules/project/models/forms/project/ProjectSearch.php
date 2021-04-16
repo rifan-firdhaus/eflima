@@ -6,13 +6,17 @@ use modules\core\helpers\Common;
 use modules\core\models\interfaces\SearchableModel;
 use modules\core\models\traits\SearchableModelTrait;
 use modules\crm\models\queries\CustomerQuery;
+use modules\finance\models\ProposalStatus;
 use modules\project\models\Project;
+use modules\project\models\ProjectStatus;
 use modules\project\models\queries\ProjectQuery;
 use modules\ui\widgets\inputs\Select2Data;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
+use yii\db\Exception;
+use yii\helpers\ArrayHelper;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
@@ -70,6 +74,35 @@ class ProjectSearch extends Project implements SearchableModel
         ]);
 
         return $dataFactory->serialize();
+    }
+
+
+    /**
+     * @return array
+     * @throws Exception
+     * @throws InvalidConfigException
+     */
+    public function getStatusSummary()
+    {
+        $query = clone $this->getQuery();
+
+        $statuses = $query->groupBy('project.status_id')->joinWith('status')->select(['status_of_project.*', 'count' => "COUNT([[project.id]])"])->createCommand()->queryAll();
+        $total = array_sum(ArrayHelper::getColumn($statuses, 'count'));
+        $remainingStatuses = ProjectStatus::find()->andWhere(['NOT IN', 'id', ArrayHelper::getColumn($statuses, 'id')])->asArray()->all();
+
+        $statuses = ArrayHelper::merge($statuses, $remainingStatuses);
+
+        foreach ($statuses AS &$status) {
+            if (!isset($status['count'])) {
+                $status['count'] = 0;
+            }
+
+            $status['ratio'] = $status['count'] > 0 ? $status['count'] / $total : 0;
+        }
+
+        ArrayHelper::multisort($statuses, 'order');
+
+        return $statuses;
     }
 
     /**

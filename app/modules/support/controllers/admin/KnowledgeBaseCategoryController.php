@@ -20,6 +20,49 @@ use yii\web\Response;
 class KnowledgeBaseCategoryController extends Controller
 {
     /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.knowledge-base.category.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.category.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.knowledge-base.category.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['enable'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.category.visibility'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.knowledge-base.category.delete'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    /**
      * @return array|string|Response
      *
      * @throws InvalidConfigException
@@ -52,7 +95,7 @@ class KnowledgeBaseCategoryController extends Controller
 
     /**
      * @param KnowledgeBaseCategory $model
-     * @param                $data
+     * @param                       $data
      *
      * @return string|array
      */
@@ -124,9 +167,9 @@ class KnowledgeBaseCategoryController extends Controller
     }
 
     /**
-     * @param integer               $id
+     * @param integer                      $id
      * @param string|KnowledgeBaseCategory $modelClass
-     * @param null|Closure          $queryFilter
+     * @param null|Closure                 $queryFilter
      *
      * @return string|Response|KnowledgeBaseCategory
      * @throws InvalidConfigException

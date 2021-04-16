@@ -48,7 +48,7 @@ echo $form->fields([
     [
         'class' => CardField::class,
         'inputOptions' => [
-            'id' => Html::getInputId($model, 'general_section'),
+            'id' => Html::getRealInputId($model, 'general_section'),
         ],
         'fields' => [
             [
@@ -86,6 +86,7 @@ echo $form->fields([
                                         'class' => CustomerGroupInput::class,
                                         'aliasAttribute' => 'new_group',
                                         'allowClear' => true,
+                                        'allowAdd' => Yii::$app->user->can('admin.setting.crm.customer-group.add'),
                                     ],
                                 ],
                             ],
@@ -99,7 +100,7 @@ echo $form->fields([
         'class' => CardField::class,
         'label' => Yii::t('app', 'Company Detail'),
         'inputOptions' => [
-            'id' => Html::getInputId($model, 'company_detail_section'),
+            'id' => Html::getRealInputId($model, 'company_detail_section'),
         ],
         'card' => [
             'icon' => 'i8:file',
@@ -164,7 +165,7 @@ echo $form->fields([
         'class' => CardField::class,
         'label' => Yii::t('app', 'Personal Contact Detail'),
         'inputOptions' => [
-            'id' => Html::getInputId($model, 'personal_detail_section'),
+            'id' => Html::getRealInputId($model, 'personal_detail_section'),
         ],
         'card' => [
             'icon' => 'i8:file',
@@ -310,10 +311,11 @@ echo $form->fields([
     ],
 ]);
 
+$this->registerJs("$('#{$form->id}').customerForm()");
+
 echo $this->block('@form:end', compact('form'));
 
 Form::end();
 
-$this->registerJs("$('#{$form->id}').customerForm()");
 
 echo $this->block('@end');

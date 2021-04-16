@@ -7,7 +7,6 @@ use modules\account\Account;
 use modules\core\db\ActiveQuery;
 use modules\core\db\ActiveRecord;
 use modules\core\validators\DateValidator;
-use modules\crm\models\Customer;
 use modules\project\models\queries\ProjectMilestoneQuery;
 use modules\project\models\queries\ProjectQuery;
 use modules\task\models\query\TaskQuery;
@@ -15,6 +14,7 @@ use modules\task\models\Task;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\Exception as DbException;
@@ -38,6 +38,8 @@ use yii\db\Exception as DbException;
  * @property int                $order         [int(11) unsigned]
  * @property int                $created_at    [int(11) unsigned]
  * @property int                $updated_at    [int(11) unsigned]
+ * @property int                $creator_id    [int(11) unsigned]
+ * @property int                $updater_id    [int(11) unsigned]
  */
 class ProjectMilestone extends ActiveRecord
 {
@@ -137,6 +139,23 @@ class ProjectMilestone extends ActiveRecord
     }
 
     /**
+     * @inheritDoc
+     */
+    public function beforeDelete()
+    {
+        foreach ($this->tasks AS $task) {
+            $task->milestone_id = null;
+            $task->milestone_order = null;
+
+            if (!$task->save(false)) {
+                throw new DbException('Failed to remove task from milestone');
+            }
+        }
+
+        return parent::beforeDelete();
+    }
+
+    /**
      * @inheritdoc
      */
     public function behaviors()
@@ -144,7 +163,13 @@ class ProjectMilestone extends ActiveRecord
         $behaviors = parent::behaviors();
 
         $behaviors['timestamp'] = [
-            'class' => TimestampBehavior::class
+            'class' => TimestampBehavior::class,
+        ];
+
+        $behaviors['blamable'] = [
+            'class' => BlameableBehavior::class,
+            'createdByAttribute' => 'creator_id',
+            'updatedByAttribute' => 'updater_id',
         ];
 
         return $behaviors;
@@ -385,7 +410,7 @@ class ProjectMilestone extends ActiveRecord
             'params' => $this->getHistoryParams(),
             'description' => 'Moving task "{task_title}" from milestone "{name}" to "{to_name}"',
             'model' => Project::class,
-            'model_id' => $this->project_id
+            'model_id' => $this->project_id,
         ];
 
         $history['params']['to_id'] = $toMilestone->id;
@@ -410,7 +435,7 @@ class ProjectMilestone extends ActiveRecord
         $history = [
             'params' => $this->getHistoryParams(),
             'model' => Project::class,
-            'model_id' => $this->project_id
+            'model_id' => $this->project_id,
         ];
 
         if ($this->scenario === 'admin/add' && $insert) {

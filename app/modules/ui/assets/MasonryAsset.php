@@ -9,13 +9,14 @@ use yii\web\JqueryAsset;
  */
 class MasonryAsset extends AssetBundle
 {
-    public $sourcePath = '@npm/masonry-layout/dist';
+    public $sourcePath = '@npm/packery/dist';
 
     public $js = [
-        'masonry.pkgd.min.js',
+        'packery.pkgd.min.js',
     ];
 
     public $depends = [
         JqueryAsset::class,
+        DraggabillyAsset::class
     ];
 }

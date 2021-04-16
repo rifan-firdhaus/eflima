@@ -82,6 +82,7 @@ $this->beginContent('@modules/account/views/layouts/admin/components/side-panel-
                 <?= Html::a(Yii::t('app', 'Stop'), ['/task/admin/task/toggle-timer', 'id' => $model->id, 'start' => 0], [
                     'class' => 'btn btn-sm btn-outline-danger w-100',
                     'icon' => 'i8:stop',
+                    'data-lazy-options' => ['method' => 'POST']
                 ]) ?>
             </div>
         </div>

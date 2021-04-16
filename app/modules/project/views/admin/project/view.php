@@ -1,8 +1,10 @@
 <?php
 
 use modules\account\web\admin\View;
+use modules\account\widgets\inputs\StaffInput;
 use modules\file_manager\helpers\ImageVersion;
 use modules\finance\models\forms\invoice\InvoiceSearch;
+use modules\project\assets\admin\ProjectViewAsset;
 use modules\project\models\Project;
 use modules\project\models\ProjectMember;
 use modules\project\models\ProjectStatus;
@@ -10,7 +12,6 @@ use modules\project\widgets\inputs\ProjectStatusDropdown;
 use modules\support\models\forms\ticket\TicketSearch;
 use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\forms\task_timer\TaskTimerSearch;
-use modules\task\models\TaskAssignee;
 use modules\ui\widgets\Card;
 use modules\ui\widgets\data_table\columns\ActionColumn;
 use modules\ui\widgets\data_table\columns\DateColumn;
@@ -21,6 +22,8 @@ use yii\bootstrap4\ButtonDropdown;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\Url;
 
 /**
  * @var View            $this
@@ -31,42 +34,54 @@ use yii\helpers\Html;
  * @var TicketSearch    $ticketSearchModel
  */
 
+ProjectViewAsset::register($this);
+
 $this->beginContent('@modules/project/views/admin/project/components/view-layout.php', compact('model'));
 
 echo $this->block('@begin');
 
+if (Yii::$app->user->can('admin.project.delete')) {
+    $this->toolbar['delete-project'] = Html::a([
+        'url' => ['/project/admin/project/delete', 'id' => $model->id],
+        'class' => 'btn btn-outline-danger btn-icon',
+        'icon' => 'i8:trash',
+        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+            'object_name' => Html::tag('strong', $model->name),
+        ]),
+        'data-lazy-options' => ['method' => 'DELETE'],
+        'data-placement' => 'bottom',
+        'title' => Yii::t('app', 'Delete'),
+    ]);
+}
 
-$this->toolbar['delete-project'] = Html::a([
-    'url' => ['/project/admin/project/delete', 'id' => $model->id],
-    'class' => 'btn btn-outline-danger btn-icon',
-    'icon' => 'i8:trash',
-    'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-        'object_name' => Html::tag('strong', $model->name),
-    ]),
-    'data-placement' => 'bottom',
-    'title' => Yii::t('app', 'Delete'),
-]);
-
-$this->toolbar['update-project'] = Html::a([
-    'label' => Yii::t('app', 'Update'),
-    'url' => ['/project/admin/project/update', 'id' => $model->id],
-    'class' => 'btn btn-outline-secondary',
-    'icon' => 'i8:edit',
-    'data-lazy-modal' => 'customer-form-modal',
-    'data-lazy-container' => '#main-container',
-]);
+if (Yii::$app->user->can('admin.project.update')) {
+    $this->toolbar['update-project'] = Html::a([
+        'label' => Yii::t('app', 'Update'),
+        'url' => ['/project/admin/project/update', 'id' => $model->id],
+        'class' => 'btn btn-outline-secondary',
+        'icon' => 'i8:edit',
+        'data-lazy-modal' => 'customer-form-modal',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $projectActionItems = [
     [
         'label' => Yii::t('app', 'Set status to:'),
+        'visible' => Yii::$app->user->can('admin.project.status'),
     ],
 ];
 
-foreach (ProjectStatus::find()->enabled()->andWhere(['!=', 'id', $model->status_id])->all() AS $projectStatus) {
-    $projectActionItems[] = [
-        'label' => Html::tag('span', '', ['class' => 'color-description', 'style' => ['background-color' => $projectStatus->color_label]]) . Html::encode($projectStatus->label),
-        'url' => ['/project/admin/project/change-status', 'id' => $model->id, 'status' => $projectStatus->id],
-    ];
+if (Yii::$app->user->can('admin.project.status')) {
+    foreach (ProjectStatus::find()->enabled()->andWhere(['!=', 'id', $model->status_id])->all() AS $projectStatus) {
+        $projectActionItems[] = [
+            'label' => Html::tag('span', '', ['class' => 'color-description', 'style' => ['background-color' => $projectStatus->color_label]]) . Html::encode($projectStatus->label),
+            'url' => ['/project/admin/project/change-status', 'id' => $model->id, 'status' => $projectStatus->id],
+            'linkOptions' => [
+                'data-lazy-options' => ['method' => 'POST'],
+            ],
+        ];
+    }
 }
 
 $projectActionItems = ArrayHelper::merge($projectActionItems, [
@@ -80,6 +95,19 @@ $projectActionItems = ArrayHelper::merge($projectActionItems, [
             'data-lazy-container' => '#main-container',
             'data-lazy-modal' => 'task-form-modal',
         ],
+        'visible' => Yii::$app->user->can('admin.project.view.task'),
+    ],
+    [
+        'label' => Icon::show('i8:event', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
+                'object' => Yii::t('app', 'Event'),
+            ]),
+        'url' => ['/calendar/admin/event/add', 'model' => 'project', 'model_id' => $model->id],
+        'linkOptions' => [
+            'data-lazy-container' => '#main-container',
+            'data-lazy-modal' => 'event-form-modal',
+            'data-lazy-modal-size' => 'modal-lg',
+        ],
+        'visible' => Yii::$app->user->can('admin.project.view.event'),
     ],
     [
         'label' => Icon::show('i8:cash', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -90,6 +118,7 @@ $projectActionItems = ArrayHelper::merge($projectActionItems, [
             'data-lazy-container' => '#main-container',
             'data-lazy-modal' => 'invoice-form-modal',
         ],
+        'visible' => Yii::$app->user->can('admin.project.view.invoice'),
     ],
     [
         'label' => Icon::show('i8:receive-cash', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -100,6 +129,7 @@ $projectActionItems = ArrayHelper::merge($projectActionItems, [
             'data-lazy-container' => '#main-container',
             'data-lazy-modal' => 'expense-form-modal',
         ],
+        'visible' => Yii::$app->user->can('admin.project.view.payment'),
     ],
     [
         'label' => Icon::show('i8:cash', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -110,6 +140,7 @@ $projectActionItems = ArrayHelper::merge($projectActionItems, [
             'data-lazy-container' => '#main-container',
             'data-lazy-modal' => 'expense-form-modal',
         ],
+        'visible' => Yii::$app->user->can('admin.project.view.expense'),
     ],
     [
         'label' => Icon::show('i8:two-tickets', ['class' => 'icon icons8-size mr-2']) . Yii::t('app', 'Add {object}', [
@@ -121,6 +152,7 @@ $projectActionItems = ArrayHelper::merge($projectActionItems, [
             'data-lazy-modal' => 'ticket-form-modal',
             'data-lazy-modal-size' => 'dialog-md',
         ],
+        'visible' => Yii::$app->user->can('admin.project.view.ticket'),
     ],
 ]);
 
@@ -128,7 +160,7 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
     'label' => Icon::show('i8:double-down'),
     'encodeLabel' => false,
     'buttonOptions' => [
-        'class' => ['btn btn-outline-secondary btn-icon', 'toggle' => ''],
+        'class' => ['btn btn-outline-secondary btn-icon', 'toggle' => 'dropdown-toggle dropdown-toggle-none'],
     ],
     'dropdown' => [
         'encodeLabels' => false,
@@ -137,7 +169,7 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
 ]);
 ?>
 
-    <div class="d-flex h-100">
+    <div class="d-flex h-100" id="project-view-wrapper-<?= $this->uniqueId ?>">
         <div class="overflow-auto py-3 w-100 container-fluid mh-100">
             <div class="d-flex row border-bottom">
                 <div class="col-md-5">
@@ -266,7 +298,7 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
                     <?php endif; ?>
 
                     <?php
-                    Card::begin([
+                    $memberCard = Card::begin([
                         'title' => Yii::t('app', 'Members'),
                         'icon' => 'i8:account',
                         'headerOptions' => [
@@ -274,6 +306,26 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
                         ],
                         'bodyOptions' => false,
                     ]);
+
+                    if (Yii::$app->user->can('admin.project.member')) {
+                        $memberButton = Html::a(Icon::show('i8:paper-plane') . Yii::t('app', 'Invite'), '#', [
+                            'class' => 'btn btn-outline-primary btn-sm btn-project-member',
+                        ]);
+                        $memberInput = StaffInput::widget([
+                            'name' => 'assignee',
+                            'url' => ['/project/admin/project/staff-invitable-auto-complete', 'id' => $model->id],
+                            'id' => 'project-member-input',
+                            'options' => [
+                                'class' => 'project-member-input',
+                            ],
+                        ]);
+
+                        $memberCard->addToHeader(
+                            Html::tag('div', $memberInput . $memberButton, [
+                                'class' => 'project-member-input-container',
+                            ])
+                        );
+                    }
 
                     echo $this->block('@members:begin');
 
@@ -329,8 +381,8 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
                                 },
                             ],
                             [
-                                'attribute' => 'assigned_at',
-                                'label' => Yii::t('app', 'Assigned At'),
+                                'attribute' => 'invited_at',
+                                'label' => Yii::t('app', 'Invited At'),
                                 'class' => DateColumn::class,
                             ],
                             [
@@ -340,6 +392,7 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
                                     'view' => false,
                                     'update' => false,
                                     'delete' => [
+                                        'visible' => Yii::$app->user->can('admin.project.member'),
                                         'value' => [
                                             'icon' => 'i8:trash',
                                             'label' => Yii::t('app', 'Delete'),
@@ -348,7 +401,7 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
                                             ]),
                                             'class' => 'text-danger',
                                             'data-lazy-container' => false,
-                                            'data-lazy-options' => ['scroll' => false],
+                                            'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                                         ],
                                     ],
                                 ],
@@ -368,64 +421,72 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
             <div class="row pt-3 bg-really-light">
                 <div class="col-12">
                     <?php
-                    Card::begin([
-                        'title' => Yii::t('app', 'Invoice Overview'),
-                        'icon' => 'i8:cash',
-                        'bodyOptions' => false,
-                        'options' => [
-                            'class' => 'card border mb-3 border-bottom-0 rounded shadow-sm overflow-hidden',
-                        ],
-                        'headerOptions' => [
-                            'class' => 'card-header border-bottom',
-                        ],
-                    ]);
-                    echo $this->render('@modules/finance/views/admin/invoice/components/data-payment-statistic', [
-                        'searchModel' => $invoiceSearchModel,
-                        'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'invoice'],
-                    ]);
-                    Card::end();
+                    if (Yii::$app->user->can('admin.project.view.invoice')) {
+                        Card::begin([
+                            'title' => Yii::t('app', 'Invoice Overview'),
+                            'icon' => 'i8:cash',
+                            'bodyOptions' => false,
+                            'options' => [
+                                'class' => 'card border mb-3 border-bottom-0 rounded shadow-sm overflow-hidden',
+                            ],
+                            'headerOptions' => [
+                                'class' => 'card-header border-bottom',
+                            ],
+                        ]);
+                        echo $this->render('@modules/finance/views/admin/invoice/components/data-payment-statistic', [
+                            'searchModel' => $invoiceSearchModel,
+                            'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'invoice'],
+                        ]);
+                        Card::end();
+                    }
 
-                    Card::begin([
-                        'title' => Yii::t('app', 'Task Overview'),
-                        'icon' => 'i8:checked',
-                        'bodyOptions' => false,
-                        'options' => [
-                            'class' => 'card mb-3 border border-bottom-0 rounded shadow-sm overflow-hidden',
-                        ],
-                    ]);
-                    echo $this->render('@modules/task/views/admin/task/components/data-statistic', [
-                        'searchModel' => $taskSearchModel,
-                        'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'task'],
-                    ]);
-                    Card::end();
+                    if (Yii::$app->user->can('admin.project.view.task')) {
+                        Card::begin([
+                            'title' => Yii::t('app', 'Task Overview'),
+                            'icon' => 'i8:checked',
+                            'bodyOptions' => false,
+                            'options' => [
+                                'class' => 'card mb-3 border border-bottom-0 rounded shadow-sm overflow-hidden',
+                            ],
+                        ]);
+                        echo $this->render('@modules/task/views/admin/task/components/data-statistic', [
+                            'searchModel' => $taskSearchModel,
+                            'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'task'],
+                        ]);
+                        Card::end();
+                    }
 
-                    Card::begin([
-                        'title' => Yii::t('app', 'Timesheet Overview'),
-                        'icon' => 'i8:timer',
-                        'bodyOptions' => false,
-                        'options' => [
-                            'class' => 'card borderd mb-3 border-bottom-0 rounded shadow-sm overflow-hidden',
-                        ],
-                    ]);
-                    echo $this->render('@modules/task/views/admin/task-timer/components/data-statistic', [
-                        'searchModel' => $taskTimerSearchModel,
-                        'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'task-timer'],
-                    ]);
-                    Card::end();
+                    if (Yii::$app->user->can('admin.project.view.task-timer')) {
+                        Card::begin([
+                            'title' => Yii::t('app', 'Timesheet Overview'),
+                            'icon' => 'i8:timer',
+                            'bodyOptions' => false,
+                            'options' => [
+                                'class' => 'card borderd mb-3 border-bottom-0 rounded shadow-sm overflow-hidden',
+                            ],
+                        ]);
+                        echo $this->render('@modules/task/views/admin/task-timer/components/data-statistic', [
+                            'searchModel' => $taskTimerSearchModel,
+                            'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'task-timer'],
+                        ]);
+                        Card::end();
+                    }
 
-                    Card::begin([
-                        'title' => Yii::t('app', 'Ticket Overview'),
-                        'icon' => 'i8:two-tickets',
-                        'bodyOptions' => false,
-                        'options' => [
-                            'class' => 'card mb-3 border border-bottom-0 rounded shadow-sm overflow-hidden',
-                        ],
-                    ]);
-                    echo $this->render('@modules/support/views/admin/ticket/components/data-statistic', [
-                        'searchModel' => $ticketSearchModel,
-                        'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'ticket'],
-                    ]);
-                    Card::end();
+                    if (Yii::$app->user->can('admin.project.view.ticket')) {
+                        Card::begin([
+                            'title' => Yii::t('app', 'Ticket Overview'),
+                            'icon' => 'i8:two-tickets',
+                            'bodyOptions' => false,
+                            'options' => [
+                                'class' => 'card mb-3 border border-bottom-0 rounded shadow-sm overflow-hidden',
+                            ],
+                        ]);
+                        echo $this->render('@modules/support/views/admin/ticket/components/data-statistic', [
+                            'searchModel' => $ticketSearchModel,
+                            'searchAction' => ['/project/admin/project/view', 'id' => $model->id, 'action' => 'ticket'],
+                        ]);
+                        Card::end();
+                    }
                     ?>
                 </div>
             </div>
@@ -446,7 +507,15 @@ $this->toolbar['project-more'] = ButtonDropdown::widget([
         </div>
     </div>
 
+
 <?php
+
+$jsOptions = Json::encode([
+    'inviteUrl' => Url::to(['/project/admin/project-member/invite', 'id' => $model->id]),
+]);
+
+$this->registerJs("$('#project-view-wrapper-{$this->uniqueId}').projectView({$jsOptions})");
+
 echo $this->block('@end');
 
 $this->endContent();

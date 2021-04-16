@@ -16,8 +16,10 @@ use modules\ui\widgets\lazy\Lazy;
 use Pusher\Pusher;
 use Throwable;
 use Yii;
+use yii\base\Action;
 use yii\base\InvalidConfigException;
 use yii\db\StaleObjectException;
+use yii\filters\AccessRule;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response;
 
@@ -33,11 +35,77 @@ class StaffController extends Controller
     {
         $behaviors = parent::behaviors();
 
-        array_unshift($behaviors['access']['rules'], [
-            'allow' => true,
-            'actions' => ['login'],
-            'roles' => ['?'],
-        ]);
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.staff.list'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.staff.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.staff.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete','bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.staff.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['view'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.staff.view'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['block'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.staff.block'],
+                'matchCallback' => function ($rule, $action) {
+                    /**
+                     * @var AccessRule $rule
+                     * @var Action     $action
+                     */
+
+                    return (bool) (int) Yii::$app->request->get('block',true);
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['block'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.staff.unblock'],
+                'matchCallback' => function ($rule, $action) {
+                    /**
+                     * @var AccessRule $rule
+                     * @var Action     $action
+                     */
+
+                    return !((bool) (int) Yii::$app->request->get('block',true));
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete', 'logout','dashboard'],
+                'roles' => ['@'],
+                'verbs' => ['GET'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['login'],
+                'roles' => ['?','@'],
+            ],
+        ];
 
         return $behaviors;
     }
@@ -152,6 +220,12 @@ class StaffController extends Controller
 
         $model->accountModel->contactModel = $model->account->contact;
         $model->accountModel->contactModel->scenario = 'admin/update';
+
+        $roles = array_values(Yii::$app->authManager->getRolesByUser($model->accountModel->id));
+
+        if ($roles) {
+            $model->accountModel->role = $roles[0]->name;
+        }
 
         return $this->modify($model, Yii::$app->request->post());
     }
@@ -296,6 +370,34 @@ class StaffController extends Controller
         return $this->redirect(['index']);
     }
 
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Staff::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Staff'),
+            ]));
+        }
+
+        if (Staff::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Staffs'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
     /**
      * @param int|string $id
      *

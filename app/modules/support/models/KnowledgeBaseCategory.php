@@ -19,6 +19,9 @@ use yii\behaviors\TimestampBehavior;
  * @property bool            $is_enabled [tinyint(1)]
  * @property int             $created_at [int(11) unsigned]
  * @property int             $updated_at [int(11) unsigned]
+ * @property string          $description
+ * @property int             $creator_id [int(11) unsigned]
+ * @property int             $updater_id [int(11) unsigned]
  */
 class KnowledgeBaseCategory extends ActiveRecord
 {
@@ -53,6 +56,7 @@ class KnowledgeBaseCategory extends ActiveRecord
             [
                 ['name'],
                 'required',
+                'on' => ['admin/add','admin/update']
             ],
             [
                 'is_enabled',

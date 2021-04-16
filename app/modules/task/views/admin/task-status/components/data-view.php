@@ -47,15 +47,17 @@ echo $this->render('data-table', [
 
 $dataView->beginHeader();
 
-echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/task/admin/task-status/add'], [
-    'class' => 'btn btn-primary',
-    'data-lazy-modal' => 'task-status-form',
-    'data-lazy-modal-size' => 'modal-md',
-    'data-lazy-container' => '#main-container',
-]);
+if(Yii::$app->user->can('admin.setting.task.task-status.add')) {
+    echo Html::a(Icon::show('i8:plus') . Yii::t('app', 'Create'), ['/task/admin/task-status/add'], [
+        'class' => 'btn btn-primary',
+        'data-lazy-modal' => 'task-status-form',
+        'data-lazy-modal-size' => 'modal-md',
+        'data-lazy-container' => '#main-container',
+    ]);
+}
 
 $dataView->endHeader();
 
 DataView::end();
 
-echo $this->block('@begin');
+echo $this->block('@end');

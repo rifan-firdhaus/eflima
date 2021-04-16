@@ -105,12 +105,19 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 'hAlign' => Cell::H_ALIGN_CENTER,
             ],
             'trueLabel' => Yii::t('app', 'Enabled'),
-            'falseLabel' => Yii::t('app', 'Disabled'),
             'trueActionLabel' => Icon::show('i8:ok', ['class' => 'icons8-size mr-2']) . Yii::t('app', 'Enable'),
+            'trueItemOptions' => [
+                'linkOptions' => [
+                    'data-lazy-options'=> ['method' => 'POST'],
+                ],
+            ],
+
+            'falseLabel' => Yii::t('app', 'Disabled'),
             'falseActionLabel' => Icon::show('i8:unavailable', ['class' => 'icons8-size mr-2']) . Yii::t('app', 'Disable'),
             'falseItemOptions' => [
                 'linkOptions' => [
                     'class' => 'text-danger',
+                    'data-lazy-options'=> ['method' => 'POST'],
                 ],
             ],
             'buttonOptions' => function ($value) {
@@ -134,6 +141,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'buttons' => [
                 'view' => false,
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.setting.country.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'data-toggle' => 'tooltip',
@@ -141,6 +149,19 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'data-lazy-container' => '#main-container',
                         'data-lazy-modal-size' => 'modal-md',
                         'data-lazy-modal' => 'country-form-modal',
+                    ],
+                ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.setting.country.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false, 'method' => 'DELETE'],
                     ],
                 ],
             ],

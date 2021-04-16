@@ -4,6 +4,7 @@
 use Closure;
 use modules\account\models\forms\history\HistorySearch;
 use modules\account\models\queries\HistoryQuery;
+use modules\account\models\StaffAccount;
 use modules\account\web\admin\Controller;
 use modules\core\helpers\Common;
 use modules\crm\models\Customer;
@@ -15,6 +16,8 @@ use modules\task\models\forms\task\TaskSearch;
 use modules\task\models\Task;
 use modules\ui\widgets\form\Form;
 use modules\ui\widgets\lazy\Lazy;
+use Mpdf\MpdfException;
+use Mpdf\Output\Destination;
 use Throwable;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -25,13 +28,113 @@ use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\RangeNotSatisfiableHttpException;
 use yii\web\Response;
+use ZipArchive;
 
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  */
 class InvoiceController extends Controller
 {
+    public $viewMenu = [
+        'detail' => [
+            'route' => ['/finance/admin/invoice/detail'],
+            'role' => 'admin.invoice.view.detail',
+        ],
+        'payment' => [
+            'route' => ['/finance/admin/invoice/payment'],
+            'role' => 'admin.invoice.view.payment',
+        ],
+        'task' => [
+            'route' => ['/finance/admin/invoice/task'],
+            'role' => 'admin.invoice.view.task',
+        ],
+        'history' => [
+            'route' => ['/finance/admin/invoice/history'],
+            'role' => 'admin.invoice.view.history',
+        ],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['access']['rules'] = [
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.list'],
+                'matchCallback' => function () {
+                    return Yii::$app->request->get('view', 'default') === 'default';
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['index'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.customer.view.invoice'],
+                'matchCallback' => function () {
+                    return Yii::$app->request->get('view', 'default') === 'customer';
+                },
+            ],
+            [
+                'allow' => true,
+                'actions' => ['add'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.invoice.add'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['update'],
+                'verbs' => ['GET', 'POST', 'PATCH'],
+                'roles' => ['admin.invoice.update'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['delete', 'bulk-delete'],
+                'verbs' => ['DELETE', 'POST'],
+                'roles' => ['admin.invoice.delete'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['detail', 'download', 'bulk-download'],
+                'verbs' => ['GET', 'POST'],
+                'roles' => ['admin.invoice.view.detail'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['payment'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.view.payment'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['task'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.view.task'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['history'],
+                'verbs' => ['GET'],
+                'roles' => ['admin.invoice.view.history'],
+            ],
+            [
+                'allow' => true,
+                'actions' => ['auto-complete', 'view'],
+                'verbs' => ['GET'],
+                'roles' => ['@'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * @param string $view
      *
@@ -98,13 +201,38 @@ class InvoiceController extends Controller
     /**
      * @param string|int $id
      *
-     * @param string     $action
+     * @return Response
+     */
+    public function actionView($id)
+    {
+        foreach ($this->viewMenu AS $item) {
+            if (!Yii::$app->user->can($item['role'])) {
+                continue;
+            }
+
+            $route = $item['route'];
+
+            if (is_callable($route)) {
+                call_user_func($route, $id);
+            } else {
+                $route['id'] = $id;
+            }
+
+
+            return $this->redirect($route);
+        }
+
+        return $this->redirect(['/']);
+    }
+
+    /**
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function actionView($id, $action = 'view')
+    public function actionDetail($id)
     {
         $model = $this->getModel($id);
 
@@ -112,27 +240,24 @@ class InvoiceController extends Controller
             return $model;
         }
 
-        switch ($action) {
-            case 'payment':
-                return $this->payment($model);
-            case 'history':
-                return $this->history($model);
-            case 'task':
-                return $this->task($model);
-        }
-
         return $this->render('view', compact('model'));
     }
 
     /**
-     * @param Invoice $model
+     * @param string|int $id
      *
      * @return string
      *
      * @throws InvalidConfigException
      */
-    public function payment($model)
+    public function actionPayment($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Invoice)) {
+            return $model;
+        }
+
         $paymentSearchModel = new InvoicePaymentSearch([
             'params' => [
                 'invoice_id' => $model->id,
@@ -147,12 +272,20 @@ class InvoiceController extends Controller
     }
 
     /**
-     * @param Invoice $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function task($model)
+    public function actionTask($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Invoice)) {
+            return $model;
+        }
+
         $taskSearchModel = new TaskSearch([
             'params' => [
                 'model' => 'invoice',
@@ -166,12 +299,20 @@ class InvoiceController extends Controller
     }
 
     /**
-     * @param Invoice $model
+     * @param string|int $id
      *
      * @return string
+     *
+     * @throws InvalidConfigException
      */
-    public function history($model)
+    public function actionHistory($id)
     {
+        $model = $this->getModel($id);
+
+        if (!($model instanceof Invoice)) {
+            return $model;
+        }
+
         $historySearchParams = [
             'model' => Invoice::class,
             'model_id' => $model->id,
@@ -297,6 +438,9 @@ class InvoiceController extends Controller
      */
     public function actionUpdate($id)
     {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+
         $model = $this->getModel($id, Invoice::class);
 
         if (!($model instanceof Invoice)) {
@@ -304,6 +448,7 @@ class InvoiceController extends Controller
         }
 
         $model->scenario = 'admin/update';
+        $model->assignor_id = $account->profile->id;
 
         $model->normalizeAttributes();
 
@@ -320,9 +465,13 @@ class InvoiceController extends Controller
      */
     public function actionAdd($customer_id = null)
     {
+        /** @var StaffAccount $account */
+        $account = Yii::$app->user->identity;
+
         $model = new Invoice([
             'scenario' => 'admin/add',
             'customer_id' => $customer_id,
+            'assignor_id' => $account->profile->id,
         ]);
 
         if (!Common::isEmpty($customer_id) && !$model->getCustomer()->exists()) {
@@ -396,6 +545,99 @@ class InvoiceController extends Controller
         }
 
         return $this->goBack(['index']);
+    }
+
+
+    /**
+     * @return array|string|Response
+     *
+     * @throws InvalidConfigException
+     * @throws Throwable
+     *
+     */
+    public function actionBulkDelete()
+    {
+        $ids = (array) Yii::$app->request->post('id', []);
+
+        $total = Invoice::find()->andWhere(['id' => $ids])->count();
+
+        if (count($ids) < $total) {
+            return $this->notFound(Yii::t('app', 'Some {object} you are looking for doesn\'t exists', [
+                'object' => Yii::t('app', 'Invoices'),
+            ]));
+        }
+
+        if (Invoice::bulkDelete($ids)) {
+            Yii::$app->session->addFlash('success', Yii::t('app', '{number} {object} successfully deleted', [
+                'number' => count($ids),
+                'object' => Yii::t('app', 'Invoices'),
+            ]));
+        }
+
+        return $this->goBack(['index']);
+    }
+
+    /**
+     * @param      $id
+     * @param bool $inline
+     *
+     * @throws InvalidConfigException
+     * @throws MpdfException
+     * @throws RangeNotSatisfiableHttpException
+     */
+    public function actionDownload($id, $inline = false)
+    {
+        $model = $this->getModel($id);
+        $pdf = $model->asPDF();
+        $inline = (bool) (int) $inline;
+
+        $fileName = Yii::t('app', 'Invoice #{number}', ['number' => $model->number]) . '.pdf';
+
+        $output = $pdf->Output($fileName, Destination::STRING_RETURN);
+
+        Yii::$app->response->sendContentAsFile($output, $fileName, [
+            'inline' => $inline,
+            'mimeType' => 'application/pdf',
+        ]);
+    }
+
+    /**
+     * @throws InvalidConfigException
+     * @throws MpdfException
+     */
+    public function actionBulkDownload()
+    {
+        $ids = Yii::$app->request->get('id', '');
+        $ids = explode(',', $ids);
+        $dir = Yii::getAlias('@runtime/invoice');
+
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
+
+        $fileName = $dir . '/' . time() . '-' . rand(0, 100000) . '.zip';
+
+        $zip = new ZipArchive();
+        $zip->open($fileName, ZipArchive::CREATE);
+
+        $query = Invoice::find()->where(['id' => $ids]);
+
+        foreach ($query->each(10) AS $invoice) {
+            /** @var Invoice $invoice */
+
+            $pdfName = Yii::t('app', 'Invoice #{number}', ['number' => $invoice->number]) . '.pdf';
+            $pdf = $invoice->asPDF();
+
+            $zip->addFromString($pdfName, $pdf->Output($pdfName, Destination::STRING_RETURN));
+        }
+
+        $zip->close();
+
+        Yii::$app->response->sendFile(Yii::getAlias('@webroot/public/inv.zip'), 'Invoices.zip', [
+            'mimeType' => 'application/zip',
+        ]);
+
+        unlink($fileName);
     }
 
     /**

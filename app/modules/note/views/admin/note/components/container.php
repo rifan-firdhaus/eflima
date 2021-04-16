@@ -80,9 +80,15 @@ if (!isset($configurations['jsOptions']['url'])) {
                 ?>
             </div>
         </div>
-        <div class="note-items">
 
+        <?php if (!$configurations['inline']): ?>
+            <div class="note-container-close" data-note-container-close><?= Icon::show('i8:multiply') ?></div>
+        <?php endif; ?>
+
+        <div class="note-items">
+            <div class="note-item-container-sizer"></div>
         </div>
+
         <div class="note-container-overlay"></div>
     </div>
 

@@ -8,8 +8,8 @@ use yii\web\Application as BaseApplication;
 /**
  * @author Rifan Firdhaus Widigdo <rifanfirdhaus@gmail.com>
  *
- * @property bool  $isAdmin
- * @property mixed $setting
+ * @property bool    $isAdmin
+ * @property Setting $setting
  */
 class Application extends BaseApplication
 {

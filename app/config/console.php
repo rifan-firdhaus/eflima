@@ -1,10 +1,12 @@
 <?php
 
 use modules\account\Account;
+use modules\account\models\StaffAccount;
+use modules\account\rbac\DbManager;
 use modules\core\components\Setting;
 use modules\core\Core;
 use yii\log\FileTarget;
-use modules\account\rbac\DbManager;
+use yii\web\User;
 
 $config = [
     'name' => 'Eflima',
@@ -24,14 +26,24 @@ $config = [
         'account' => Account::class,
     ],
     'controllerMap' => [
+        'dummy' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'migrationPath' => null, // disable non-namespaced migrations if app\migrations is listed below
+            'migrationTable' => '{{%dummy}}',
+            'migrationNamespaces' => [
+                'modules\crm\migrations\dummy',
+                'modules\account\migrations\dummy',
+                'modules\task\migrations\dummy',
+            ]
+        ],
         'migrate' => [
             'class' => 'yii\console\controllers\MigrateController',
             'migrationPath' => null, // disable non-namespaced migrations if app\migrations is listed below
             'migrationNamespaces' => [
                 'modules\core\migrations',
                 'modules\ui\migrations',
-                'modules\address\migrations',
                 'modules\account\migrations',
+                'modules\address\migrations',
                 'modules\crm\migrations',
                 'modules\task\migrations',
                 'modules\finance\migrations',

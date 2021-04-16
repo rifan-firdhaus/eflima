@@ -165,14 +165,14 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
 
                 foreach ($members AS $index => $member) {
                     $result[] = Html::tag('div', Html::img($member->account->getFileVersionUrl('avatar', 'thumbnail')), [
-                        'class' => 'task-avatar',
+                        'class' => 'avatar-list-item',
                         'data-toggle' => 'tooltip',
                         'title' => $member->name,
                     ]);
 
                     if ($index === 1 && $more > 0) {
                         $result[] = Html::tag('div', "+{$more}", [
-                            'class' => 'task-avatar-more',
+                            'class' => 'avatar-list-item-more',
                             'data-toggle' => 'tooltip',
                         ]);
 
@@ -189,6 +189,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
             'controller' => '/calendar/admin/event',
             'buttons' => [
                 'view' => [
+                    'visible' => Yii::$app->user->can('admin.event.view'),
                     'value' => [
                         'icon' => 'i8:eye',
                         'data-toggle' => 'tooltip',
@@ -199,6 +200,7 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                     ],
                 ],
                 'update' => [
+                    'visible' => Yii::$app->user->can('admin.event.update'),
                     'value' => [
                         'icon' => 'i8:edit',
                         'data-toggle' => 'tooltip',
@@ -208,6 +210,19 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                         'data-lazy-modal-size' => 'modal-lg',
                     ],
                 ],
+                'delete' => [
+                    'visible' => Yii::$app->user->can('admin.event.delete'),
+                    'value' => [
+                        'icon' => 'i8:trash',
+                        'label' => Yii::t('app', 'Delete'),
+                        'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure?', [
+                            'object_name' => Yii::t('app', 'this item'),
+                        ]),
+                        'class' => 'text-danger',
+                        'data-lazy-container' => '#main#',
+                        'data-lazy-options' => ['scroll' => false,'method' => 'DELETE'],
+                    ],
+                ]
             ],
         ],
     ],

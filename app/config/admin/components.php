@@ -93,6 +93,7 @@ return [
         'itemChildTable' => "{{%account_auth_item_child}}",
         'assignmentTable' => "{{%account_auth_assignment}}",
         'ruleTable' => "{{%account_auth_rule}}",
+        'cache' => 'cache'
     ],
     'i18n' => [
         'translations' => [

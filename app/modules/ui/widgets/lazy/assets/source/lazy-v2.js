@@ -183,12 +183,16 @@
           request.setRequestHeader("X-Lazy-Container", self.option("container"));
         }
 
+        request.setRequestHeader("X-Page", self.option("pushState"));
+
         $element.trigger("lazy.beforeSend", [request, settings]);
       };
 
       $element.trigger("lazy.load", [url, method, data, options]);
 
-      promise = lazy.load(url, method, data, ajaxOptions, $element, render);
+      promise = lazy.load(url, method, data, ajaxOptions, $element, function($content){
+        render($content, options.renderer);
+      });
 
       promise.done(function(result, statusText, xhr){
         _url = url;
@@ -207,14 +211,12 @@
             rendered: true,
             uniqueId: self.uniqueId
           }, result.title, url);
+
         }
 
         initContent($element.children());
 
         $element.trigger("lazy.loaded", [result, xhr, options]);
-
-        console.log((typeof self.option("scroll") === "undefined" || self.option("scroll")));
-        console.log(options.scroll !== false);
 
         if ((typeof self.option("scroll") === "undefined" || self.option("scroll")) && (options.scroll !== false)) {
           $(document).scrollTop($element.scrollTop());
@@ -262,10 +264,14 @@
         return self;
       },
 
-      render = function($content){
+      render = function($content, renderer){
         $element.trigger("lazy.beforeRender", [$content]);
 
-        $element.html($content);
+        if (renderer) {
+          renderer.apply($element.get(0), [$content]);
+        } else {
+          $element.html($content);
+        }
 
         $element.trigger("lazy.render", [$content]);
       },
@@ -343,7 +349,9 @@
           containerObject = $.lazyModal(modalOptions);
         }
 
-        $element.trigger("lazyLink.go", [containerObject]);
+        $element.trigger("lazyLink.go", [containerObject, options]);
+
+        console.log(options);
 
         containerObject.load(url, options.method, options.data, options);
       });
@@ -397,7 +405,7 @@
     };
 
     var init = function(){
-        options = $.extend({}, LazyLink.defaults, options);
+        options = $.extend(true, {}, LazyLink.defaults, options);
 
         $element.on("click", function(e){
           if (e.defaultPrevented) {
@@ -684,11 +692,11 @@
     return lazyContainer;
   };
 
-  $.fn.lazyContainer = function(arg1, arg2, arg3, arg4, arg5){
+  $.fn.lazyContainer = function(arg1, arg2, arg3, arg4, arg5, arg6){
     var lazyContainer = this.data("lazyContainer");
 
     if (lazyContainer && typeof arg1 === "string") {
-      return lazyContainer[arg1](arg2, arg3, arg4, arg5);
+      return lazyContainer[arg1](arg2, arg3, arg4, arg5, arg6);
     }
 
     this.each(function(){
@@ -786,13 +794,13 @@
     gotoState(state, true);
   });
 
-  var gotoState = function(state, fromHistory){
+  var gotoState = function(state, fromHistory, shouldReload){
     var $container = $("#" + state.data.containerId);
 
     if ($container.length > 0) {
       var lazyContainer = $container.data("lazyContainer");
 
-      if (lazyContainer.uniqueId !== state.data.uniqueId || fromHistory !== true) {
+      if (shouldReload !== false && (lazyContainer.uniqueId !== state.data.uniqueId || fromHistory !== true)) {
         lazyContainer.load(state.cleanUrl, state.data.method, state.data.data, state.data.options, fromHistory !== true);
       }
     } else {

@@ -674,11 +674,11 @@
     return lazyContainer;
   };
 
-  $.fn.lazyContainer = function(arg1, arg2, arg3, arg4, arg5){
+  $.fn.lazyContainer = function(arg1, arg2, arg3, arg4, arg5,arg6){
     var lazyContainer = this.data("lazyContainer");
 
     if (lazyContainer && typeof arg1 === "string") {
-      return lazyContainer[arg1](arg2, arg3, arg4, arg5);
+      return lazyContainer[arg1](arg2, arg3, arg4, arg5,arg6);
     }
 
     this.each(function(){

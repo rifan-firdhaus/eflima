@@ -2,6 +2,7 @@
 
 namespace modules\project\migrations;
 
+use modules\account\rbac\DbManager;
 use modules\core\components\Setting;
 use modules\project\models\ProjectStatus;
 use Yii;
@@ -30,7 +31,9 @@ class M190531234724Project extends Migration
             'order' => $this->integer(3)->unsigned()->defaultValue(100),
             'is_enabled' => $this->boolean()->defaultValue(1),
             'description' => $this->text()->null(),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -48,7 +51,9 @@ class M190531234724Project extends Migration
             'deadline_date' => $this->integer()->unsigned()->null(),
             'visibility' => $this->char(1)->notNull(),
             'is_visible_to_customer' => $this->boolean()->defaultValue(1),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -67,7 +72,9 @@ class M190531234724Project extends Migration
             'started_date' => $this->integer()->unsigned()->null(),
             'deadline_date' => $this->integer()->unsigned()->null(),
             'order' => $this->integer()->unsigned()->defaultValue(99),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -75,7 +82,6 @@ class M190531234724Project extends Migration
             'id' => $this->primaryKey()->unsigned(),
             'project_id' => $this->integer()->unsigned()->notNull(),
             'staff_id' => $this->integer()->unsigned()->notNull(),
-            'assigned_at' => $this->integer()->unsigned()->notNull(),
         ], $tableOptions);
 
         $this->createTable('{{%project_discussion_topic}}', [
@@ -85,7 +91,9 @@ class M190531234724Project extends Migration
             'content' => $this->text()->null(),
             'is_internal' => $this->boolean()->defaultValue(0),
             'is_closed' => $this->boolean()->defaultValue(0),
+            'creator_id' => $this->integer()->unsigned()->null(),
             'created_at' => $this->integer()->unsigned()->null(),
+            'updater_id' => $this->integer()->unsigned()->null(),
             'updated_at' => $this->integer()->unsigned()->null(),
         ], $tableOptions);
 
@@ -96,11 +104,17 @@ class M190531234724Project extends Migration
         $this->addColumn('{{%ticket}}', 'project_id', $this->integer()->unsigned()->null());
 
         $this->addForeignKey(
-            'status_of_project',
-            '{{%project}}', 'status_id',
-            '{{%project_status}}', 'id',
-            'RESTRICT',
-            'CASCADE'
+            'creator_of_project_status',
+            '{{%project_status}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_project_status',
+            '{{%project_status}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
         );
 
         $this->addForeignKey(
@@ -136,6 +150,20 @@ class M190531234724Project extends Migration
         );
 
         $this->addForeignKey(
+            'creator_of_project_milestone',
+            '{{%project_milestone}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_project_milestone',
+            '{{%project_milestone}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
             'project_of_ticket',
             '{{%ticket}}', 'project_id',
             '{{%project}}', 'id',
@@ -149,6 +177,28 @@ class M190531234724Project extends Migration
             '{{%customer}}', 'id',
             'RESTRICT',
             'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'status_of_project',
+            '{{%project}}', 'status_id',
+            '{{%project_status}}', 'id',
+            'RESTRICT',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'creator_of_project',
+            '{{%project}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_project',
+            '{{%project}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
         );
 
         $this->addForeignKey(
@@ -183,7 +233,33 @@ class M190531234724Project extends Migration
             'CASCADE'
         );
 
+        $this->addForeignKey(
+            'creator_of_project_discussion_topic',
+            '{{%project_discussion_topic}}', 'creator_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
+        $this->addForeignKey(
+            'updater_of_project_discussion_topic',
+            '{{%project_discussion_topic}}', 'updater_id',
+            '{{%account}}', 'id',
+            'NO ACTION'
+        );
+
         $this->registerDefaults();
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        $time = time();
+        $this->beginCommand('Register permissions');
+
+        if (!$auth->installPermissions($this->permissions())) {
+            return false;
+        }
+
+        $this->endCommand($time);
     }
 
     public function registerDefaults()
@@ -231,12 +307,177 @@ class M190531234724Project extends Migration
     }
 
     /**
+     * @return array
+     */
+    public function permissions()
+    {
+        return [
+            'admin.project' => [
+                'parent' => 'admin.root',
+                'description' => 'Manage Project',
+            ],
+            'admin.project.list' => [
+                'parent' => 'admin.project',
+                'description' => 'List of Project',
+            ],
+            'admin.project.add' => [
+                'parent' => 'admin.project',
+                'description' => 'Add Project',
+            ],
+            'admin.project.update' => [
+                'parent' => 'admin.project',
+                'description' => 'Update Project',
+            ],
+            'admin.project.status' => [
+                'parent' => 'admin.project',
+                'description' => 'Update Project Status',
+            ],
+            'admin.project.member' => [
+                'parent' => 'admin.project',
+                'description' => 'Invite Project Member',
+            ],
+            'admin.project.view' => [
+                'parent' => 'admin.project',
+                'description' => 'View Project Details',
+            ],
+            'admin.project.view.detail' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Detail',
+            ],
+            'admin.project.view.task' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Task',
+            ],
+            'admin.project.view.task-timer' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Timesheet',
+            ],
+            'admin.project.view.ticket' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Ticket',
+            ],
+            'admin.project.view.invoice' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Invoice',
+            ],
+            'admin.project.view.expense' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Expense',
+            ],
+            'admin.project.view.payment' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Payment',
+            ],
+            'admin.project.view.discussion' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Discussion',
+            ],
+            'admin.project.view.discussion.view' => [
+                'parent' => 'admin.project.view.discussion',
+                'description' => 'View Discussion',
+            ],
+            'admin.project.view.discussion.add' => [
+                'parent' => 'admin.project.view.discussion',
+                'description' => 'Add Discussion Topic',
+            ],
+            'admin.project.view.discussion.update' => [
+                'parent' => 'admin.project.view.discussion',
+                'description' => 'Update Discussion Topic',
+            ],
+            'admin.project.view.discussion.delete' => [
+                'parent' => 'admin.project.view.discussion',
+                'description' => 'Delete Discussion Topic',
+            ],
+            'admin.project.view.event' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Event',
+            ],
+            'admin.project.view.milestone' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project Milestone',
+            ],
+            'admin.project.view.milestone.list' => [
+                'parent' => 'admin.project.view.milestone',
+                'description' => 'List of Milestone',
+            ],
+            'admin.project.view.milestone.add' => [
+                'parent' => 'admin.project.view.milestone',
+                'description' => 'Add Milestone',
+            ],
+            'admin.project.view.milestone.update' => [
+                'parent' => 'admin.project.view.milestone',
+                'description' => 'Update Milestone',
+            ],
+            'admin.project.view.milestone.delete' => [
+                'parent' => 'admin.project.view.milestone',
+                'description' => 'Delete Milestone',
+            ],
+            'admin.project.view.milestone.task' => [
+                'parent' => 'admin.project.view.milestone',
+                'description' => 'Add/Move/Remove Task to/from Milestone',
+            ],
+            'admin.project.view.history' => [
+                'parent' => 'admin.project.view',
+                'description' => 'Project History',
+            ],
+            'admin.project.delete' => [
+                'parent' => 'admin.project',
+                'description' => 'Delete Project',
+            ],
+
+            'admin.customer.view.project' => [
+                'parent' => 'admin.customer.view',
+                'description' => 'Customer Project'
+            ],
+
+            'admin.setting.project' => [
+                'parent' => 'admin.setting',
+                'description' => 'Project Setting',
+            ],
+            'admin.setting.project.general' => [
+                'parent' => 'admin.setting.project',
+                'description' => 'Project General Setting',
+            ],
+
+
+            'admin.setting.project.project-status' => [
+                'parent' => 'admin.setting.project',
+                'description' => 'Project Status',
+            ],
+            'admin.setting.project.project-status.list' => [
+                'parent' => 'admin.setting.project.project-status',
+                'description' => 'List of Project Status',
+            ],
+            'admin.setting.project.project-status.add' => [
+                'parent' => 'admin.setting.project.project-status',
+                'description' => 'Add Project Status',
+            ],
+            'admin.setting.project.project-status.update' => [
+                'parent' => 'admin.setting.project.project-status',
+                'description' => 'Update Project Status',
+            ],
+            'admin.setting.project.project-status.delete' => [
+                'parent' => 'admin.setting.project.project-status',
+                'description' => 'Delete Project Status',
+            ],
+            'admin.setting.project.project-status.visibility' => [
+                'parent' => 'admin.setting.project.project-status',
+                'description' => 'Enable/Disable Project Status',
+            ],
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     public function safeDown()
     {
+        $this->dropForeignKey('creator_of_project_status', '{{%project_status}}');
+        $this->dropForeignKey('updater_of_project_status', '{{%project_status}}');
         $this->dropForeignKey('status_of_project', '{{%project}}');
         $this->dropForeignKey('customer_of_project', '{{%project}}');
+        $this->dropForeignKey('creator_of_project', '{{%project}}');
+        $this->dropForeignKey('updater_of_project', '{{%project}}');
         $this->dropForeignKey('project_of_attachment', '{{%project_attachment}}');
         $this->dropForeignKey('project_of_invoice', '{{%invoice}}');
         $this->dropForeignKey('project_of_expense', '{{%expense}}');
@@ -245,7 +486,11 @@ class M190531234724Project extends Migration
         $this->dropForeignKey('project_of_member', '{{%project_member}}');
         $this->dropForeignKey('staff_of_project_member', '{{%project_member}}');
         $this->dropForeignKey('project_of_milestone', '{{%project_milestone}}');
+        $this->dropForeignKey('creator_of_project_milestone', '{{%project_milestone}}');
+        $this->dropForeignKey('updater_of_project_milestone', '{{%project_milestone}}');
         $this->dropForeignKey('project_of_discussion_topic', '{{%project_discussion_topic}}');
+        $this->dropForeignKey('creator_of_project_discussion_topic', '{{%project_discussion_topic}}');
+        $this->dropForeignKey('updater_of_project_discussion_topic', '{{%project_discussion_topic}}');
 
         $this->dropColumn('{{%invoice}}', 'project_id');
         $this->dropColumn('{{%expense}}', 'project_id');
@@ -259,6 +504,13 @@ class M190531234724Project extends Migration
         $this->dropTable('{{%project_milestone}}');
         $this->dropTable('{{%project_member}}');
         $this->dropTable('{{%project_discussion_topic}}');
+
+        /** @var DbManager $auth */
+        $auth = Yii::$app->authManager;
+
+        if (!$auth->uninstallPermissions($this->permissions())) {
+            return false;
+        }
 
         return true;
     }

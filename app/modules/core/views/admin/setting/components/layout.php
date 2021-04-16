@@ -32,7 +32,7 @@ $this->fullHeightContent = true;
                     'class' => 'nav',
                 ],
                 'options' => [
-                    'class' => 'sidebar-nav position-sticky nav flex-column menu',
+                    'class' => 'sidebar-nav bg-really-light light position-sticky nav flex-column menu',
                 ],
             ]); ?>
         </div>

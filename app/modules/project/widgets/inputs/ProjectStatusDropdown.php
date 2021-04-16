@@ -40,6 +40,9 @@ class ProjectStatusDropdown extends ButtonDropdown
             $this->dropdown['items'][] = [
                 'label' => Html::tag('span', '', ["style" => "background-color: {$status['color_label']}", 'class' => 'color-description']) . Html::encode($status['label']),
                 'encode' => false,
+                'linkOptions' => [
+                    'data-lazy-options' => ['method' => "POST"]
+                ],
                 'url' => $url,
             ];
         }

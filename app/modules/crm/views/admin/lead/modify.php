@@ -23,28 +23,17 @@ $this->menu->active = 'main/crm/lead';
 
 if (!$model->isNewRecord) {
     if (!Lazy::isLazyModalRequest()) {
-        $this->toolbar['delete-lead'] = Html::a(
-            '',
-            ['/crm/admin/lead/delete', 'id' => $model->id],
-            [
-                'class' => 'btn btn-danger btn-icon',
-                'icon' => 'i8:trash',
-                'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
-                    'object_name' => Html::tag('strong', $model->name),
-                ]),
-                'data-placement' => 'bottom',
-                'title' => Yii::t('app', 'Delete'),
-            ]
-        );
-
-        $this->toolbar['add-lead'] = Html::a(
-            Yii::t('app', 'Add'),
-            ['/crm/admin/lead/add', 'id' => $model->id],
-            [
-                'class' => 'btn btn-secondary',
-                'icon' => 'i8:plus',
-            ]
-        );
+        $this->toolbar['delete-lead'] = Html::a([
+            'url' => ['/crm/admin/lead/delete', 'id' => $model->id],
+            'class' => 'btn btn-outline-danger btn-icon',
+            'icon' => 'i8:trash',
+            'data-confirmation' => Yii::t('app', 'You are about to delete {object_name}, are you sure', [
+                'object_name' => Html::tag('strong', $model->name),
+            ]),
+            'data-placement' => 'bottom',
+            'title' => Yii::t('app', 'Delete'),
+            'data-lazy-options' => ['method' => 'DELETE'],
+        ]);
     }
 }
 

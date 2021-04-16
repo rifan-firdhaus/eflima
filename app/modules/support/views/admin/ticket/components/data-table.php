@@ -115,8 +115,10 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 /** @var Ticket $model */
 
                 return TicketStatusDropdown::widget([
-                    'url' => ['/support/admin/ticket/change-status', 'id' => $model->id],
                     'value' => $model->status_id,
+                    'url' =>  function ($status) use ($model) {
+                        return ['/support/admin/ticket/change-status', 'status' => $status['id'], 'id' => $model->id];
+                    },
                 ]);
             },
         ],
@@ -134,8 +136,10 @@ $dataTable = DataTable::begin(ArrayHelper::merge([
                 /** @var Ticket $model */
 
                 return TicketPriorityDropdown::widget([
-                    'url' => ['/support/admin/ticket/change-priority', 'id' => $model->id],
                     'value' => $model->priority_id,
+                    'url' => function ($status) use ($model) {
+                        return ['/support/admin/ticket/change-priority', 'priority' => $status['id'], 'id' => $model->id];
+                    },
                 ]);
             },
         ],
